@@ -3,6 +3,8 @@
 \usepackage{algorithm}
 \usepackage[export]{adjustbox}
 \usepackage[noend]{algpseudocode}
+\usepackage{todonotes}
+\usepackage{xspace}
 %%%% As of March 2017, [siggraph] is no longer used. Please use sigconf (above) for SIGGRAPH conferences.
 
 %%%% Proceedings format for SIGPLAN conferences 
@@ -26,7 +28,7 @@
 % These commands are for a PROCEEDINGS abstract or paper.
 \copyrightyear{2019}
 \acmYear{2019}
-\setcopyright{acmlicensed}
+\setcopyright{licensedusgovmixed}
 \acmConference[EuroMPI '19]{EuroMPI '19: ACM Symposium on Neural Gaze Detection}{September 11th-13th, 2019 }{Zurich, Switzerland}
 \acmPrice{15.00}
 \acmDOI{10.1145/1122445.1122456}
@@ -63,38 +65,55 @@
 % The "author" command and its associated commands are used to define the authors and their affiliations.
 % Of note is the shared affiliation of the first two authors, and the "authornote" and "authornotemark" commands
 % used to denote shared contribution to the research.
-\author{Dong Zhong}
+\author{Dong Zhong
+\orcid{1234-5678-9012}}
 \email{dzhong@vols.utk.edu}
-\orcid{1234-5678-9012}
-\authornotemark[1]
 \affiliation{%
   \institution{The University of Tennessee}
-  \streetaddress{P.O. Box 1212}
+  \streetaddress{1122 Volunteer Blvd}
   \city{Knoxville}
   \state{TN}
-  \postcode{43017-6221}
+  \postcode{37996}
+  \country{USA}
 }
-
-\author{George Bosilca}
+\author{Aurelien Bouteiller
+\orcid{0000-0001-5108-509X}}
+\email{bouteill@icl.utk.edu}
+\affiliation{%
+  \institution{The University of Tennessee}
+  \streetaddress{1122 Volunteer Blvd}
+  \city{Knoxville}
+  \state{TN}
+  \postcode{37996}
+  \country{USA}
+}
+\author{George Bosilca
+\orcid{0000-0003-2411-8495}}
 \email{bosilca@icl.utk.edu}
 \affiliation{%
   \institution{The University of Tennessee}
-  \city{Knoxville}
-  \state{TN}}
-
-\author{Aurelien Bouteiller}
-\email{bouteill@icl.utk.edu} 
-\affiliation{%
-  \institution{The University of Tennessee}
+  \streetaddress{1122 Volunteer Blvd}
   \city{Knoxville}
   \state{TN}
+  \postcode{37996}
+  \country{USA}
 }
-
+%\author{Jack J. Dongarra}
+%\orcid{0000-0003-3247-1782}
+%\email{dongarra@icl.utk.edu}
+%\affiliation{%
+%  \institution{The University of Tennessee}
+%  \streetaddress{1122 Volunteer Blvd}
+%  \city{Knoxville}
+%  \state{TN}
+%  \postcode{37996}
+%  \country{USA}
+%}
 %
 % By default, the full list of authors will be used in the page headers. Often, this list is too long, and will overlap
 % other information printed in the page headers. This command allows the author to define a more concise list
 % of authors' names for this purpose.
-\renewcommand{\shortauthors}{Dong and Aurelien, et al.}
+%\renewcommand{\shortauthors}{Zhong, Bouteiller, et al.}
 
 %
 % The abstract is a short summary of the work to be presented in the article.
@@ -216,11 +235,11 @@ PRRTE provides an easy way of launching, running and monitoring PMIx-based appli
     \toprule
     Symbol & Description \\
     \midrule
-    \texttt \bf N & Number of Daemon/nodes \\
-    \texttt Id & The identifier of a Daemon \\
-    \texttt LIST\{ID\} & List of known failed daemons' ID \\
-    \texttt  $\delta$ & Heartbeat period \\
-    \texttt  $\eta$ & Timeout for assuming a daemon failure\\
+    \texttt{\bf N} & Number of Daemon/nodes \\
+    \texttt{Id} & The identifier of a Daemon \\
+    \texttt{LIST\{ID\}} & List of known failed daemons' ID \\
+    $\delta$ & Heartbeat period \\
+    $\eta$ & Timeout for assuming a daemon failure\\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -242,7 +261,7 @@ PRRTE provides an easy way of launching, running and monitoring PMIx-based appli
 \end{figure}
 We provide strategy to detect both process failure and node failure in different ways. The OpenRTR Daemon's Local Launch Subsystem(odls) is responsible for launching and monitoring local processes that are intended to launch the target applications' executable. Before the children processes execute the targets' executable, it need to set affinity of children processes according to a complex series of rules. This binding may fail in a myriad of different ways, the children processes will send a message to the parent indicating what happened (rendered error message) and the parent will read the message and analyze if this is a process failure and the use the runtime system's reporting mechanisms to display this error globally. 
 
-For a general distributed system, nodes can communicate to any other nodes by sending message through communication channels. We arrange all N nodes to a logistic ring topology as in figure 3, which means, each particular node \textbf{\textit{p}} has a observer and a predecessor in the ring. The predecessor will send periodic heartbeat messages to \textbf{\textit{p}} with the period of T, at the same time \textbf{\textit{p}} will send heartbeat messages to its observer. For each node it emits heartbeats $m_1$, $m_2$, ... at time ${\tau_1}$, ${\tau_2}$, ... to its observer \textbf{\textit{q}}. Let ${\tau_i^'}$ = ${\tau_i}$ + $t$. At any time \textbf{\textit{t}} $\in$ [${\tau_i^'}$, ${\tau_+1^'}$), \textbf{\textit{q}} believe \textbf{\textit{p}} is alive if it receive message $m_i$ or higher. Otherwise, \textbf{\textit{q}} suspect \textbf{\textit{p}} is failed, \textbf{\textit{q}} will prepare error information of \textbf{\textit{p}} and propagate this information. 
+For a general distributed system, nodes can communicate to any other nodes by sending message through communication channels. We arrange all N nodes to a logistic ring topology as in figure 3, which means, each particular node \textbf{\textit{p}} has a observer and a predecessor in the ring. The predecessor will send periodic heartbeat messages to \textbf{\textit{p}} with the period of T, at the same time \textbf{\textit{p}} will send heartbeat messages to its observer. For each node it emits heartbeats $m_1$, $m_2$, ... at time $\tau_1$, $\tau_2$, ... to its observer \textbf{\textit{q}}. Let $\tau_i' = \tau_i + t$. At any time \textbf{\textit{t}} $\in [\tau_i', \tau_{i+1}')$, \textbf{\textit{q}} believe \textbf{\textit{p}} is alive if it receive message $m_i$ or higher. Otherwise, \textbf{\textit{q}} suspect \textbf{\textit{p}} is failed, \textbf{\textit{q}} will prepare error information of \textbf{\textit{p}} and propagate this information. 
 
 When the observer detects the predecessor is failed, there are two major steps we do. First we need to reconnect the ring topology as in figure 3, the observer will search its own known failed list and figured the first alive node \textbf{\textit{nq}} preceding in the ring, it set \textbf{\textit{nq}} as its predecessor and then send a request to \textbf{\textit{nq}} for being the new observer. The second step is failure propagation: the observe need to get access to the job's global mapping and binding information and find out all those processes hosted on predecessor node. After we get the list of all those affected processes and node, the observer call the propagation component to delivery this message on node level to its neighbours, then observer will notify its local processes. Then, the observer updates its local known failure List\{\textit{ID}\}. For all those nodes who received the notification, each node need to forward this information, maintain its own List\{\textit{ID}\} and notify locally. 
 
@@ -429,15 +448,28 @@ The last experiment (Figure 14) investigates the effect of multiple node failure
 
 \section{Application}
 In this section, we present an actual use case of the resilient PRRTE to support the functionality in ULFM of revocation and correction of a broken communicator after node failure. For ULFM the global communicator could be reconfigured after process failure detection, the failed processes are excluded from the global communicator using the MPI\_Comm\_shrink() and are re-spawned using the MPI function MPI\_Comm\_spawn(). However,the job will be aborted with node failure, by using PRRTE instead of OpenMPI runtime the job doesn't need to be terminated after node failure, also with the runtime level propagation mechanism the error message can be delivered to the job scope ( in this case the MPI universe). With the notification MPI application can get the consensus knowledge of failures, then application can use the recovery functions (Shrink, Respawn) provided by ULFM to build new communicator without the processes on the failed node but with those newly spawned processes. 
+\todo{add SHMEM, REINIT; thinking about moving this part as 2. Motivation}
 
 \section{Conclusion}
 Failure detection and propagation is a critical service for resilient systems. In this work, we present an efficient failure detection and propagation design and implementation for distributed systems integrated within PMIx\_PRRTE. The process and node failure detection strategy presented in this work depends on heartbeats and timeouts, and communication bound to provide a reliable solution that works at scale without constraints of the kind of faults. Our design and implementation takes into account of the complicate relationship and trade-off between system overhead, detection efficient and risks: low detection time requires frequent emission of heartbeats messages, increasing the system noise and the risk of false positive. Our solution addresses those concerns and capable of tolerating high frequency node and process failures with the help of high performance reliable broadcast notification can quickly disseminate the fault information, our results from different machines and benchmarks compared to two other related work shows that Resilient PRRTE significantly advances the state of art with respect to efficient detection and propagation of failures. This runtime level failure tolerate implementation breaks the limit of running MPI  application only and support all PMIx-based application which is more extensive than MPI scope.   
+
+
+\section{Acknowledgments}
+%
+% The acknowledgments section is defined using the "acks" environment (and NOT an unnumbered section). This ensures
+% the proper identification of the section in the article metadata, and the consistent spelling of the heading.
+\begin{acks}
+%CAARES and ECP OMPIX
+This material is based upon work supported by the National Science Foundation under Grant No. (1725692); and the Exascale Computing Project (17-SC-20-SC), a collaborative effort of the 
+U.S. Department of Energy Office of Science and the National Nuclear Security Administration.    
+\end{acks}
 
 %
 % The next two lines define the bibliography style to be used, and the bibliography file.
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{sample-base}
 
+\end{document}
 % 
 % If your work has an appendix, this is the place to put it.
 \appendix
