@@ -24,11 +24,10 @@
 % the commands and values with those provided to you when you complete the rights form.
 %
 % These commands are for a PROCEEDINGS abstract or paper.
-\copyrightyear{2018}
-\acmYear{2018}
+\copyrightyear{2019}
+\acmYear{2019}
 \setcopyright{acmlicensed}
-\acmConference[Woodstock '18]{Woodstock '18: ACM Symposium on Neural Gaze Detection}{June 03--05, 2018}{Woodstock, NY}
-\acmBooktitle{Woodstock '18: ACM Symposium on Neural Gaze Detection, June 03--05, 2018, Woodstock, NY}
+\acmConference[EuroMPI '19]{EuroMPI '19: ACM Symposium on Neural Gaze Detection}{September 11th-13th, 2019 }{Zurich, Switzerland}
 \acmPrice{15.00}
 \acmDOI{10.1145/1122445.1122456}
 \acmISBN{978-1-4503-9999-9/18/06}
@@ -77,17 +76,18 @@
 }
 
 \author{George Bosilca}
+\email{bosilca@icl.utk.edu}
 \affiliation{%
   \institution{The University of Tennessee}
   \city{Knoxville}
   \state{TN}}
-\email{larst@affiliation.org}
 
 \author{Aurelien Bouteiller}
+\email{bouteill@icl.utk.edu} 
 \affiliation{%
-  \institution{Inria Paris-Rocquencourt}
-  \city{Rocquencourt}
-  \country{France}
+  \institution{The University of Tennessee}
+  \city{Knoxville}
+  \state{TN}
 }
 
 %
@@ -99,6 +99,7 @@
 %
 % The abstract is a short summary of the work to be presented in the article.
 \begin{abstract}
+TODO : fix the expression and maybe the logic ?
 As the scale of High Performance Computing (HPC) system continues to grow, with more and more nodes deployed, mean-time-to-failure (MTTF) of those HPC systems is dramatic impacted (become lower and lower/drops). In order to efficiently run long time computing job on these systems, fault tolerance become a prime challenge/technology. In this paper, we present the design and implementation of an efficient runtime-level failure detection and propagation strategy targeting exascale systems. The detection is able to detect both node failure and process failure. A ring topology is maintained by allowing one node sending and receiving periodically heartbeat to/from another node to detect a node failure(observing another single node). For process failure each host node (is in charge of monitoring) monitors its children processes. The propagation use a reliable broadcast method over a binomial graph(an arbitrary communication topology) to distribute error message to applications, guarantees a logarithmic propagate time. We focus primarily on the most widely used programming paradigms PMIx Reference RunTime Environment(PRRTE), the algorithms and strategies proposed have a larger scope of most distributed programming environment. Experiments on different machines successfully demonstrated the algorithm performs well.
 \end{abstract}
 
@@ -427,60 +428,12 @@ The last experiment (Figure 14) investigates the effect of multiple node failure
 \end{figure}
 
 \section{Application}
-
+ULFM?
 
 \section{Conclusion}
 Failure detection and propagation is a critical service for any fault tolerate systems. The process and node failure detection strategy presented in this work depends on heartbeats and timeouts,  
-\section{CCS Concepts and User-Defined Keywords}
-
-\subsection{Inline (In-text) Equations}
-\subsection{Display Equations}
-A numbered display equation---one set off by vertical space from the
-text and centered horizontally---is produced by the \textbf{equation}
-environment. An unnumbered display equation is produced by the
-\textbf{displaymath} environment.
-
-Again, in either environment, you can use any of the symbols
-and structures available in \LaTeX\@; this section will just
-give a couple of examples of display equations in context.
-First, consider the equation, shown as an inline equation above:
-\begin{equation}
-  \lim_{n\rightarrow \infty}x=0
-\end{equation}
-Notice how it is formatted somewhat differently in
-the \textbf{displaymath}
-environment.  Now, we'll enter an unnumbered equation:
-\begin{displaymath}
-  \sum_{i=0}^{\infty} x + 1
-\end{displaymath}
-and follow it with another numbered equation:
-\begin{equation}
-  \sum_{i=0}^{\infty}x_i=\int_{0}^{\pi+2} f
-\end{equation}
-just to demonstrate \LaTeX's able handling of numbering.
-
-\section{Citations and Bibliographies}
 
 \section{Acknowledgments}
-
-\section{Appendices}
-
-If your work needs an appendix, add it before the ``\verb|\end{document}|'' command at the conclusion of your source document. 
-
-Start the appendix with the ``\verb|appendix|'' command:
-\begin{verbatim}
-  \appendix
-\end{verbatim}
-and note that in the appendix, sections are lettered, not numbered. This document has two appendices, demonstrating the section and subsection identification method.
-
-\section{SIGCHI Extended Abstracts}
-
-The ``\verb|sigchi-a|'' template style (available only in \LaTeX\ and not in Word) produces a landscape-orientation formatted article, with a wide left margin. Three environments are available for use with the ``\verb|sigchi-a|'' template style, and produce formatted output in the margin:
-\begin{itemize}
-\item {\verb|sidebar|}:  Place formatted text in the margin.
-\item {\verb|marginfigure|}: Place a figure in the margin.
-\item {\verb|margintable|}: Place a table in the margin.
-\end{itemize}
 
 %
 % The acknowledgments section is defined using the "acks" environment (and NOT an unnumbered section). This ensures
