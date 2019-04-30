@@ -109,33 +109,45 @@ As the scale of High Performance Computing (HPC) system continues to grow, with 
 %
 \begin{CCSXML}
 <ccs2012>
- <concept>
-  <concept_id>10010520.10010553.10010562</concept_id>
-  <concept_desc>Computer systems organization~Embedded systems</concept_desc>
-  <concept_significance>500</concept_significance>
- </concept>
- <concept>
-  <concept_id>10010520.10010575.10010755</concept_id>
-  <concept_desc>Computer systems organization~Redundancy</concept_desc>
-  <concept_significance>300</concept_significance>
- </concept>
- <concept>
-  <concept_id>10010520.10010553.10010554</concept_id>
-  <concept_desc>Computer systems organization~Robotics</concept_desc>
-  <concept_significance>100</concept_significance>
- </concept>
- <concept>
-  <concept_id>10003033.10003083.10003095</concept_id>
-  <concept_desc>Networks~Network reliability</concept_desc>
-  <concept_significance>100</concept_significance>
- </concept>
+<concept>
+<concept_id>10010520.10010521.10010537</concept_id>
+<concept_desc>Computer systems organization~Distributed architectures</concept_desc>
+<concept_significance>500</concept_significance>
+</concept>
+<concept>
+<concept_id>10010520.10010521.10010542.10010546</concept_id>
+<concept_desc>Computer systems organization~Heterogeneous (hybrid) systems</concept_desc>
+<concept_significance>300</concept_significance>
+</concept>
+<concept>
+<concept_id>10010520.10010575.10010577</concept_id>
+<concept_desc>Computer systems organization~Reliability</concept_desc>
+<concept_significance>300</concept_significance>
+</concept>
+<concept>
+<concept_id>10010520.10010575.10011743</concept_id>
+<concept_desc>Computer systems organization~Fault-tolerant network topologies</concept_desc>
+<concept_significance>300</concept_significance>
+</concept>
+<concept>
+<concept_id>10011007.10010940.10011003.10011005</concept_id>
+<concept_desc>Software and its engineering~Software fault tolerance</concept_desc>
+<concept_significance>300</concept_significance>
+</concept>
+<concept>
+<concept_id>10011007.10011006.10011041.10011048</concept_id>
+<concept_desc>Software and its engineering~Runtime environments</concept_desc>
+<concept_significance>300</concept_significance>
+</concept>
 </ccs2012>
 \end{CCSXML}
 
-\ccsdesc[500]{Computer systems organization~Embedded systems}
-\ccsdesc[300]{Computer systems organization~Redundancy}
-\ccsdesc{Computer systems organization~Robotics}
-\ccsdesc[100]{Networks~Network reliability}
+\ccsdesc[500]{Computer systems organization~Distributed architectures}
+\ccsdesc[300]{Computer systems organization~Heterogeneous (hybrid) systems}
+\ccsdesc[300]{Computer systems organization~Reliability}
+\ccsdesc[300]{Computer systems organization~Fault-tolerant network topologies}
+\ccsdesc[300]{Software and its engineering~Software fault tolerance}
+\ccsdesc[300]{Software and its engineering~Runtime environments}
 
 %
 % Keywords. The author(s) should pick words that accurately describe the work being
@@ -242,7 +254,7 @@ For broadcasting we use the scalable and fault tolerant topology binomial graph 
   \item All nodes forwarding the message upon receiving to make the broadcast reliable. Make sure all alive nodes receive the information at least once. 
 \end{enumerate}
 
-\begin{algorithm}
+\begin{algorithm}implementation
 \caption{Reliable broadcast algorithm }
 \textbf{\textit{N}} \Comment{Number of alive nodes}\newline
 \textbf{List\{$EID$\}} \Comment{Local list of known error processes' identifier}\newline
@@ -332,7 +344,7 @@ Based on the results we conclude that the granularity of heartbeat timeout is 40
 \captionof{figure}{PRRTE with fault tolerance overhead over PRRTE and ULFM using IMB}
 \end{figure*}
 
-Figure 7 shows the overhead incurred with P2P and collective communications, test results come from Intel MPI benchmark(v2019.2). All IMB-MPI1 suits can be successfully conducted with no false detection with $ \delta \geq 1 ms $. For the P2P setting, we run the benchmark on two nodes will all cores included using the "multi" option, which pairs core from both node as groups to ensure that no matter how daemon are binded the communication will be affected. For the collective we run the benchmark on 64 nodes using all cores. Any single test we using message size from several bytes to mega bytes, for each message size test last more than 20 second to ensure enough heartbeats emissions are occurred during the experiments. The PRRTE overhead is calculated by: latency of the benchmark suits with enable failure detection compared to disable failure detection. From the figure we can see that the latency of performance and bandwidth performance are barely affected by heartbeat periods from milliseconds to seconds. Notably, point to point communication overhead of all tested heartbeat values are less than three percentage. As for collective communication (Bcast Reduce and Allreduce) the overhead are less than eight percentage compared to a deviation of four percentage of the benchmark itself. Also we calculated the overhead compared to OpenMPI/ULFM2, shows that the overhead results are similar for P2P and collective respectively for all message size.
+Figure 7 illustrates the overhead incurred with P2P and collective communications, test results come from Intel MPI benchmark(v2019.2). All IMB-MPI1 suits can be successfully conducted with no false detection with $ \delta \geq 1 ms $. For the P2P setting, we run the benchmark on two nodes will all cores included using the "multi" option, which pairs core from both node as groups to ensure that no matter how daemon are binded the communication will be affected. For the collective we run the benchmark on 64 nodes using all cores. Any single test we using message size from several bytes to mega bytes, for each message size test last more than 20 second to ensure enough heartbeats emissions are occurred during the experiments. The PRRTE overhead is calculated by: latency of the benchmark suits with enable failure detection compared to disable failure detection. From the figure we can see that the latency of performance and bandwidth performance are barely affected by heartbeat periods from milliseconds to seconds. Notably, point to point communication overhead of all tested heartbeat values are less than three percentage. As for collective communication (Bcast Reduce and Allreduce) the overhead are less than eight percentage compared to a deviation of four percentage of the benchmark itself. Also we calculated the overhead compared to OpenMPI/ULFM2, shows that the overhead results are similar for P2P and collective respectively for all message size.
 
 \subsection{Comparison with SWIM}
 This section compares our failure detector with SWIM\cite{Abhinandan02}, using a random-probing based failure detection protocol and disseminates membership updates via network multi-cast. SWIM using subgroups to probe to decrease the randomness increases the scalability. To avoid false detection, SWIM uses suspicion mechanism, when a node does not reply direct or indirect probing in time, the initiator then judges this node as suspicious instead of failure, then broadcast
@@ -373,7 +385,7 @@ However, PRRTE process failure detection is implemented in a much simpler mechan
   \caption{Process failure detection and propagation delay compared to ULFM}
 \end{figure}
 
-Figure 10 compares the latency of process failure detection and propagation of ULFM and PRRTE. The sensitivity of ULFM heartbeat without false detection is 10 milliseconds, but we want to compare the best performance from ULFM using high speed in-band detection which is faster than using the lowest heartbeat period. For PRRTE the daemons in charge of detecting any process failure. PRRTE is using TCP to broadcast among daemons, each daemon using the PMIx notification method to distribute the error information to all hosted processes. The experiments are conducted on our local cluster NaCl from 2 nodes to 64 nodes using all cores on each node, all processes are equalled mapped to node and bind to core, by doing this ULFM can use the in-band shared communication for detection and propagation. We can see with a simpler implementation, PRRTE still shows the detection and propagation time is less than 5 millisecond with different number of nodes start from 2 to 64 using TCP. For ULFM the detection and propagation delay increase from 2 millisecond to 3 millisecond as the processes number increases with number of nodes using infiniband. For both PRRTE and ULFM the latency increase trend fit to $ a*\log_2(N) + b $, which can be easily scale up to hundreds of thousands of nodes. Similar result shows in figure 11 from Cori with more processes on each node, we can see that with 4K processes the detection and propagation latency is about 10 milliseconds. This result vindicates the efficiency of our broadcast and propagation algorithm.  
+Figure 10 compares the latency of process failure detection and propagation of ULFM and PRRTE. The sensitivity of ULFM heartbeat without false detection is 10 milliseconds, but we want to compare the best performance from ULFM using high speed in-band detection which is faster than using the lowest heartbeat period. For PRRTE the daemons in charge of detecting any process failure. PRRTE is using TCP to broadcast among daemons, each daemon using the PMIx notification method to distribute the error information to all hosted processes. The experiments are conducted on our local cluster NaCl from 2 nodes to 64 nodes using all cores on each node, all processes are equalled mapped to node and bind to core, by doing this ULFM can use the in-band shared communication for detection and propagation. We can see with a simpler implementation, PRRTE still shows the detection and propagation time is less than 5 millisecond with different number of nodes start from 2 to 64 using TCP. For ULFM the detection and propagation delay increase from 2 millisecond to 3 millisecond as the processes number increases with number of nodes using infiniband. For both PRRTE and ULFM the latency increase trend fit to $ a*\log_2(N) + b $, which can be easily scale up to hundreds of thousands of nodes. Similar result strengthens in figure 11 from Cori with more processes on each node, we can see that with 4K processes the detection and propagation latency is about 10 milliseconds. This result vindicates the efficiency of our broadcast and propagation algorithm.  
 
 \begin{figure}[h]
   \centering
@@ -407,7 +419,7 @@ observer node will fetch and pack the information of all affected processes then
 \end{figure}}
 However, for ULFM all affected processes need be detected by their observers independently, this will suffer from the collisions on the reliable broadcast propagation. For the worst case, all affected processes are adjacent in the detection ring, for each affected process need to re-connect and update the ring, bring a linear increase of $ \eta $ to the detection latency. From the figure see that PRRTE can detect and propagate a node failure between (0.5s, 1s) for all tested number of node. 
 
-The last experiment (Figure 14) investigates the effect of multiple node failures happened in the system. The test setting is the same as single node failure case, except we inject multiple node failures from children processes. For the first scenario, injecting failure to nonadjacent nodes, the detection and propagation are independently conducted by different observer nodes which is a parallel execution. And the results in the figure show that the latency is a constant value which is not affected by the number node failure. The worst scenario is to inject failure to contiguous N nodes, all failures are detected by a single observer (switches to observing the predecessor of the detected failed node). This shows a serial execution. For each node failure it will cause an extra delay of $ \eta $ to the detection latency of the following node failures. From the figure we can see the results matches a linear increase. This suggest that from fault tolerance perspective the system will be more stable and reliable by building the detection ring in a arbitrary layout of nodes, avoid choosing predecessor and successor from the same cabinet.  
+The last experiment (Figure 14) investigates the effect of multiple node failures happened in the system. The test setting is the same as single node failure case, except we inject multiple node failures from children processes. For the first scenario, injecting failure to nonadjacent nodes, the detection and propagation are independently conducted by different observer nodes which is a parallel execution. And the results in the figure show that the latency is a constant value which is not affected by the number node failure. The worst scenario is to inject failure to contiguous N nodes, all failures are detected by a single observer (switches to observing the predecessor of the detected failed node). This shows a serial execution. For each node failure it will cause an extra delay of $ \eta $ to the detection latency of the following node failures. From the figure we can see the results matches a linear increase. This extrapolate that from fault tolerance perspective the system will be more stable and reliable by building the detection ring in a arbitrary layout of nodes, avoid choosing predecessor and successor from the same cabinet.  
 
 \begin{figure}[h]
   \centering
@@ -416,21 +428,10 @@ The last experiment (Figure 14) investigates the effect of multiple node failure
 \end{figure}
 
 \section{Application}
-ULFM?
-MPI_Comm_revoke
-MPI_Comm_shrink
-MPI_Comm_spawn  revocation and correction of a broken communicator.
+In this section, we present an actual use case of the resilient PRRTE to support the functionality in ULFM of revocation and correction of a broken communicator after node failure. For ULFM the global communicator could be reconfigured after process failure detection, the failed processes are excluded from the global communicator using the MPI\_Comm\_shrink() and are re-spawned using the MPI function MPI\_Comm\_spawn(). However,the job will be aborted with node failure, by using PRRTE instead of OpenMPI runtime the job doesn't need to be terminated after node failure, also with the runtime level propagation mechanism the error message can be delivered to the job scope ( in this case the MPI universe). With the notification MPI application can get the consensus knowledge of failures, then application can use the recovery functions (Shrink, Respawn) provided by ULFM to build new communicator without the processes on the failed node but with those newly spawned processes. 
 
 \section{Conclusion}
-Failure detection and propagation is a critical service for resilient systems. The process and node failure detection strategy presented in this work depends on heartbeats and timeouts, 
-
-\section{Acknowledgments}
-
-%
-% The acknowledgments section is defined using the "acks" environment (and NOT an unnumbered section). This ensures
-% the proper identification of the section in the article metadata, and the consistent spelling of the heading.
-\begin{acks}
-\end{acks}
+Failure detection and propagation is a critical service for resilient systems. In this work, we present an efficient failure detection and propagation design and implementation for distributed systems integrated within PMIx\_PRRTE. The process and node failure detection strategy presented in this work depends on heartbeats and timeouts, and communication bound to provide a reliable solution that works at scale without constraints of the kind of faults. Our design and implementation takes into account of the complicate relationship and trade-off between system overhead, detection efficient and risks: low detection time requires frequent emission of heartbeats messages, increasing the system noise and the risk of false positive. Our solution addresses those concerns and capable of tolerating high frequency node and process failures with the help of high performance reliable broadcast notification can quickly disseminate the fault information, our results from different machines and benchmarks compared to two other related work shows that Resilient PRRTE significantly advances the state of art with respect to efficient detection and propagation of failures. This runtime level failure tolerate implementation breaks the limit of running MPI  application only and support all PMIx-based application which is more extensive than MPI scope.   
 
 %
 % The next two lines define the bibliography style to be used, and the bibliography file.
@@ -440,21 +441,4 @@ Failure detection and propagation is a critical service for resilient systems. T
 % 
 % If your work has an appendix, this is the place to put it.
 \appendix
-
-\section{Research Methods}
-
-\subsection{Part One}
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi malesuada, quam in pulvinar varius, metus nunc fermentum urna, id sollicitudin purus odio sit amet enim. Aliquam ullamcorper eu ipsum vel mollis. Curabitur quis dictum nisl. Phasellus vel semper risus, et lacinia dolor. Integer ultricies commodo sem nec semper. 
-
-\subsection{Part Two}
-
-Etiam commodo feugiat nisl pulvinar pellentesque. Etiam auctor sodales ligula, non varius nibh pulvinar semper. Suspendisse nec lectus non ipsum convallis congue hendrerit vitae sapien. Donec at laoreet eros. Vivamus non purus placerat, scelerisque diam eu, cursus ante. Etiam aliquam tortor auctor efficitur mattis. 
-
-\section{Online Resources}
-
-Nam id fermentum dui. Suspendisse sagittis tortor a nulla mollis, in pulvinar ex pretium. Sed interdum orci quis metus euismod, et sagittis enim maximus. Vestibulum gravida massa ut felis suscipit congue. Quisque mattis elit a risus ultrices commodo venenatis eget dui. Etiam sagittis eleifend elementum. 
-
-Nam interdum magna at lectus dignissim, ac dignissim lorem rhoncus. Maecenas eu arcu ac neque placerat aliquam. Nunc pulvinar massa et mattis lacinia.
-
 \end{document}
