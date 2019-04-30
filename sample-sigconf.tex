@@ -181,7 +181,7 @@ In this section, we describe the design of Resilient PRRTE and we provide ration
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{PMIx_PRRTE.png}
+  \includegraphics[trim=0.2cm 9.0cm 0.2cm 9cm,width=\linewidth]{PMIx_PRRTE.pdf}
   \caption{Resilient PRRTE component architecture. The orange boxes represent the component we mainly use to add the resilient features. The dark blue colored boxes are the new modules}
 \end{figure}
 
@@ -217,20 +217,20 @@ PRRTE provides an easy way of launching, running and monitoring PMIx-based appli
 \centering
 \begin{minipage}{.23\textwidth}
   \centering
-  \includegraphics[width=\linewidth]{ring_detector.png}
+  \includegraphics[trim=3cm 8.0cm 3cm 8cm,width=\linewidth]{ring_detector.pdf}
   \captionof{figure}{Ring topology}
   \label{fig:Ring}
 \end{minipage}%
 \begin{minipage}{.23\textwidth}
   \centering
-  \includegraphics[width=\linewidth]{reconnet_cross.png}
+  \includegraphics[trim=3cm 8.0cm 3cm 8cm,width=\linewidth]{reconnet_cross.pdf}
   \captionof{figure}{Reconnect with failures}
   \label{fig:Reconnect Ring}
 \end{minipage}
 \end{figure}
 We provide strategy to detect both process failure and node failure in different ways. The OpenRTR Daemon's Local Launch Subsystem(odls) is responsible for launching and monitoring local processes that are intended to launch the target applications' executable. Before the children processes execute the targets' executable, it need to set affinity of children processes according to a complex series of rules. This binding may fail in a myriad of different ways, the children processes will send a message to the parent indicating what happened (rendered error message) and the parent will read the message and analyze if this is a process failure and the use the runtime system's reporting mechanisms to display this error globally. 
 
-For a general distributed system, nodes can communicate to any other nodes by sending message through communication channels. We arrange all N nodes to a logistic ring topology as in figure 2, which means, each particular node \textbf{\textit{p}} has a observer and a predecessor in the ring. The predecessor will send periodic heartbeat messages to \textbf{\textit{p}} with the period of T, at the same time \textbf{\textit{p}} will send heartbeat messages to its observer. For each node it emits heartbeats $m_1$, $m_2$, ... at time ${\tau_1}$, ${\tau_2}$, ... to its observer \textbf{\textit{q}}. Let ${\tau_i^'}$ = ${\tau_i}$ + $t$. At any time \textbf{\textit{t}} $\in$ [${\tau_i^'}$, ${\tau_+1^'}$), \textbf{\textit{q}} believe \textbf{\textit{p}} is alive if it receive message $m_i$ or higher. Otherwise, \textbf{\textit{q}} suspect \textbf{\textit{p}} is failed, \textbf{\textit{q}} will prepare error information of \textbf{\textit{p}} and propagate this information. 
+For a general distributed system, nodes can communicate to any other nodes by sending message through communication channels. We arrange all N nodes to a logistic ring topology as in figure 3, which means, each particular node \textbf{\textit{p}} has a observer and a predecessor in the ring. The predecessor will send periodic heartbeat messages to \textbf{\textit{p}} with the period of T, at the same time \textbf{\textit{p}} will send heartbeat messages to its observer. For each node it emits heartbeats $m_1$, $m_2$, ... at time ${\tau_1}$, ${\tau_2}$, ... to its observer \textbf{\textit{q}}. Let ${\tau_i^'}$ = ${\tau_i}$ + $t$. At any time \textbf{\textit{t}} $\in$ [${\tau_i^'}$, ${\tau_+1^'}$), \textbf{\textit{q}} believe \textbf{\textit{p}} is alive if it receive message $m_i$ or higher. Otherwise, \textbf{\textit{q}} suspect \textbf{\textit{p}} is failed, \textbf{\textit{q}} will prepare error information of \textbf{\textit{p}} and propagate this information. 
 
 When the observer detects the predecessor is failed, there are two major steps we do. First we need to reconnect the ring topology as in figure 3, the observer will search its own known failed list and figured the first alive node \textbf{\textit{nq}} preceding in the ring, it set \textbf{\textit{nq}} as its predecessor and then send a request to \textbf{\textit{nq}} for being the new observer. The second step is failure propagation: the observe need to get access to the job's global mapping and binding information and find out all those processes hosted on predecessor node. After we get the list of all those affected processes and node, the observer call the propagation component to delivery this message on node level to its neighbours, then observer will notify its local processes. Then, the observer updates its local known failure List\{\textit{ID}\}. For all those nodes who received the notification, each node need to forward this information, maintain its own List\{\textit{ID}\} and notify locally. 
 
@@ -286,12 +286,12 @@ Group communication use out-of-band non-blocking peer to peer as the basic messa
 
 \begin{figure}
   \centering
-  \includegraphics[width=\linewidth]{bmg_origin.png}
+  \includegraphics[width=\linewidth]{BMG_seq.pdf}
   \caption{Binomial graph with 12 nodes}
 \end{figure}
 \begin{figure}
   \centering
-  \includegraphics[width=\linewidth]{reorder_seq.png}
+  \includegraphics[trim=0.2cm 0.4cm 0.2cm 0.2cm, width=0.9\linewidth,angle=270]{reoder_span.pdf}
   \caption{Broadcast using binomial spanning tree from node 0, extra messages to neighbours are colored in green }
 \end{figure}
 Figure 5 shows the BMG with 12 nodes with, node 0 start the propagation and send messages to all its six neighbours with the sequence marked. And Figure 6 shows the a spanning tree for broadcast originated from node 0 also with extra messages colored green for resilient purpose. Those extra green messages balanced the trade-offs between high-radix trees that allow for more parallelism at each level in the tree and more network connection, and lower-radix deeper communication trees with reduced network congestion. The advantages of this new broadcast algorithm:
@@ -321,12 +321,12 @@ Based on the results we conclude that the granularity of heartbeat timeout is 40
 \centering
 \begin{minipage}{.38\textwidth}
   \centering
-  \includegraphics[width=\linewidth]{multi_pingping_pingpong_overhead.png}
+  \includegraphics[width=\linewidth]{multi_pingping_pingpong_overhead.pdf}
   \label{fig:Ring}
 \end{minipage}%
 \begin{minipage}{.62\textwidth}
   \centering
-  \includegraphics[width=\linewidth]{Bcast_overhead_with_ulfm_max_col.png}
+  \includegraphics[width=\linewidth]{Bcast_overhead_with_ulfm_max_col.pdf}
   \label{fig:Reconnect Ring}
 \end{minipage}
 \captionof{figure}{PRRTE with fault tolerance overhead over PRRTE and ULFM using IMB}
@@ -338,7 +338,7 @@ Figure 7 shows the overhead incurred with P2P and collective communications, tes
 This section compares our failure detector with SWIM\cite{Abhinandan02}, using a random-probing based failure detection protocol and disseminates membership updates via network multi-cast. SWIM using subgroups to probe to decrease the randomness increases the scalability. To avoid false detection, SWIM uses suspicion mechanism, when a node does not reply direct or indirect probing in time, the initiator then judges this node as suspicious instead of failure, then broadcast
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{HB_prrte_swim.png}
+  \includegraphics[width=\linewidth]{HB_prrte_swim.pdf}
   \caption{Detection and Propagation delay compared to SWIM using Go-Memberlist}
 \end{figure}
 this suspicious info in the subgroup, if any node in the subgroup receives an acknowledge before the timeout, it will unmask the suspected node as alive, otherwise mark as failure. In order to improve the efficiency of multi-cast, SWIM use a infection-style dissemination mechanism as information spreads in a manner analogous to the spread of gossip in society, or epidemic in the general population.
@@ -351,7 +351,7 @@ Figure 9 compare the scalability of the detector with regard to the number of de
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{Scale_prrte_swim.png}
+  \includegraphics[width=\linewidth]{Scale_prrte_swim.pdf}
   \caption{Scalability compared to SWIM using Go-Memberlist}
 \end{figure}
 
@@ -369,7 +369,7 @@ However, PRRTE process failure detection is implemented in a much simpler mechan
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{Process_Failure_log_fit.png}
+  \includegraphics[width=\linewidth]{Process_Failure_log_fit.pdf}
   \caption{Process failure detection and propagation delay compared to ULFM}
 \end{figure}
 
@@ -377,7 +377,7 @@ Figure 10 compares the latency of process failure detection and propagation of U
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{Cori_Process_Failure_fit.png}
+  \includegraphics[width=\linewidth]{Cori_Process_Failure_fit.pdf}
   \caption{Process failure detection and propagation delay on Cori}
 \end{figure}
 
@@ -391,7 +391,7 @@ Future more, we want to explore the performance of our heartbeat detector  for n
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{PRRTE_ULFM_new_nodebug.png}
+  \includegraphics[width=\linewidth]{PRRTE_ULFM_new_nodebug.pdf}
   \caption{Daemon Failure detection and propagation delay compared to ULFM with different heartbeat period}
 \end{figure}
 
@@ -402,7 +402,7 @@ observer node will fetch and pack the information of all affected processes then
 \textbf{
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{Daemon_prrte_only.png}
+  \includegraphics[width=\linewidth]{Daemon_prrte_only.pdf}
   \caption{Daemon Failure Detection and Propagation delay with different number of nodes}
 \end{figure}}
 However, for ULFM all affected processes need be detected by their observers independently, this will suffer from the collisions on the reliable broadcast propagation. For the worst case, all affected processes are adjacent in the detection ring, for each affected process need to re-connect and update the ring, bring a linear increase of $ \eta $ to the detection latency. From the figure see that PRRTE can detect and propagate a node failure between (0.5s, 1s) for all tested number of node. 
@@ -411,19 +411,7 @@ The last experiment (Figure 14) investigates the effect of multiple node failure
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{multi_daemon_failures.png}
-  \caption{Multiple process failures at the same time}
-\end{figure}
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\linewidth]{multi_failures.png}
-  \caption{Multiple process failures at the same time}
-\end{figure}
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=0.8\linewidth,frame]{failure_detection.png}
+  \includegraphics[width=\linewidth]{multi_daemon_failures.pdf}
   \caption{Multiple process failures at the same time}
 \end{figure}
 
@@ -431,7 +419,7 @@ The last experiment (Figure 14) investigates the effect of multiple node failure
 ULFM?
 
 \section{Conclusion}
-Failure detection and propagation is a critical service for any fault tolerate systems. The process and node failure detection strategy presented in this work depends on heartbeats and timeouts,  
+Failure detection and propagation is a critical service for resilient systems. The process and node failure detection strategy presented in this work depends on heartbeats and timeouts, 
 
 \section{Acknowledgments}
 
