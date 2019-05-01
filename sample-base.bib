@@ -418,17 +418,18 @@ month={Sep.}
   lastaccessed = "Nov 03, 2017"
 }
 
-
-@article{George18,
-    doi={10.1177/1094342017711505},
-	Author = {George Bosilca and Aurelien Bouteiller and Amina Guermouche and Thomas Herault and Yves Robert and Pierre Sens and Jack Dongarra},
-	Journal = {The International Journal of High Performance Computing Applications},
-	Number = {1},
-	Pages = {139-158},
-	Title = {A failure detector for HPC platforms},
-	Volume = {32},
-	Year = {2018}
-}
+@INPROCEEDINGS{George16, 
+author={G. {Bosilca} and A. {Bouteiller} and A. {Guermouche} and T. {Herault} and Y. {Robert} and P. {Sens} and J. {Dongarra}}, 
+booktitle={SC '16: Proceedings of the International Conference for High Performance Computing, Networking, Storage and Analysis}, 
+title={Failure Detection and Propagation in HPC systems}, 
+year={2016}, 
+volume={}, 
+number={}, 
+pages={312-322}, 
+keywords={fault diagnosis;fault tolerant computing;parallel processing;failure detection;failure propagation;HPC systems;fault information distribution;virtual observation ring;no-uniform variant;reliable broadcast;circulant graph overlay network;logarithmic fault propagation;Titan ORNL supercomputer;exascale-ready algorithm;fault tolerance;Computer crashes;Protocols;Fault tolerance;Fault tolerant systems;Heart beat;Observers;Algorithm design and analysis;MPI;Failure Detection;Fault-Tolerance}, 
+doi={10.1109/SC.2016.26}, 
+ISSN={2167-4337}, 
+month={Nov},}
 
 @online{Cori01,
   title =        "CORI",
@@ -452,4 +453,92 @@ month={Sep.}
  publisher = {ACM},
  address = {New York, NY, USA},
  keywords = {GPU, MPI, collectives operations, event-driven, heterogeneous system, system noise},
+} 
+
+@inproceedings{ulfm13,
+	Address = {Berlin, Heidelberg},
+	Author = {Bland, Wesley},
+	Booktitle = {Euro-Par 2012: Parallel Processing Workshops},
+	Editor = {Caragiannis, Ioannis and Alexander, Michael and Badia, Rosa Maria and Cannataro, Mario and Costan, Alexandru and Danelutto, Marco and Desprez, Fr{\'e}d{\'e}ric and Krammer, Bettina and Sahuquillo, Julio and Scott, Stephen L. and Weidendorfer, Josef},
+	Pages = {499--504},
+	Publisher = {Springer Berlin Heidelberg},
+	Title = {User Level Failure Mitigation in MPI},
+	Year = {2013}
+	}
+
+@article{Bland2013,
+	Author = {Bland, Wesley and Bouteiller, Aurelien and Herault, Thomas and Hursey, Joshua and Bosilca, George and Dongarra, Jack J.},
+	Journal = {Computing},
+	Month = {Dec},
+	Number = {12},
+	Pages = {1171--1184},
+	Title = {An evaluation of User-Level Failure Mitigation support in MPI},
+	Volume = {95},
+	Year = {2013}}
+
+@article{reinit18,
+author = {Chakraborty, Sourav and Laguna, Ignacio and Emani, Murali and Mohror, Kathryn and Panda, Dhabaleswar K. and Schulz, Martin and Subramoni, Hari},
+title = {EReinit: Scalable and efficient fault-tolerance for bulk-synchronous MPI applications},
+journal = {Concurrency and Computation: Practice and Experience},
+volume = {0},
+number = {0},
+pages = {e4863},
+keywords = {fault tolerance, high-performance computing, MPI, resilience},
+doi = {10.1002/cpe.4863},
+url = {https://onlinelibrary.wiley.com/doi/abs/10.1002/cpe.4863},
+eprint = {https://onlinelibrary.wiley.com/doi/pdf/10.1002/cpe.4863},
+note = {e4863 cpe.4863},
+}
+
+@inproceedings{X10-ft16,
+ author = {Hamouda, Sara S. and Herta, Benjamin and Milthorpe, Josh and Grove, David and Tardieu, Olivier},
+ title = {Resilient X10 over MPI User Level Failure Mitigation},
+ booktitle = {Proceedings of the 6th ACM SIGPLAN Workshop on X10},
+ series = {X10 2016},
+ year = {2016},
+ isbn = {978-1-4503-4386-2},
+ location = {Santa Barbara, CA, USA},
+ pages = {18--23},
+ numpages = {6},
+ url = {http://doi.acm.org/10.1145/2931028.2931030},
+ doi = {10.1145/2931028.2931030},
+ acmid = {2931030},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {MPI, Resilience, User Level Failure Mitigation, X10},
+} 
+
+@inproceedings{shmem-ft15,
+ author = {Hao, Pengfei and Pophale, Swaroop and Shamis, Pavel and Curtis, Tony and Chapman, Barbara},
+ title = {Check-Pointing Approach for Fault Tolerance in OpenSHMEM},
+ booktitle = {Revised Selected Papers of the Second Workshop on OpenSHMEM and Related Technologies. Experiences, Implementations, and Technologies - Volume 9397},
+ series = {OpenSHMEM 2015},
+ year = {2015},
+ isbn = {978-3-319-26427-1},
+ location = {Annapolis, MD, USA},
+ pages = {36--52},
+ numpages = {17},
+ url = {http://dx.doi.org/10.1007/978-3-319-26428-8_3},
+ doi = {10.1007/978-3-319-26428-8_3},
+ acmid = {2952637},
+ publisher = {Springer-Verlag New York, Inc.},
+ address = {New York, NY, USA},
+} 
+
+@inproceedings{hadoop-ft,
+ author = {Zounmevo, Judicael A. and Kimpe, Dries and Ross, Robert and Afsahi, Ahmad},
+ title = {Using MPI in High-performance Computing Services},
+ booktitle = {Proceedings of the 20th European MPI Users' Group Meeting},
+ series = {EuroMPI '13},
+ year = {2013},
+ isbn = {978-1-4503-1903-4},
+ location = {Madrid, Spain},
+ pages = {43--48},
+ numpages = {6},
+ url = {http://doi.acm.org/10.1145/2488551.2488556},
+ doi = {10.1145/2488551.2488556},
+ acmid = {2488556},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {MPI, MPMD, distributed services, extreme scale, fault-tolerance},
 } 
