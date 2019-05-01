@@ -237,6 +237,65 @@
   lastaccessed = "June 24, 2014"
 }
 
+@INPROCEEDINGS{7161563, 
+author={C. {Cao} and T. {Herault} and G. {Bosilca} and J. {Dongarra}}, 
+booktitle={2015 IEEE International Parallel and Distributed Processing Symposium}, 
+title={Design for a Soft Error Resilient Dynamic Task-Based Runtime}, 
+year={2015}, 
+volume={}, 
+number={}, 
+pages={765-774}, 
+keywords={directed graphs;fault tolerant computing;parallel processing;soft error resilient dynamic task-based runtime;modern computing system;resilient extension;generic framework;soft error resilience;task-based programming paradigm;sub-DAG;algorithmic property;PaRSEC task-based runtime framework;Runtime;Symmetric matrices;Dynamic scheduling;Fault tolerance;Fault tolerant systems;Heuristic algorithms;Algorithm design and analysis;soft error resilience;runtime;fault tolerance}, 
+doi={10.1109/IPDPS.2015.81}, 
+ISSN={1530-2075}, 
+month={May},}
+
+
+
+@article{doi:10.1177/1094342016669416,
+author = {Omer Subasi and Tatiana Martsinkevich and Ferad Zyulkyarov and Osman Unsal and Jesus Labarta and Franck Cappello},
+title ={Unified fault-tolerance framework for hybrid task-parallel message-passing applications},
+journal = {The International Journal of High Performance Computing Applications},
+volume = {32},
+number = {5},
+pages = {641-657},
+year = {2018},
+doi = {10.1177/1094342016669416},
+
+URL = { 
+        https://doi.org/10.1177/1094342016669416
+    
+},
+eprint = { 
+        https://doi.org/10.1177/1094342016669416
+    
+}
+,
+    abstract = { We present a unified fault-tolerance framework for task-parallel message-passing applications to mitigate transient errors. First, we propose a fault-tolerant message-logging protocol that only requires the restart of the task that experienced the error and transparently handles any message passing interface calls inside the task. In our experiments we demonstrate that our fault-tolerant solution has a reasonable overhead, with a maximum observed overhead of 4.5\%. We also show that fine-grained parallelization is important for hiding the overheads related to the protocol as well as the recovery of tasks. Secondly, we develop a mathematical model to unify task-level checkpointing and our protocol with system-wide checkpointing in order to provide complete failure coverage. We provide closed formulas for the optimal checkpointing interval and the performance score of the unified scheme. Experimental results show that the performance improvement can be as high as 98\% with the unified scheme. }
+}
+
+
+
+
+@InProceedings{10.1007/978-3-319-50995-2_5,
+author="Bouteiller, Aurelien
+and Bosilca, George
+and Venkata, Manjunath Gorentla",
+editor="Gorentla Venkata, Manjunath
+and Imam, Neena
+and Pophale, Swaroop
+and Mintz, Tiffany M.",
+title="Surviving Errors with OpenSHMEM",
+booktitle="OpenSHMEM and Related Technologies. Enhancing OpenSHMEM for Hybrid Environments",
+year="2016",
+publisher="Springer International Publishing",
+address="Cham",
+pages="66--81",
+abstract="Unexpected error conditions stem from a variety of underlying causes, including resource exhaustion, network failures, hardware failures, or program errors. As the scale of HPC systems continues to grow, so does the probability of encountering a condition that causes a failure; meanwhile, error recovery and run-through failure management are becoming mature, and interoperable HPC programming paradigms are beginning to feature advanced error management. As a result from these developments, it becomes increasingly desirable to gracefully handle error conditions in OpenSHMEM. In this paper, we present the design and rationale behind an extension of the OpenSHMEM API that can (1) notify user code of unexpected erroneous conditions, (2) permit customized user response to errors without incurring overhead on an error-free execution path, (3) propagate the occurence of an error condition to all Processing Elements, and (4) consistently close the erroneous epoch in order to resume the application.",
+isbn="978-3-319-50995-2"
+}
+
+
 
 @inproceedings{Castain05,
 	Address = {Berlin, Heidelberg},
