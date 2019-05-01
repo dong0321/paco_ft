@@ -179,15 +179,95 @@ As the scale of High Performance Computing (HPC) system continues to grow, with 
 \maketitle
 
 \section{Introduction}
-The drive to produce more and more powerful supercomputers leads to HPC platforms/systems consist millions of cores distributed over hundreds of thousands of nodes, it is becoming increasingly imperative to adopt fault tolerance and resilient features to applications and runtime environments. Efforts toward fault tolerance has been attempted by researchers at application level. 
 
-A runtime environment support distributed HPC applications operating in heterogeneous environment, the system provide service for managing processes launching, deployment and monitoring, also providing interaction and communication infrastructures for hosts and parallel applications. 
+The complexity and vastness of the questions posed by modern science has
+fueled the emergence of an era where exploring the boundaries of mater, life,
+and human knowledge require large instruments, either to perform the
+experiments, collect the observation, and in the
+case of High Performance Computing (HPC), perform the compute intensive
+analysis of scientific data. As the march of science continues, small and
+easy problem have already been solved, and significant advances increasingly
+involve dwelling with finer grain accuracy problems, which entails that the
+compute workloads are getting larger, fueling an unending need for larger
+HPC systems.
 
-A resilient runtime environment must have the capability of continuing the job execution even with failures, and also be able to detect failure and distribute the fault information to the applications with minimal disturbance to the whole system.  
+In turn, facing the hard limits on power consumption and chip frequency,
+HPC architects have been forced to embrace massive parallelism as well as
+a deeper and more complex component hierarchy (e.g., non-uniform memory architectures,
+GPU accelerated nodes) to continue the growth in available compute capabilities.
+This has stressed the traditional HPC software infrastructure in different 
+ways, but it notably put to prominence two different issues that had been 
+largely ignored in the last two decades: fault tolerance and programming 
+models.
 
-TODO:
-Detection and propagation ?
+The Message Passing Interface (MPI) has been instrumental in 
+permitting the efficient programming of massively parallel systems, scaling 
+along from early systems with tens of processors to nowadays systems routinely 
+encompassing hundreds of thousands of cores. As failures become more 
+common on large and complex systems, The MPI standard is in the process of 
+evolving to integrate fault tolerance capabilities, as proposed in the 
+User-Level Failure Mitigation (ULFM) specification draft~\cite{ulfm}, or 
+various efforts to integrate tightly checkpoint-restart with MPI~\cite{reinit}.
+The second stress comes from programming systems that are inherently
+hierarchical. This has brought forth a renaissance in the field of
+programming models, leading to a variety of contenders challenging the
+hegemony of MPI as the sole method of harnessing the power of parallel systems.
+Naturally, these alternatives to MPI also dwell with the fault tolerance
+issue~\cite{parsec-ft, oshmem-ft, x10-ft}. In addition, the convergence
+between Big-Data infrastructure and the HPC infrastructure, as well as
+the emergence of machine learning as a massive consumer of compute
+capabilities is enticing new communities to look into deploying on HPC
+type of systems, and these communities have long been used to an infrastructure
+and programming model that encapsulates resilience as a core feature~\cite{hadoop}.
 
+A feature that's commonly needed by all these communities with a vested
+interest in fault tolerance is the capability to efficiently, timely and
+accurately detect and report failures, so that they can manifest as
+error codes from the programming interface, or trigger implicit recovery
+actions. In prior works~\cite{sc16}, we have designed a tailor-made
+failure detector for MPI that deploys finely tuned optimizations to
+improve its performance. These optimizations are unfortunately strongly
+tied to the MPI internal infrastructure. For example, a key parameter to 
+the performance of that detector is the
+access to low-level remote memory access routines, which may not be typically
+available in a less MPI-centric context. Similar concepts could be
+applied to other HPC networking interfaces (e.g., Open SHMEM), but at 
+the expense of a major infrastructure rewrite for each and every one of 
+them. In this paper, we test the hypothesis that a fully-dedicated MPI 
+solution is not necessary to achieve great accuracy and performance, and 
+that a generic failure detection solution provided by an external runtime 
+entity that does not have access to the MPI context and communication conduits
+can deliver a similar level of service. In order to test that hypothesis, 
+and further, to define how generic one can make the solution, we designed 
+a failure detection component in the PMIx~\cite{pmix} runtime reference implementation
+(PRRTE), which is a fully fledged runtime that can deploy, monitor and 
+serve multiple HPC networking stack clients like Open MPI, or the 
+reference Open SHMEM implementation. We then compare this generic 
+failure detection service with the fully-dedicated MPI detector from 
+ULFM Open MPI on one hand, and with the SWIM failure detector which stands 
+as a state of the art detector for unstructured peer-to-peer systems, henceforth 
+highlighting that there is a performance tradeoff in generality, but 
+satisfactory level of performance can be achieved in a portable and reusable 
+component that can satisfy the needs of a variety of HPC networking systems. 
+
+\todo{
+Make sure all contributions are explicit: 
+design a general purpose fault tolerance framework in PMIx 
+explore the performance tradeoff incurred by generality
+demonstrate that the runtime based failure detector can compete with the 
+highly tuned/MPI specific ULFM detector, and outperforms completely generic detectors.
+}
+
+The rest of this paper is organized as follows. In Section~\ref{motivation}
+we describe motivating use cases and give some background on the MPI specific 
+failure detector implementation in ULFM. In Section~\ref{design} we describe 
+the algorithms and implementation details of our generic failure detector.
+Section~\ref{experiments} describes the performance and accuracy comparison
+between three different failure detectors providing a distinct tradeoff 
+on the general to specific scale. We then discuss related works\todo{make sure corresponds to final organization} in 
+Section~\ref{related} before we conclude.
+
+\todo{decide if move to the end}
 \section{Related work}
 In this section, we survey related work on large scale distributed runtime environments,different kinds of heartbeat based and random gossip based failure detectors, together with reliable broadcast algorithms to propagate fault information.
 
@@ -459,7 +539,7 @@ EREINIT a global-restart failure recovery model by allowing a fast re-initializa
 Failure detection and propagation is a critical service for resilient systems. In this work, we present an efficient failure detection and propagation design and implementation for distributed systems integrated within PMIx\_PRRTE. The process and node failure detection strategy presented in this work depends on heartbeats and timeouts, and communication bound to provide a reliable solution that works at scale without constraints of the kind of faults. Our design and implementation takes into account of the complicate relationship and trade-off between system overhead, detection efficient and risks: low detection time requires frequent emission of heartbeats messages, increasing the system noise and the risk of false positive. Our solution addresses those concerns and capable of tolerating high frequency node and process failures with the help of high performance reliable broadcast notification can quickly disseminate the fault information, our results from different machines and benchmarks compared to two other related work shows that Resilient PRRTE significantly advances the state of art with respect to efficient detection and propagation of failures. This runtime level failure tolerate implementation breaks the limit of running MPI  application only and support all PMIx-based application which is more extensive than MPI scope.   
 
 
-\section{Acknowledgments}
+%\section{Acknowledgments}
 %
 % The acknowledgments section is defined using the "acks" environment (and NOT an unnumbered section). This ensures
 % the proper identification of the section in the article metadata, and the consistent spelling of the heading.
