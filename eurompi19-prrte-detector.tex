@@ -5,6 +5,10 @@
 \usepackage[noend]{algpseudocode}
 \usepackage{todonotes}
 \usepackage{xspace}
+\usepackage{listings}
+
+\newcommand{\mpifunc}[1]{\lstinline"MPI_#1"}
+
 %%%% As of March 2017, [siggraph] is no longer used. Please use sigconf (above) for SIGGRAPH conferences.
 
 %%%% Proceedings format for SIGPLAN conferences 
@@ -189,7 +193,7 @@ As the scale of High Performance Computing (HPC) system continues to grow, with 
 % the first part of the formatted document.
 \maketitle
 
-\section{Introduction}
+\section{Introduction}\label{sec:intro}
 
 The complexity and vastness of the questions posed by modern science has
 fueled the emergence of an era where exploring the boundaries of mater, life,
@@ -198,17 +202,17 @@ experiments, collect the observation, and in the
 case of High Performance Computing (HPC), perform the compute intensive
 analysis of scientific data. As the march of science continues, small and
 easy problem have already been solved, and significant advances increasingly
-involve dwelling with finer grain accuracy problems, which entails that the
+require tackling finer grain, more accurate problems, which entails that the
 compute workloads are getting larger, fueling an unending need for larger
 HPC systems.
 
-In turn, facing the hard limits on power consumption and chip frequency,
+In turn, facing hard limits on power consumption and chip frequency,
 HPC architects have been forced to embrace massive parallelism as well as
 a deeper and more complex component hierarchy (e.g., non-uniform memory architectures,
 GPU accelerated nodes) to continue the growth in available compute capabilities.
 This has stressed the traditional HPC software infrastructure in different 
 ways, but it notably put to prominence two different issues that had been 
-largely ignored in the last two decades: fault tolerance and programming 
+largely dormant in the last two decades: fault tolerance and novel programming 
 models.
 
 The Message Passing Interface (MPI) has been instrumental in 
@@ -217,21 +221,20 @@ along from early systems with tens of processors to nowadays systems routinely
 encompassing hundreds of thousands of cores. As failures become more 
 common on large and complex systems, The MPI standard is in the process of 
 evolving to integrate fault tolerance capabilities, as proposed in the 
-User-Level Failure Mitigation (ULFM) specification draft \cite{Bland2013}, or 
-various efforts to integrate tightly checkpoint-restart with MPI \cite{reinit18}.
+User-Level Failure Mitigation (ULFM) specification draft~\cite{Bland2013}, or 
+various efforts to integrate tightly checkpoint-restart with MPI~\cite{reinit18}.
 The second stress comes from programming systems that are inherently
 hierarchical. This has brought forth a renaissance in the field of
 programming models, leading to a variety of contenders challenging the
 hegemony of MPI as the sole method of harnessing the power of parallel systems.
-Naturally, these alternatives to MPI also dwell with the fault tolerance
-issue~\cite{7161563, doi:10.1177/1094342016669416, shmem-ft15, 10.1007/978-3-319-50995-2_5, X10-ft16}. In addition, the convergence
+Naturally, these alternatives to MPI also have to handle fault tolerance~\cite{7161563, doi:10.1177/1094342016669416, shmem-ft15, 10.1007/978-3-319-50995-2_5, X10-ft16}. 
+In addition, the convergence
 between Big-Data infrastructure and the HPC infrastructure, as well as
 the emergence of machine learning as a massive consumer of compute
-capabilities is enticing new communities to look into deploying on HPC
-type of systems, and these communities have long been used to an infrastructure
-and programming model that encapsulates resilience as a core feature \cite{hadoop-ft}.
+capabilities is gathering around HPC systems new communities that 
+have long held expectations that the infrastructure provides resilience as a core feature \cite{hadoop-ft}.
 
-A feature that's commonly needed by all these communities with a vested
+A feature that's commonly needed by these communities with a vested
 interest in fault tolerance is the capability to efficiently, timely and
 accurately detect and report failures, so that they can manifest as
 error codes from the programming interface, or trigger implicit recovery
@@ -246,18 +249,18 @@ applied to other HPC networking interfaces (e.g., Open SHMEM), but at
 the expense of a major infrastructure rewrite for each and every one of 
 them. In this paper, we test the hypothesis that a fully-dedicated MPI 
 solution is not necessary to achieve great accuracy and performance, and 
-that a generic failure detection solution provided by an external runtime 
+that a generic failure detection solution, provided by an external runtime, 
 entity that does not have access to the MPI context and communication conduits
 can deliver a similar level of service. In order to test that hypothesis, 
 and further, to define how generic one can make the solution, we designed 
-a failure detection component in the PMIx \cite{CASTAIN18} runtime reference implementation
+a failure detection component in the PMIx~\cite{CASTAIN18} runtime reference implementation
 (PRRTE), which is a fully fledged runtime that can deploy, monitor and 
 serve multiple HPC networking stack clients like Open MPI, or the 
 reference Open SHMEM implementation. We then compare this generic 
 failure detection service with the fully-dedicated MPI detector from 
 ULFM Open MPI on one hand, and with the SWIM failure detector which stands 
-as a state of the art detector for unstructured peer-to-peer systems, henceforth 
-highlighting that there is a performance tradeoff in generality, but 
+as a state of the art detector for unstructured peer-to-peer systems. Henceforth 
+we highlight that there is a performance tradeoff in generality, but 
 satisfactory level of performance can be achieved in a portable and reusable 
 component that can satisfy the needs of a variety of HPC networking systems. 
 
@@ -269,42 +272,81 @@ demonstrate that the runtime based failure detector can compete with the
 highly tuned/MPI specific ULFM detector, and outperforms completely generic detectors.
 }
 
-The rest of this paper is organized as follows. In Section~\ref{motivation}
+The rest of this paper is organized as follows. In Section~\ref{sec:motivation}
 we describe motivating use cases and give some background on the MPI specific 
-failure detector implementation in ULFM. In Section~\ref{design} we describe 
+failure detector implementation in ULFM. In Section~\ref{sec:design} we describe 
 the algorithms and implementation details of our generic failure detector.
-Section~\ref{experiments} describes the performance and accuracy comparison
+Section~\ref{sec:experiments} describes the performance and accuracy comparison
 between three different failure detectors providing a distinct tradeoff 
 on the general to specific scale. We then discuss related works\todo{make sure corresponds to final organization} in 
-Section~\ref{related} before we conclude.
+Section~\ref{sec:related} before we conclude.
 
 \todo{decide if move to the end}
-\section{Related work}
+\section{Related work}\label{sec:related}
 In this section, we survey related work on large scale distributed runtime environments, different kinds of heartbeat based and random gossip based failure detectors, together with reliable broadcast algorithms to propagate fault information.
 
 \subsection{Runtime systems}
-A wide range of approach to the problem of exscale distributed computing runtime environments have been studied, each primarily emphasizing a particular key aspect of the overall problem. 
+A wide range of approach to the problem of exascale distributed computing runtime environments have been studied, each primarily emphasize a particular key aspect of the overall problem. 
 
-MPICH provides several runtime environments, such as MPD \cite{Butler00}, Hydra \cite{MPICH14} and Gforker \cite{MPICH14}. MPD connects nodes through a ring topology but it is not resilient, two node failures could separate nodes into two separates groups that prevents communication with one another. Another drawback of MPD is that this approach has proved to be non-scalable \cite{Bosilca11}.
-Hydra scales well for large number of processes on a single node and interacts efficiently with hybrid programming models that combine MPI and threads, but it does not behave well on multi-node environment. ORTE \cite{Castain05, Jeffrey12}, the Open MPI runtime environment, provides not only the required message passing API, but also an accompanying runtime system to launch, monitor, and kill parallel jobs. It also connects daemons through various topologies, however the communication is not reliable. Also, all those runtimes are limited to MPI application.
+MPICH provides several runtime environments, such as MPD~\cite{Butler00}, Hydra~\cite{MPICH14} and Gforker~\cite{MPICH14}. MPD connects nodes through a ring topology but it is not resilient, two node failures could separate nodes into two separates groups that prevents communication with one another. Another drawback of MPD is that this approach has proved to be non-scalable~\cite{Bosilca11}.
+Hydra scales well for large number of processes on a single node and interacts efficiently with hybrid programming models that combine MPI and threads, but it does not behave well on multi-node environment.\todo{citation needed?} Open RTE~\cite{Castain05, Jeffrey12} is the Open MPI runtime environment to launch, monitor, and kill parallel jobs, as well as managing I/O forwarding. It also connects daemons through various topologies, however the communication is not reliable. Also, all those runtimes have limited applicability outside of the related MPI implementation 
+that has motivated their creation. 
 
-PRRTE has the capability to run MPI jobs more scalably, and also supports applications utilize more than one programming model, such as an MPI application that also uses OpenMP. 
+The PRRTE runtime serves as the demonstrator and reference implementation
+for the PMIx specification~\cite{CASTAIN18}. Technically it is a fork of
+the Open RTE runtime, and thus inherit most of its capabilities to launch
+and monitor MPI jobs. Thanks to its well specified PMIx interface. PRRTE
+can deploy not only the related MPI implementation of project from which it
+is spun, but also a wide variety of parallel applications (MPI based or not).
+Although PRRTE provides rudimentary support for clients fault detection and reporting, 
+detection of failed nodes is rudimentary and slow, and the reporting 
+communication topology is not itself resilient. 
+The current work expands on the existing capabilities of PRRTE by adding
+advanced failure detection and reporting methodologies that can operate 
+despite the failure of the runtime daemon themselves.
 
 \subsection{Failure detection}
-Research in the areas of failure detection has been extensively studied. Chandar and Toueg \cite{Chandra96} proposed the first unreliable failure detector oracle that could solve consensus and atomic broadcast problem for reliable distributed systems. Many implementations \cite{Wei02, Larrea00, Kawazoe97} based on this oracle work are using all-to-all communication where every node periodically sends heartbeats to all nodes. However, those implementations are not scalable for lager systems with hundreds of nodes. The gossip-style protocol \cite{van98, Ranganathan01, Gupta01, Abhinandan02}, which nodes pick some other nodes to monitor and exchange information, becomes a popular approach for failure detection in order to scale up. However, these gossip methods do not work well with large number of node crashes, and it could potentially take a fairly long time to detect a specific failure. Furthermore, the gossip methods still have the disadvantage of redundant failure messages that decreases the scalability.
+Research in the areas of failure detection has been extensively studied. Chandra and Toueg~\cite{Chandra96} proposed the first unreliable failure detector oracle that could solve consensus and atomic broadcast problem for reliable distributed systems. Many implementations~\cite{Wei02, Larrea00, Kawazoe97} based on this oracle work are using all-to-all heartbeat patterns where every node periodically communicates with all nodes. However, those implementations are not scalable for lager systems with hundreds of nodes. The gossip-style protocol \cite{van98, Ranganathan01, Gupta01, Abhinandan02}, in which nodes pick at random other nodes to monitor and exchange information, is a popular approach for failure detection in unstructured systems were the group membership 
+is not a-priori established. However, these gossip methods do not work well with very large number of node crashes, and the time to detect a specific failure is not strictly bounded given the 
+random nature of the protocol. Furthermore, the gossip methods have the disadvantage of 
+generating a large number of redundant detection and gossip messages that decrease the scalability.
 
-Recently, our previous work \cite{George16} propose an observation ring based detector for HPC systems, the simulation results demonstrate the efficient of the algorithm, however the implementation in ULFM is an application level failure detection strategy, which can only detect process failures. This extension resilient PRRTE work exceed this limitation and has the capability to detect both process and node failures which is also not limited to MPI application only. 
+Recently, our previous work \cite{George16} propose an observation ring based detector for HPC systems. 
+the simulation results demonstrate the efficient of the algorithm, however the implementation in ULFM is an application level failure detection strategy, which can only detect MPI process failures. The 
+implementation employs multiple optimization and shortcuts that are possible because it is 
+tightly and deeply integrated within the MPI library. For example, limitations on the 
+accuracy of the detector when the MPI implementation is not actively communicating 
+are circumvented by using Remote Memory Access primitives (RMA) which are
+initially provided for supporting the MPI communication; the operational 
+mode and accuracy of the detector can be impacted by the thread model used 
+during the MPI initialization (e.g., \mpifunc{MPI_THREAD_SINGLE} may result in 
+lower accuracy of the detector); in manycore systems, every MPI process 
+is observed and reported as an independent entity, which can impart that the 
+overhead scales with the number of MPI processes rather than the number of 
+compute nodes. This resilient PRRTE work 
+exceed these limitations and has the capability to detect both process and 
+node failures with a smaller observation topology, and is not limited to
+MPI application only. 
 
 \subsection{Reliable broadcast}
-Notable efforts have been made for fault-tolerant communication based on logical network typologies. A fully connected topology can handle large number of failures but it cannot be scalable since it sends too many messages. A circular topology is good for scalability but suffers from multiple node failures. 
-A more recent effort is k-nomial graph \cite{Angskun07, Pava11} which is a balance between the previous two methods. In k-nomial graph, the diameter is defined as the longest shortest path between any two nodes in the graph. Compare to others, binomial has the lowest diameter which has the advantage of minimal reroute hops. Also binomial graph scales well with reasonable degree, regular graph (each node has the same number of neighbours). The broadcast routing approach in \cite{Angskun07} using a spanning tree shows good performance. In the case of reliable broadcast, low average distance is a key-concept but not the only factor affect the performance of notification latency. Our reliable broadcast algorithm use BMG topology for routing and forwarding messages, we also use a reordering strategy when forwarding messages lead to lower average reroute hops and message traffic density. We also consider the concurrent sending capability of single node by sending messages to all its neighbours beyond the children of the node in spanning tree. 
+Notable efforts have been made for fault-tolerant communication based on logical network typologies. A fully connected topology can handle large number of failures but it cannot be scalable since it sends too many messages. At the other extreme, a ring topology is good for scalability
+but offers a poor propagation latency and suffers in scenarios with multiple node failures.
+A more recent effort is k-nomial circulant graph~\cite{Angskun07, Pava11} which is a balance between the previous two methods. In a k-nomial circulant graph, the diameter is defined as the longest shortest path between any two nodes in the graph.\todo{this sentence is self evident, need to review the full def on k-nomial} Among k-nomial circulant graphs, the binomial graph (BMG) has the lowest diameter, which minimizes the number of hops for a dissemination to reach all 
+processes. Also binomial graph scales well thanks to a regular, fixed degree graph (each node has the same number of neighbors). 
+%
+The broadcast routing approach in~\cite{Angskun07} uses a collection 
+of binomial spanning trees with a fixed send ordering of neighbors. 
 %The key-concept of fault-tolerant broadcasting is diameter of the topology, which is defined the longest shortest path between any two nodes in the graph. Binomial has the smallest diameter.
 %Also binomial graph scales well with reasonable degree, regular graph and lowest diameter. 
 %However when doing a reliable broadcast with message forwarding, 
 %However when implementing a binomial graph, previous approach \cite{Angskun07} uses a fixed sending sequence to all the neighbours which has the disadvantage of not using high sending priority to unnotified nodes. Our work uses binomial graph with a reordering strategy when sending and forwarding messages, which means lower average reroute hops and message traffic density.
-%However when implementing a binomial graph, previous approach \cite{Angskun07} uses a fixed sending sequence to all the neighbours which cannot reach unnotified nodes quickly enough. Our work uses binomial graph with a reordering strategy when sending and forwarding messages leading to lower average reroute hops and message traffic density.
+
+Our work uses a BMG with a reordering strategy when sending and forwarding messages that 
+puts a high priority for messages that target leaves in previously effected 
+binomial trees, which helps reaching not yet notified nodes quicker when intermediate 
+hops have failed.\todo{that text needs another review/pass. But, not clear if want to talk about this in this paper.}
  
-\section{Design and implementation}
+\section{Design and implementation}\label{sec:design}
 
 In this section, we describe the design of Resilient PRRTE, our resilient mechanism has two components: a node level observation ring and a reliable broadcast overlay network. We also provide rationale for our design decisions,and detailed implementation.
 
@@ -446,7 +488,7 @@ Figure 5 shows the BMG with 12 nodes, node 0 starts the propagation and sends me
 \end{enumerate}
 For inter-node notification, children processes subscribe to a event handler with specific error code and will be triggered by the notification function when a daemon doing the locally notification. Also,applications can register to multiple events which enable the capability to receive notification from different jobs. This attribute is introduced in group communication and propagation component.
 
-\section{Experiment Evaluation}
+\section{Experiment Evaluation}\label{sec:experiments}
 
 \subsection{Experiment Setup}
 The experiment are conducted on two different machines: (1) \todo{more detail about nacl}a local cluster named NaCl, an Intel Xeon X5660 machine with 66 nodes, 12 cores per node. (2) NERSC's Cori\cite{Cori01} -a Cray XC40 with Intel Xeon "Haswell" processor nodes using Cray "Aries" high speed inter-node network,32 cores per node. The resilient PRRTE is based on PRRTE(\#71ef547), with external PMIx(\#21d7c9). The comparison ULFM is based on(\#77f9157). The experiments is repeated 30 times and we present the average. The benchmark are deployed with one MPI rank per core. 
@@ -547,7 +589,7 @@ The last experiment (Figure 14) investigates the effect of multiple node failure
   \caption{Multiple process failures at the same time}
 \end{figure}
 
-\section{Application}
+\section{Application}\label{sec:motivation}
 In this section, we present an actual use case of the resilient PRRTE to support the functionality in ULFM of revocation and correction of a broken communicator after node failure. For ULFM the global communicator could be reconfigured after process failure detection, the failed processes are excluded from the global communicator using the MPI\_Comm\_shrink() and are re-spawned using the MPI function MPI\_Comm\_spawn(). However,the job will be aborted with node failure, by using PRRTE instead of OpenMPI runtime the job doesn't need to be terminated after node failure, also with the runtime level propagation mechanism the error message can be delivered to the job scope ( in this case the MPI universe). With the notification MPI application can get the consensus knowledge of failures, then application can use the recovery functions (Shrink, Respawn) provided by ULFM to build new communicator without the processes on the failed node but with those newly spawned processes. 
 \todo{add SHMEM, REINIT; thinking about moving this part as 2. Motivation}
 
@@ -555,7 +597,7 @@ OpenSHMEM fault tolerance model is based on check-point and restart, that suits 
 
 EREINIT a global-restart failure recovery model by allowing a fast re-initialization of MPI. This work is a co-design between MVAPICH and Slurm resource manager to add process and node failures detection and propagation features. The detection is using Slurm's health check mechanism by sending ping messages to nodes, propagation is implemented in a manner of forcing the controller to individually send the notification to children of the failed nodes. However this work is highly depends on one particular resource manager Slurm has the limitation to run only on Slurm machine, also it use a inefficient propagation method. Our resilient PRRTE work can exceed the bottleneck of EREINIT(Slurm machine only) to run on machines with different resource managers(Slurm, PBS, LSF, TORQUE, etc). Also with our efficient propagation algorithm the notification will be much faster advances the stabilization and recovery time of EREINIT.
 
-\section{Conclusion}
+\section{Conclusion}\label{sec:conclusion}
 Failure detection and propagation is a critical service for resilient systems. In this work, we present an efficient failure detection and propagation design and implementation for distributed systems integrated within PMIx\_PRRTE. The process and node failure detection strategy presented in this work depends on heartbeats and timeouts, and communication bound to provide a reliable solution that works at scale without constraints of the kind of faults. Our design and implementation takes into account of the complicate relationship and trade-off between system overhead, detection efficient and risks: low detection time requires frequent emission of heartbeats messages, increasing the system noise and the risk of false positive. Our solution addresses those concerns and capable of tolerating high frequency node and process failures with the help of high performance reliable broadcast notification can quickly disseminate the fault information, our results from different machines and benchmarks compared to two other related work shows that Resilient PRRTE significantly advances the state of art with respect to efficient detection and propagation of failures. This runtime level failure tolerate implementation breaks the limit of running MPI  application only and support all PMIx-based application which is more extensive than MPI scope.   
 
 
