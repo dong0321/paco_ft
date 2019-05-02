@@ -329,7 +329,7 @@ node failures with a smaller observation topology, and is not limited to
 MPI application only. 
 
 \subsection{Reliable broadcast}
-Notable efforts have been made for fault-tolerant communication based on logical network typologies \cite{luo}. A fully connected topology can handle large number of failures but it cannot be scalable since it sends too many messages. At the other extreme, a ring topology is good for scalability
+Notable efforts have been made for fault-tolerant communication based on logical network typologies \cite{Luo18}. A fully connected topology can handle large number of failures but it cannot be scalable since it sends too many messages. At the other extreme, a ring topology is good for scalability
 but offers a poor propagation latency and suffers in scenarios with multiple node failures.
 A more recent effort is k-nomial circulant graph~\cite{Angskun07, Pava11} which is a balance between the previous two methods. In a k-nomial circulant graph, the diameter is defined as the longest shortest path between any two nodes in the graph.\todo{this sentence is self evident, need to review the full def on k-nomial} Among k-nomial circulant graphs, the binomial graph (BMG) has the lowest diameter, which minimizes the number of hops for a dissemination to reach all 
 processes. Also binomial graph scales well thanks to a regular, fixed degree graph (each node has the same number of neighbors). 
