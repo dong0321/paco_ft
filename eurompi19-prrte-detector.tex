@@ -371,7 +371,9 @@ In this section, we describe the design of Resilient \prrte, our resilient mecha
 \end{figure}
 
 \subsection{Model}
-\prrte is a fork of the \ompi runtime, \orte~\cite{Castain05}. It is based on a Module Component Architecture (MCA) which permits easily extend or substitute the core subsystem with experimental features. As shown in in figure~\ref{fig:prrte}, within this architecture, each of the major subsystems is defined as an MCA framework, with a well-defined interface. Also each framework contains one or more components each representing a different implementation. Then the \orte work spun off to its own effort as a ``\verb|shim|`` between the application and the host environment that includes full support for the \pmix \cite{CASTAIN18} - an abstract set of interfaces by which not only applications and tools can interact with the resident system management stack (SMS), but also the various SMS components can interact with each other. 
+\texttt{\bf Failure model: } Node failure: the result of node crash, lost the daemon and all processes hosted on this node. Process failure: one or more serial or parallel processes due to a processor or node failure.
+
+\texttt{\bf System model: } \prrte is a fork of the \ompi runtime, \orte~\cite{Castain05}. It is based on a Module Component Architecture (MCA) which permits easily extend or substitute the core subsystem with experimental features. As shown in in figure~\ref{fig:prrte}, within this architecture, each of the major subsystems is defined as an MCA framework, with a well-defined interface. Also each framework contains one or more components each representing a different implementation. Then the \orte work spun off to its own effort as a ``\verb|shim|`` between the application and the host environment that includes full support for the \pmix \cite{CASTAIN18} - an abstract set of interfaces by which not only applications and tools can interact with the resident system management stack (SMS), but also the various SMS components can interact with each other. 
 
 \prrte provides an easy way of launching, running and monitoring \pmix-based applications outside of a \pmix-enabled environment on distributed systems. The \prrte overall architecture is out the scope of this paper, but we still want to mention some features embraced by it. First of all, \prrte's very first feature is Job controlling and Monitoring~\cite{Ralph15} which enables the application and SMS to coordinate the response to failure: termination of the job or a subset of processes, request replacement of nodes and processes, or continue execution at a lower setting. This provides the foundation of resilience strategy of our work. Another important feature is the \pmix Event Notification~\cite{Ralph002} : the resource manager or server can notify the application of events, the application processes can notify their server or SMS of issues. This provides the channel for locally propagation of error messages. Resilient \prrte mainly embraces two new features of failure detection and reliable broadcast for messages propagation globally and locally. We will give a detail introduction of the two features in the following sections.
 
@@ -384,9 +386,8 @@ In this section, we describe the design of Resilient \prrte, our resilient mecha
     \toprule
     Symbol & Description \\
     \midrule
-    Daemon & ORTE Daemons are runtime environment processes:
-they are the link between the HNP and the application
-processes
+    HNP & Head Node Process \\
+    Daemon & Runtime environment process: the link  \\&  between the HNP and the application \\
     \texttt{\bf N} & Number of Daemon/nodes \\
     \texttt{Id} & The identifier of a Daemon \\
     \texttt{LIST\{ID\}} & List of known failed daemons' ID \\
