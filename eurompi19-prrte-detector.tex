@@ -266,8 +266,8 @@ a failure detection component in the \pmix~\cite{CASTAIN18} runtime reference im
 serve multiple HPC networking stack clients like \ompi, or the 
 reference \oshmem implementation. We then compare this generic 
 failure detection service with the fully-dedicated \mpi detector from 
-\ulfm \ompi on one hand, and with the SWIM failure detector on the other hand, the later standing
-as a state of the art detector for unstructured peer-to-peer systems. Henceforth 
+\ulfm \ompi on one hand, and with the Scalable Weakly-Consistent Infection-style Membership (SWIM) protocol on the other hand, the later standing
+as a state-of-the-art detector for unstructured peer-to-peer systems. Henceforth 
 we highlight that there is a performance tradeoff in generality, but 
 satisfactory level of performance can be achieved in a portable and reusable 
 component that can satisfy the needs of a variety of HPC networking systems. 
@@ -290,10 +290,10 @@ on the general to specific scale. We then discuss related works\todo{make sure c
 Section~\ref{sec:related} before we conclude.
 
 \todo{decide if move to the end}
-\section{Related work}\label{sec:related}
+\section{Related Work}\label{sec:related}
 In this section, we survey related work on large scale distributed runtime environments, different kinds of heartbeat based and random gossip based failure detectors, together with reliable broadcast algorithms to propagate fault information.
 
-\subsection{Runtime systems}
+\subsection{Runtime Enviroments}
 A wide range of approach to the problem of exascale distributed computing runtime environments have been studied, each primarily emphasize a particular key aspect of the overall problem. 
 
 MPICH provides several runtime environments, such as MPD~\cite{Butler00}, Hydra~\cite{MPICH14} and Gforker~\cite{MPICH14}. MPD connects nodes through a ring topology but it is not resilient, two node failures could separate nodes into two separates groups that prevents communication with one another. Another drawback of MPD is that this approach has proved to be non-scalable~\cite{Bosilca11}.
@@ -313,7 +313,7 @@ The current work expands on the existing capabilities of \prrte by adding
 advanced failure detection and reporting methodologies that can operate 
 despite the failure of the runtime daemon themselves.
 
-\subsection{Failure detection}
+\subsection{Failure Detection}
 Research in the areas of failure detection has been extensively studied. Chandra and Toueg~\cite{Chandra96} proposed the first unreliable failure detector oracle that could solve consensus and atomic broadcast problem for reliable distributed systems. Many implementations~\cite{Wei02, Larrea00, Kawazoe97} based on this oracle work are using all-to-all heartbeat patterns where every node periodically communicates with all nodes. However, those implementations are not scalable for lager systems with hundreds of nodes. The gossip-style protocol \cite{van98, Ranganathan01, Gupta01, Abhinandan02}, in which nodes pick at random other nodes to monitor and exchange information, is a popular approach for failure detection in unstructured systems were the group membership 
 is not a-priori established. However, these gossip methods do not work well with very large number of node crashes, and the time to detect a specific failure is not strictly bounded given the 
 random nature of the protocol. Furthermore, the gossip methods have the disadvantage of 
@@ -336,10 +336,10 @@ exceed these limitations and has the capability to detect both process and
 node failures with a smaller observation topology, and is not limited to
 MPI application only. 
 
-\subsection{Reliable broadcast}
+\subsection{Reliable Broadcast}
 Notable efforts have been made for fault-tolerant communication based on logical network typologies \cite{Luo18}. A fully connected topology can handle large number of failures but it cannot be scalable since it sends too many messages. At the other extreme, a ring topology is good for scalability
 but offers a poor propagation latency and suffers in scenarios with multiple node failures.
-A more recent effort is k-nomial circulant graph~\cite{Angskun07, Pava11} which is a balance between the previous two methods. %In a k-nomial circulant graph, the diameter is defined as the longest shortest path between any two nodes in the graph.\todo{this sentence is self evident, need to review the full def on k-nomial}
+A more recent effort is k-nomial circulant graph~\cite{Angskun07, Pava11} which is a balance between the previous two methods. 
 Among k-nomial circulant graphs, the binomial graph (BMG) has the lowest diameter, which minimizes the number of hops for a dissemination to reach all 
 processes. Also binomial graph scales well thanks to a regular, fixed degree graph (each node has the same number of neighbors). 
 %
@@ -355,7 +355,7 @@ puts a high priority for messages that target leaves in previously effected
 binomial trees, which helps reaching not yet notified nodes quicker when intermediate 
 hops have failed.\todo{that text needs another review/pass. But, not clear if want to talk about this in this paper.}
  
-\section{Design and implementation}\label{sec:design}
+\section{Design and Implementation}\label{sec:design}
 
 In this section, we describe the design of Resilient \prrte, our resilient mechanism has two components: a node level observation ring and a reliable broadcast overlay network. We also provide rationale for our design decisions, and implementation details.
 
@@ -378,7 +378,7 @@ In this section, we describe the design of Resilient \prrte, our resilient mecha
 
 \prrte provides an easy way of launching, running and monitoring \pmix-based applications outside of a \pmix-enabled environment on distributed systems. The \prrte overall architecture is out the scope of this paper, but we still want to mention some features embraced by it. First of all, \prrte's very first feature is Job controlling and Monitoring~\cite{Ralph15} which enables the application and SMS to coordinate the response to failure: termination of the job or a subset of processes, request replacement of nodes and processes, or continue execution at a lower setting. This provides the foundation of resilience strategy of our work. Another important feature is the \pmix Event Notification~\cite{Ralph002} : the resource manager or server can notify the application of events, the application processes can notify their server or SMS of issues. This provides the channel for locally propagation of error messages. Resilient \prrte mainly embraces two new features of failure detection and reliable broadcast for messages propagation globally and locally. We will give a detail introduction of the two features in the following sections.
 
-\subsection{Detection of process and node failure/Error management}
+\subsection{Detection of Process and Node Failures}
 
 \begin{table}
   \caption{Parameters and notations}
@@ -419,7 +419,7 @@ For a general distributed system, nodes can communicate to any other nodes by se
 
 When the observer detects that the predecessor is failed, there are two major steps we do. First we need to reconnect the ring topology as in figure 4, the observer will search its own known failed list and figured out the first alive node \textbf{\textit{nq}} preceding in the ring, it set \textbf{\textit{nq}} as its predecessor and then send a request to \textbf{\textit{nq}} for being the new observer. The second step is failure propagation: the observer need to get access to the job's global mapping and binding information and find out all those processes hosted on predecessor node. After we get the list of all those affected processes and node, the observer calls the propagation component to delivery this message on node level to its neighbours, then observer will notify its local processes. Then, the observer updates its local known failure List\{\textit{ID}\}. For all those nodes who received the notification, each node need to forward this information, maintain its own List\{\textit{ID}\} and notify locally. As show in figure 1, we created a new module in error management as detector to enable this feature.
 
-\subsection{Failure propagation}
+\subsection{Detection Broadcasting}
 For broadcasting we use the scalable and fault tolerant topology binomial graph (BMG)~\cite{Angskun07}. BMG has good fault-tolerant properties such as optimal connectivity, low fault-diameter, strongly resilient and good optimal probability in failure cases. In order to continuing the job execution rather than aborting, we need let all participated nodes and applications be aware of failures, the three major mechanisms are 
 \begin{enumerate}
   \item Observer fetch error information of failed node. Start the propagation globally by calling group communication component for broadcasting.
@@ -509,7 +509,7 @@ The experiment are conducted on two different machines: (1) \todo{more detail ab
 %~\cite{Cori01} 
 -- a Cray XC40 with Intel Xeon "Haswell" processors and the Cray "Aries" high speed inter-node network, 32 cores per node. The resilient \prrte is based on \prrte(\#71ef547), with external \pmix(\#21d7c9). The comparison \ulfm is based on(\#77f9157). The experiments is repeated 30 times and we present the average. We use Intel MPI Benchmark\cite{IMB} for MPI performance measurements for point-to-point and global communications and deploy with one \mpi rank per core. For all experiments we use map-by node, bind-to core binding policy -- put sequential MPI processes on adjacent processor cores. The only exception is the P2P benchmark experiment we use map-by node, bind-by node -- put sequential MPI processes on adjacent nodes. \todo{add binding policy}
 
-\subsection{Accuracy and noise}
+\subsection{Accuracy and Noise}
 For the first experiment we want to implore the noise overhead generated by the heartbeat ring detector with different heartbeat period from milliseconds to seconds. We also investigate the accuracy of the detector with different heartbeat period. 
 
 The accuracy experiment is conducted as: (1)\ Start with a high value of $ \eta $, and decrease $ \eta $ and corresponding $ \delta $ until we notice false positive. The default setting of $ \eta $ and $ \delta $ are $ \eta = \delta * 2 $. (2) Use a reasonable fixed value of  $ \delta $ , decrease  $ \eta $ until any node misses the deadline of a heartbeat sending.  \todo{pull the description of the methodology in to make it self contained} If the test is successful (no failure is detected when there is no injection, and all injected failure are correctly detected), then we decrease the heartbeat period and repeat the test until a false positive is reported. We explore detector accuracy with two experiments show false positive behavior on 64 nodes on NaCl: 
@@ -547,7 +547,7 @@ For \prrte, we also synchronize with barrier, and use our benchmark to inject no
 
 Figure 9 compare the scalability of the two detectors regard to the number of deployed processes. We set the heartbeat period to 0.5 second with timeout of 1 second. For smaller number of processes \prrte failure detector is stabilizing in approximately 0.75 second,a statistic behavior of the randomness of when the failure happened between two contiguous heartbeats, while the stabilization delay of SWIM is more than 10 times of heartbeat period. As the number of processes increases, \prrte's latency remains almost the same. But SWIM shows a linear increase which will be the bottleneck of scaling up(with the assumption it can solve the maximum connection requests limit). For \prrte with 4K processes the stabilization is still beyond the range of heart period and timeout.
 
-\subsection{Comparison with \ulfm for process failure}
+\subsection{Comparison with \ulfm for Process Failures}
 This section compares our failure detector with our previous work \ulfm~\cite{George16}, the \ulfm implementation also has two main components: process level detection ring, and propagation overlay with all launched processes. The detection ring is built at Byte Transfer Layer (BTL) level - which provides the portable low-level transport abstraction in \ompi. The current detection implementation provides several mechanisms to ensure the timely activation and delivery of heartbeats:
 \begin{enumerate}
   \item Using a separate, library internal thread to send the heartbeats in order to be separated from the application's communication, this also avoid the possible heartbeat delay of compute intensive application. For receiver it need to poll BTL engine to check the aliveness of its successor. 
@@ -573,7 +573,7 @@ However, \prrte process failure detection is implemented as the daemons are moni
 
 Figure 10 compares the latency of process failure detection and propagation of \ulfm and \prrte. The sensitivity of \ulfm heartbeat without false detection is 10 milliseconds, but we want to compare the best performance from \ulfm using high speed in-band detection which is faster than using the lowest heartbeat period. For \prrte, the daemons are in charge of detecting any process failure. \prrte uses TCP to broadcast among daemons, each daemon uses the \pmix notification method to distribute the error information to all hosted processes. Experiments are conducted on our local cluster NaCl from 2 nodes to 64 nodes using all cores on each node, all processes are equalled mapped to node and bind to core, by doing this \ulfm can use the in-band shared communication for detection and propagation. We can see that our implementation gains almost the same performance as \ulfm but highly reduced the complexity, the detection and propagation time is less than 5 millisecond with different number of nodes start from 2 to 64 using TCP. For \ulfm the detection and propagation delay increase from 2 millisecond to 3 millisecond as the processes number increases with number of nodes using infiniband. For both \prrte and \ulfm the latency increase trend fit to $ a*\log_2(N) + b $, which can be easily scale up to hundreds of thousands of nodes. Similar result strengthens in figure 11 from Cori with more processes on each node, we can see that with 4K processes the detection and propagation latency is about 10 milliseconds. This result indicates the efficiency of our broadcast and propagation algorithm.  
 
-\subsection{Node failure detection}
+\subsection{Node Failures Detection}
 Future more, we want to extend the performance of our heartbeat detector  for node failure detection and propagation from  three perspectives. 
 \begin{enumerate}
   \item Latency of detection time and propagation time with different heartbeat periods.
