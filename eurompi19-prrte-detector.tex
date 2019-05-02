@@ -129,7 +129,7 @@
 %
 % The abstract is a short summary of the work to be presented in the article.
 \begin{abstract}
-TODO : fix the expression and maybe the logic ?
+\todo{ fix the expression and maybe the logic ?}
 As the scale of High Performance Computing (HPC) system continues to grow, with more and more nodes deployed, mean-time-to-failure (MTTF) of those HPC systems is dramatic impacted (become lower and lower/drops). In order to efficiently run long time computing job on these systems, fault tolerance become a prime challenge/technology. In this paper, we present the design and implementation of an efficient runtime-level failure detection and propagation strategy targeting exascale systems. The detection is able to detect both node failure and process failure. A ring topology is maintained by allowing one node sending and receiving periodically heartbeat to/from another node to detect a node failure(observing another single node). For process failure each host node (is in charge of monitoring) monitors its children processes. The propagation use a reliable broadcast method over a binomial graph(an arbitrary communication topology) to distribute error message to applications, guarantees a logarithmic propagate time. We focus primarily on the most widely used programming paradigms PMIx Reference RunTime Environment(PRRTE), the algorithms and strategies proposed have a larger scope of most distributed programming environment. Experiments on different machines successfully demonstrated the algorithm performs well.
 \end{abstract}
 
@@ -297,12 +297,12 @@ Recently, our previous work \cite{George16} propose an observation ring based de
 
 \subsection{Reliable broadcast}
 Notable efforts have been made for fault-tolerant communication based on logical network typologies. A fully connected topology can handle large number of failures but it cannot be scalable since it sends too many messages. A circular topology is good for scalability but suffers from multiple node failures. 
-A more recent effort is k-nomial graph \cite{Angskun07, Pava11} which is a balance between the previous two methods. In k-nomial graph, the diameter is defined as the longest shortest path between any two nodes in the graph. Compare to others, binomial has the lowest diameter which has the advantage of minimal reroute hops. Also binomial graph scales well with reasonable degree, regular graph (each node has the same number of neighbours). The broadcast routing approach in \cite{Angskun07} using a spanning tree shows good performance. In the case of reliable broadcast, low average distance is a key-concept but not the only factor affect the performance of notification latency. Our reliable broadcast algorithm use BMG topology for routing and forwarding messages, we also take into account of sending sequence and 
+A more recent effort is k-nomial graph \cite{Angskun07, Pava11} which is a balance between the previous two methods. In k-nomial graph, the diameter is defined as the longest shortest path between any two nodes in the graph. Compare to others, binomial has the lowest diameter which has the advantage of minimal reroute hops. Also binomial graph scales well with reasonable degree, regular graph (each node has the same number of neighbours). The broadcast routing approach in \cite{Angskun07} using a spanning tree shows good performance. In the case of reliable broadcast, low average distance is a key-concept but not the only factor affect the performance of notification latency. Our reliable broadcast algorithm use BMG topology for routing and forwarding messages, we also use a reordering strategy when forwarding messages lead to lower average reroute hops and message traffic density. We also consider the concurrent sending capability of single node by sending messages to all its neighbours beyond the children of the node in spanning tree. 
 %The key-concept of fault-tolerant broadcasting is diameter of the topology, which is defined the longest shortest path between any two nodes in the graph. Binomial has the smallest diameter.
 %Also binomial graph scales well with reasonable degree, regular graph and lowest diameter. 
 %However when doing a reliable broadcast with message forwarding, 
 %However when implementing a binomial graph, previous approach \cite{Angskun07} uses a fixed sending sequence to all the neighbours which has the disadvantage of not using high sending priority to unnotified nodes. Our work uses binomial graph with a reordering strategy when sending and forwarding messages, which means lower average reroute hops and message traffic density.
-However when implementing a binomial graph, previous approach \cite{Angskun07} uses a fixed sending sequence to all the neighbours which cannot reach unnotified nodes quickly enough. Our work uses binomial graph with a reordering strategy when sending and forwarding messages leading to lower average reroute hops and message traffic density.
+%However when implementing a binomial graph, previous approach \cite{Angskun07} uses a fixed sending sequence to all the neighbours which cannot reach unnotified nodes quickly enough. Our work uses binomial graph with a reordering strategy when sending and forwarding messages leading to lower average reroute hops and message traffic density.
  
 \section{Design and implementation}
 
@@ -381,7 +381,7 @@ For broadcasting we use the scalable and fault tolerant topology binomial graph 
 
 \begin{algorithmic}[1]
 \Procedure{Broadcast}{ $i, N, msg$ }\Comment{Daemon \textbf{i} send error message to all its neighbours}
-\For{ $k \gets 0$ to $\log_2 N$ }\Comment {Order not fixed}            
+\For{ $k \gets 0$ to $\log_2 N$ }\Comment {Sending order not fixed}            
      \State {\textbf{i} send \textbf{msg} to  ( ($N$ + i + $2^k$) \textbf{mod} {N} ) }
      \State {\textbf{i} send \textbf{msg} to  ( ($N$ + i - $2^k$) \textbf{mod} {N} ) }
 \EndFor
@@ -449,7 +449,7 @@ For inter-node notification, children processes subscribe to a event handler wit
 \section{Experiment Evaluation}
 
 \subsection{Experiment Setup}
-The experiment are conducted on two different machines: (1) a local cluster named NaCl, an Intel Xeon X5660 machine with 66 nodes, 12 cores per node. (2) NERSC's Cori\cite{Cori01} -a Cray XC40 with Intel Xeon "Haswell" processor nodes using Cray "Aries" high speed inter-node network,32 cores per node. The resilient PRRTE is based on PRRTE(\#71ef547), with external PMIx(\#21d7c9). The comparison ULFM is based on(\#77f9157). The experiments is repeated 30 times and we present the average. The benchmark are deployed with one MPI rank per core. 
+The experiment are conducted on two different machines: (1) \todo{more detail about nacl}a local cluster named NaCl, an Intel Xeon X5660 machine with 66 nodes, 12 cores per node. (2) NERSC's Cori\cite{Cori01} -a Cray XC40 with Intel Xeon "Haswell" processor nodes using Cray "Aries" high speed inter-node network,32 cores per node. The resilient PRRTE is based on PRRTE(\#71ef547), with external PMIx(\#21d7c9). The comparison ULFM is based on(\#77f9157). The experiments is repeated 30 times and we present the average. The benchmark are deployed with one MPI rank per core. 
 \subsection{Accuracy and noise}
 For the first experiment we want to implore the noise overhead generated by the heartbeat ring detector with different heartbeat period from milliseconds to seconds. We also investigate the accuracy of the detector with different heartbeat period. 
 
