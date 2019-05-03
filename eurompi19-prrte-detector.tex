@@ -507,42 +507,51 @@ local managed processes.
 
 \begin{algorithm}
 \caption{Two-Level Reliable Broadcast Algorithm}\label{fig:2lvlbmg}
-\textbf{\textit{N}} \Comment{Number of alive nodes}\newline
-\textbf{List\{$EID$\}} \Comment{List of locally known
-failed processes' identifiers}\newline
-\textbf{\textit{msg}} \Comment{Message containing failure affected process identifiers and state}\newline
-\textbf{\textit{flag}} \Comment{Boolean flag indicating whether to forward the message or not}\newline
-\textbf{List\{$AID$\}} \Comment{Processes identifiers' hosted on failed daemon identifier }\newline
+\textbf{\textit{N}}: value from environment \Comment{Number of nodes}\newline
+\textbf{\textit{Eid}}: parameter \Comment{Identifier of a process observed as failed}\newline
+\textbf{Reported$_i$}: initially empty \Comment{Set of failed process identifiers 
+previously reported, local to daemon \textbf{i}}\newline
+\textbf{\textit{msg}}: initially empty \Comment{Message containing the set of failure affected process identifiers to report}\newline
+\textbf{Hosted\{$Did$\}}: initially empty, obtained from environment \Comment{Set of process identifiers hosted by
+the daemon with identifier $Did$, empty if $Did$ is an application process}\newline
 
 \begin{algorithmic}[1]
-\Procedure{Broadcast}{ $i, N, msg$ }\Comment{Daemon \textbf{i} send error message to all its neighbours}
-\For{ $k \gets 0$ to $\log_2 N$ }\Comment {Sending order not fixed}            
-     \State {\textbf{i} send \textbf{msg} to  ( ($N$ + i + $2^k$) \textbf{mod} {N} ) }
-     \State {\textbf{i} send \textbf{msg} to  ( ($N$ + i - $2^k$) \textbf{mod} {N} ) }
+\Procedure{StartPropagation}{ $Eid$ } \Comment{Daemon \textbf{j} starts the propagation}
+\If {( $Eid$ $\notin$ $Reported_i$ )}
+  \State Add $Eid$ to $msg$
+  \If {$Eid$ is a daemon}
+    \State Obtain $Hosted\{Eid\}$
+    \State add $Hosted\{Eid\}$ to $msg$
+  \EndIf
+  \State ReliableBroadcast( $i, N, msg$ )
+  \State Add $msg$ to $Reported_i$
+\EndIf
+\EndProcedure
+\end{algorithmic}
+
+\begin{algorithmic}[1]
+\Procedure{ReliableBroadcast}{ $i, N, msg$ } \Comment{Daemon \textbf{i} sends error messages to all its neighbors}
+\For{ $k \gets 0$ to $\log_2 N$ } \Comment {Neighbors in the BMG}
+  \State {\textbf{i} sends \textbf{msg} to  ( ($N$ + i + $2^k$) \textbf{mod} {N} ) }
+  \State {\textbf{i} sends \textbf{msg} to  ( ($N$ + i - $2^k$) \textbf{mod} {N} ) }
+\EndFor
+\ForAll{ $lp \in Hosted\{i\}$ } \Comment {Local application processes}
+    \State {\textbf{i} sends \textbf{msg} to \textbf{lp}}
 \EndFor
 \EndProcedure
 \end{algorithmic}
 
 \begin{algorithmic}[1]
-\Procedure{Forwarding}{ $flag, msg$ }\Comment{Daemon \textbf{j} receives msg, forwarding and notify locally }
-\If {$flag == true$}
-    \State Broadcast( $j, N, msg$ )
-    \State Update \textbf{List\{$EID$\}}
-    \State Notify locally
+\Procedure{Forwarding}{ $msg$ } \Comment{Triggered when daemon or process \textbf{j} receives $msg$; decides if the message needs to be forwarded and notified locally}
+\If {$msg \not\subset Reported_j$}
+    \If {$j$ is a daemon}
+        \State ReliableBroadcast( $j, N, msg$ )
+    \EndIf
+    \State Add $msg$ to $Reported_j$
 \EndIf
 \EndProcedure
 \end{algorithmic}
 
-\begin{algorithmic}[1]
-\Procedure{Start propagation}{ $job, Eid, state$ }\Comment{Daemon \textbf{j} start propagation }
-\If {( $Eid$ $\notin$ List\{$EID$\} )}
-    \State Add $Eid$ to $msg$
-    \State Get \textit{AID} and adde to $msg$
-    \State Broadcast( $j, N, msg$ )
-    \State Add $Eid$ \textit{AID} to List\{$EID$\}
-\EndIf
-\EndProcedure
-\end{algorithmic}
 \end{algorithm}
 
 Figure \ref{fig:bmg} shows an example of the execution of the BMG broadcast 
