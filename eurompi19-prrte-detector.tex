@@ -287,7 +287,16 @@ between three different failure detectors providing a distinct tradeoff
 on the general to specific scale. We then discuss related works \todo{make sure corresponds to final organization} in 
 Section~\ref{sec:related} before we conclude.
 
-\todo{decide if move to the end}
+\section{Motivation and Background}\label{sec:motivation}
+In this section, we present the user case of the \ourwork.
+
+\textbf{\ulfm:} \ourwork supports the functionality in \ulfm of revocation and correction of a broken communicator after node failure. For \ulfm the global communicator could be reconfigured after process failure detection, the failed processes are excluded from the global communicator using the \mpifunc{Comm_shrink} and are re-spawned using the \mpi function \mpifunc{Comm_spawn}, but the job will be aborted with node failure. However, using \ourwork instead of \ompi runtime the job doesn't need to be terminated after node failure,the runtime level propagation mechanism deliver error message to the job scope. With the notification \mpi application can get the consensus knowledge of failure, then application can use the recovery functions (Shrink, Respawn) provided by \ulfm to build new communicator without the processes on the failed node but with those newly spawned processes. 
+\todo{add SHMEM, REINIT; thinking about moving this part as 2. Motivation}
+
+\textbf{\oshmem:} fault tolerance model is based on check-point and restart, that suits to the one-sided nature of PGAS programming model while leveraging features very specific to \oshmem. \ourwork failure detection and propagation attributes provide the flexibility to application developers to modulate the frequency and placement within the application where the checkpoint may be introduced. Also the notification provides the trigger for recovery. 
+
+\textbf{EREINIT:} a global-restart failure recovery model by allowing a fast re-initialization of \mpi. This work is a co-design between MVAPICH and Slurm resource manager to add process and node failure detection and propagation features. The detection is using Slurm's health check mechanism by sending ping messages to nodes, propagation is implemented in a manner of forcing the controller to individually send the notification to children of the failed nodes. However this work is highly depends on one particular resource manager Slurm has the limitation to run only on Slurm machine, also it use a inefficient propagation method. \ourwork work can exceed the bottleneck of EREINIT to run on machines with different resource managers(Slurm, PBS, LSF, TORQUE, etc). Also with our efficient propagation algorithm the notification will be much faster advances the stabilization and recovery time of EREINIT.
+
 \section{Related Work}\label{sec:related}
 In this section, we survey related work on large scale distributed runtime environments, different kinds of heartbeat based and random gossip based failure detectors, together with reliable broadcast algorithms to propagate fault information.
 
@@ -338,11 +347,17 @@ node failures with a smaller observation topology, and is not limited to
 MPI application only. 
 
 \subsection{Reliable Broadcast}
-Notable efforts have been made for fault-tolerant communication based on logical network typologies~\cite{Luo18}. A fully connected topology can handle large number of failures but it cannot be scalable since it sends too many messages. At the other extreme, a ring topology is good for scalability
+\todo{add something on Gossip?}
+%Notable efforts have been made for fault-tolerant communication based on logical network typologies~\cite{Luo18}.
+
+Regarding deterministic reliable broadcast algorithms, a fully connected topology can handle large number of failures but it cannot be scalable since it sends too many messages. At the other extreme, a mendable ring topology is good for scalability
 but offers a poor propagation latency and suffers in scenarios with multiple node failures.
 Circulant k-nomial graphs~\cite{Angskun07, Pava11} provide a balance between the previous two methods. 
-Among circulant k-nomial graphs, the binomial graph (BMG) has the lowest diameter, which minimizes the number of hops for a dissemination to reach all 
-processes. At the same time, binomial graphs scale well thanks to a regular, fixed degree graph (each node has the same number of neighbors). 
+Among circulant graphs, the binomial graph (BMG) has the lowest diameter, which minimizes the number of hops for a dissemination to reach all 
+processes. At the same time, binomial graphs scale well thanks to a regular, fixed degree graph (each node has the same number of neighbors). In this work 
+we expand on these foundational work by integrating elements of the 
+architecture hierarchy to reduce the cost of propagation on typical HPC systems.
+
 %
 %The broadcast routing approach in~\cite{Angskun07} uses a collection 
 %of binomial spanning trees with a fixed send ordering of neighbors. 
@@ -361,7 +376,7 @@ processes. At the same time, binomial graphs scale well thanks to a regular, fix
 
 In this section, we describe how we design a generic failure detector that can
 be provided 
-as an infrastructure service (that we call resilient-\prrte), while at the same time exploiting the 
+as an infrastructure service (that we call \ourwork), while at the same time exploiting the 
 specificities of the HPC machine model to sustain high detection accuracy 
 and speed, while incurring a limited amount of noise on the monitored application. 
 
@@ -763,15 +778,6 @@ The last experiment (figure \ref{fig:multi_daemon_failure_nacl}) investigates th
   \label{fig:multi_daemon_failure_nacl}
 \end{figure}
 
-\section{Application}\label{sec:motivation}
-In this section, we present the user case of the \ourwork.
-
-\textbf{\ulfm:} \ourwork supports the functionality in \ulfm of revocation and correction of a broken communicator after node failure. For \ulfm the global communicator could be reconfigured after process failure detection, the failed processes are excluded from the global communicator using the \mpifunc{Comm_shrink} and are re-spawned using the \mpi function \mpifunc{Comm_spawn}, but the job will be aborted with node failure. However, using \ourwork instead of \ompi runtime the job doesn't need to be terminated after node failure,the runtime level propagation mechanism deliver error message to the job scope. With the notification \mpi application can get the consensus knowledge of failure, then application can use the recovery functions (Shrink, Respawn) provided by \ulfm to build new communicator without the processes on the failed node but with those newly spawned processes. 
-\todo{add SHMEM, REINIT; thinking about moving this part as 2. Motivation}
-
-\textbf{\oshmem:} fault tolerance model is based on check-point and restart, that suits to the one-sided nature of PGAS programming model while leveraging features very specific to \oshmem. \ourwork failure detection and propagation attributes provide the flexibility to application developers to modulate the frequency and placement within the application where the checkpoint may be introduced. Also the notification provides the trigger for recovery. 
-
-\textbf{EREINIT:} a global-restart failure recovery model by allowing a fast re-initialization of \mpi. This work is a co-design between MVAPICH and Slurm resource manager to add process and node failure detection and propagation features. The detection is using Slurm's health check mechanism by sending ping messages to nodes, propagation is implemented in a manner of forcing the controller to individually send the notification to children of the failed nodes. However this work is highly depends on one particular resource manager Slurm has the limitation to run only on Slurm machine, also it use a inefficient propagation method. \ourwork work can exceed the bottleneck of EREINIT to run on machines with different resource managers(Slurm, PBS, LSF, TORQUE, etc). Also with our efficient propagation algorithm the notification will be much faster advances the stabilization and recovery time of EREINIT.
 
 \section{Conclusion}\label{sec:conclusion}
 Failure detection and propagation is a critical service for resilient systems. In this work, we present an efficient failure detection and propagation design and implementation for distributed systems integrated within \pmix\_\prrte. The process and node failure detection strategy presented in this work depends on heartbeats and timeouts, and communication bound to provide a reliable solution that works at scale without constraints of the kind of faults. Our design and implementation takes into account of the complicate relationship and trade-off between system overhead, detection efficient and risks: low detection time requires frequent emission of heartbeats messages, increasing the system noise and the risk of false positive. Our solution addresses those concerns and capable of tolerating high frequency node and process failures with the help of high performance reliable broadcast notification can quickly disseminate the fault information, our results from different machines and benchmarks compared to two other related work shows that \ourwork significantly advances the state of art with respect to efficient detection and propagation of failures. This runtime level failure tolerate implementation breaks the limit of running \mpi  application only and support all \pmix-based application which is more extensive than \mpi scope.   
