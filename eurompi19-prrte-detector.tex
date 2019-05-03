@@ -288,7 +288,7 @@ on the general to specific scale. We then discuss related works \todo{make sure 
 Section~\ref{sec:related} before we conclude.
 
 \section{Motivation and Background}\label{sec:motivation}
-In this section, we present the user case of the \ourwork.
+\todo{this is very rough, needs to be refocused in terms of motivating use cases}
 
 \textbf{\ulfm:} \ourwork supports the functionality in \ulfm of revocation and correction of a broken communicator after node failure. For \ulfm the global communicator could be reconfigured after process failure detection, the failed processes are excluded from the global communicator using the \mpifunc{Comm_shrink} and are re-spawned using the \mpi function \mpifunc{Comm_spawn}, but the job will be aborted with node failure. However, using \ourwork instead of \ompi runtime the job doesn't need to be terminated after node failure,the runtime level propagation mechanism deliver error message to the job scope. With the notification \mpi application can get the consensus knowledge of failure, then application can use the recovery functions (Shrink, Respawn) provided by \ulfm to build new communicator without the processes on the failed node but with those newly spawned processes. 
 \todo{add SHMEM, REINIT; thinking about moving this part as 2. Motivation}
@@ -635,11 +635,41 @@ The advantages of this new broadcast algorithm are:
 
 \subsection{Implementation}
 
-For inter-node notification, children processes subscribe to a event handler with specific error code and will be triggered by the notification function when a daemon doing the locally notification. Also,applications can register to multiple events which enable the capability to receive notification from different jobs. This reliable broadcast feature is implemented in group communication and propagation component.
+\todo{this paragraph too verbose}
 
- \prrte is a fork of the \ompi runtime, \orte~\cite{Castain05}. It is based on a Module Component Architecture (MCA) which permits easily extend or substitute the core subsystem with experimental features. As shown in in figure~\ref{fig:prrte}, within this architecture, each of the major subsystems is defined as an MCA framework, with a well-defined interface. Also each framework contains one or more components each representing a different implementation. Then the \orte work spun off to its own effort as a ``\verb|shim|`` between the application and the host environment that includes full support for the \pmix \cite{CASTAIN18} - an abstract set of interfaces by which not only applications and tools can interact with the resident system management stack (SMS), but also the various SMS components can interact with each other. 
+\subsubsection{\pmix Interface}
+We implemented \ourwork as a set of components in \prrte. \prrte is a fork of the \ompi runtime, \orte~\cite{Castain05}. \prrte is developed and maintained 
+by the \pmix community as a demonstrator and enabler technology that demonstrates 
+and exercises the features of the \pmix interface~\cite{CASTAIN18} --an abstract set of interfaces by which not only applications and tools can interact with the resident system management stack (SMS), but also the various SMS components can interact with each other.
+Many communication libraries, resource managers, and job scheduling systems are currently employing \pmix in production, and many more are under development. 
+For example, \ompi has now substituted \orte with a shim layer over \pmix and thus can be launched and monitored by \prrte. 
+Similarly, \oshmem uses \prrte as the default launcher. 
+Meanwhile, the Slurm batch scheduler and job starter ships with native \pmix support, meaning that an application that interoperate with Slurm through \pmix can be ported  over \prrte without effort. 
+Overall, the fact that \prrte interfaces with the communities of interest 
+highlighted in Section~\ref{sec:motivation} through a well defined and stable interface is a clear benefit for increasing the impact of \ourwork.
 
-\prrte provides an easy way of launching, running and monitoring \pmix-based applications outside of a \pmix-enabled environment on distributed systems. The \prrte overall architecture is out the scope of this paper, but we still want to mention some features embraced by it. First of all, \prrte's very first feature is Job controlling and Monitoring~\cite{Ralph15} which enables the application and SMS to coordinate the response to failure: termination of the job or a subset of processes, request replacement of nodes and processes, or continue execution at a lower setting. This provides the foundation of resilience strategy of our work. Another important feature is the \pmix Event Notification~\cite{Ralph002} : the resource manager or server can notify the application of events, the application processes can notify their server or SMS of issues. This provides the channel for locally propagation of error messages. Resilient \prrte mainly embraces two new features of failure detection and reliable broadcast for messages propagation globally and locally. We will give a detail introduction of the two features in the following sections.
+The \pmix specification provides a specified Job controlling and Monitoring interface~\cite{Ralph15} which (in theory) enables the application and SMS to coordinate the response to failure.
+Another important feature is the \pmix Event Notification~\cite{Ralph002} : the resource manager or server can notify the application of events, the application processes can notify their server or SMS of issues.
+The outputs of \ourwork are exposed to client libraries (e.g., MPI) through
+these interfaces, and, to the best of our knowledge, \ourwork is the first 
+implementation to populate these interfaces with a truly resilient implementation.
+
+Notifications of failures are produced as \pmix Event Notifications, which can be easily subscribed by the client or the SMS to track failures detected by \ourwork.
+We also employ \pmix Even Notifications to perform the internal propagation of failure notifications between daemon processes and application processes.
+
+\subsubsection{\ourwork in the \prrte Architecture}
+
+While a full depiction of the architecture and feature set of \prrte is out of the scope of this paper, some are relevant to our implementation effort. 
+\prrte is based on a Modular Component Architecture (MCA) which permits easily extending or substituting the core subsystem with experimental features.
+As shown in in figure~\ref{fig:prrte}, within this architecture, each of the major subsystems is defined as an MCA framework, with a well-defined interface, and multiple components implementing that framework can coexist. 
+
+We added three new components to \prrte
+\todo{WIP}
+...
+The reliable broadcast feature is implemented in group communication and propagation component.
+
+\todo{talk about 'OBTAIN HOSTED(i)'}
+
 
 
 \begin{figure*}[h]
