@@ -274,14 +274,6 @@ we highlight that there is a performance tradeoff in generality, but
 satisfactory level of performance can be achieved in a portable and reusable 
 component that can satisfy the needs of a variety of HPC networking systems. 
 
-\todo{
-Make sure all contributions are explicit: 
-design a general purpose fault tolerance framework in \pmix 
-explore the performance tradeoff incurred by generality
-demonstrate that the runtime based failure detector can compete with the 
-highly tuned/MPI specific \ulfm detector, and outperforms completely generic detectors.
-}
-
 The rest of this paper is organized as follows. In Section~\ref{sec:motivation}
 we describe motivating use cases and give some background on the \mpi specific 
 failure detector implementation in \ulfm. In Section~\ref{sec:design} we describe 
@@ -295,22 +287,24 @@ Section~\ref{sec:related} before we conclude.
 \section{Related Work}\label{sec:related}
 In this section, we survey related work on large scale distributed runtime environments, different kinds of heartbeat based and random gossip based failure detectors, together with reliable broadcast algorithms to propagate fault information.
 
-\subsection{Runtime Enviroments}
-A wide range of approach to the problem of exascale distributed computing runtime environments have been studied, each primarily emphasize a particular key aspect of the overall problem. 
+\subsection{Runtime Environments}
+A wide range of approaches to the problem of exascale distributed computing runtime environments have been studied, each primarily emphasize a particular key aspect of the overall problem. 
 
 MPICH provides several runtime environments, such as MPD~\cite{Butler00}, Hydra~\cite{MPICH14} and Gforker~\cite{MPICH14}. MPD connects nodes through a ring topology but it is not resilient, two node failures could separate nodes into two separates groups that prevents communication with one another. Another drawback of MPD is that this approach has proved to be non-scalable~\cite{Bosilca11}.
-Hydra scales well for large number of processes on a single node and interacts efficiently with hybrid programming models that combine \mpi and threads, but it does not behave well on multi-node environment.\todo{citation needed?} \orte~\cite{Castain05, Jeffrey12} is the \ompi runtime environment to launch, monitor, and kill parallel jobs, as well as managing I/O forwarding. It also connects daemons through various topologies, however the communication is not reliable. Also, all those runtimes have limited applicability outside of the related \mpi implementation 
-that has motivated their creation. 
+Hydra scales well for large number of processes on a single node and interacts efficiently with hybrid programming models that combine \mpi and threads. While Hydra can monitor
+and report MPI process failures, it does not cope with daemon failures. 
+%
+ \orte~\cite{Castain05, Jeffrey12} is the \ompi runtime environment to launch, monitor, and kill parallel jobs, as well as managing I/O forwarding. It also connects daemons through various topologies, however the communication is not reliable. In general, these runtimes have limited applicability outside of the related \mpi implementation that has motivated their creation.
 
 The \prrte runtime serves as the demonstrator and reference implementation
 for the \pmix specification~\cite{CASTAIN18}. Technically it is a fork of
 the \orte runtime, and thus inherit most of its capabilities to launch
 and monitor \mpi jobs. Thanks to its well specified \pmix interface. \prrte
-can deploy not only the related \mpi implementation of project from which it
-is spun, but also a wide variety of parallel applications (MPI based or not).
+can deploy not only the related \mpi implementation, but also provides a
+generic environment to deploy a wide variety of parallel applications (MPI based or not).
 Although \prrte provides rudimentary support for clients fault detection and reporting, 
 detection of failed nodes is rudimentary and slow, and the reporting 
-communication topology is not itself resilient. 
+broadcast topology is not itself resilient. 
 The current work expands on the existing capabilities of \prrte by adding
 advanced failure detection and reporting methodologies that can operate 
 despite the failure of the runtime daemon themselves.
@@ -328,9 +322,10 @@ tightly and deeply integrated within the \mpi library. For example, limitations 
 accuracy of the detector when the \mpi implementation is not actively communicating 
 are circumvented by using Remote Memory Access primitives (RMA) which are
 initially provided for supporting the \mpi communication; the operational 
-mode and accuracy of the detector can be impacted by the thread model used 
-during the \mpi initialization (e.g., \mpifunc{MPI_THREAD_SINGLE} may result in 
-lower accuracy of the detector); in manycore systems, every \mpi process 
+mode, overhead, and accuracy of the detector are impacted by the thread model used 
+during the \mpi initialization (i.e., \mpifunc{THREAD_SINGLE} results 
+in lower overhead but a higher chance of false positive than \mpifunc{THREAD_MULTIPLE}); 
+and, in manycore systems, every \mpi process 
 is observed and reported as an independent entity, which can impart that the 
 overhead scales with the number of \mpi processes rather than the number of 
 compute nodes. This resilient \prrte work 
@@ -339,51 +334,66 @@ node failures with a smaller observation topology, and is not limited to
 MPI application only. 
 
 \subsection{Reliable Broadcast}
-Notable efforts have been made for fault-tolerant communication based on logical network typologies \cite{Luo18}. A fully connected topology can handle large number of failures but it cannot be scalable since it sends too many messages. At the other extreme, a ring topology is good for scalability
+Notable efforts have been made for fault-tolerant communication based on logical network typologies~\cite{Luo18}. A fully connected topology can handle large number of failures but it cannot be scalable since it sends too many messages. At the other extreme, a ring topology is good for scalability
 but offers a poor propagation latency and suffers in scenarios with multiple node failures.
-A more recent effort is k-nomial circulant graph~\cite{Angskun07, Pava11} which is a balance between the previous two methods. 
-Among k-nomial circulant graphs, the binomial graph (BMG) has the lowest diameter, which minimizes the number of hops for a dissemination to reach all 
-processes. Also binomial graph scales well thanks to a regular, fixed degree graph (each node has the same number of neighbors). 
+Circulant k-nomial graphs~\cite{Angskun07, Pava11} provide a balance between the previous two methods. 
+Among circulant k-nomial graphs, the binomial graph (BMG) has the lowest diameter, which minimizes the number of hops for a dissemination to reach all 
+processes. At the same time, binomial graphs scale well thanks to a regular, fixed degree graph (each node has the same number of neighbors). 
 %
-The broadcast routing approach in~\cite{Angskun07} uses a collection 
-of binomial spanning trees with a fixed send ordering of neighbors. 
+%The broadcast routing approach in~\cite{Angskun07} uses a collection 
+%of binomial spanning trees with a fixed send ordering of neighbors. 
 %The key-concept of fault-tolerant broadcasting is diameter of the topology, which is defined the longest shortest path between any two nodes in the graph. Binomial has the smallest diameter.
 %Also binomial graph scales well with reasonable degree, regular graph and lowest diameter. 
 %However when doing a reliable broadcast with message forwarding, 
 %However when implementing a binomial graph, previous approach \cite{Angskun07} uses a fixed sending sequence to all the neighbours which has the disadvantage of not using high sending priority to unnotified nodes. Our work uses binomial graph with a reordering strategy when sending and forwarding messages, which means lower average reroute hops and message traffic density.
 
-Our work uses a BMG with a reordering strategy when sending and forwarding messages that 
-puts a high priority for messages that target leaves in previously effected 
-binomial trees, which helps reaching not yet notified nodes quicker when intermediate 
-hops have failed.\todo{that text needs another review/pass. But, not clear if want to talk about this in this paper.}
+%AURELIEN: removed references to that aspect as the work is not mature enough and could be used in another future publication.
+%Our work uses a BMG with a reordering strategy when sending and forwarding messages that 
+%puts a high priority for messages that target leaves in previously effected 
+%binomial trees, which helps reaching not yet notified nodes quicker when intermediate 
+%hops have failed.\todo{that text needs another review/pass. But, not clear if want to talk about this in this %paper.}
  
-\section{Design and Implementation}\label{sec:design}
+\section{A Generic HPC Failure Detection Service}\label{sec:design}
 
-In this section, we describe the design of Resilient \prrte, our resilient mechanism has two components: a node level observation ring and a reliable broadcast overlay network. We also provide rationale for our design decisions, and implementation details.
+In this section, we describe how we design a generic failure detector that can
+be provided 
+as an infrastructure service, while at the same time exploiting the 
+specificities of the HPC machine model to sustain high detection accuracy 
+and speed, while incurring a limited amount of noise on the monitored application. 
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[trim=0.2cm 9.0cm 0.2cm 9cm,width=\linewidth]{PMIx_PRRTE.pdf}
-  \caption{Resilient \prrte component architecture. The orange boxes represent the component we mainly use to add the resilient features. The dark blue colored boxes are new modules}\label{fig:prrte}
-\end{figure}
+\subsection{Machine Model}
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\linewidth]{server_client.pdf}
-  \caption{Hierarchical notification of hosted processes through \pmix notification routines. The \prrte daemon represents the entire set of hosted processes in the detection and reliable broadcast topology and takes care of issuing local notifications.}\label{fig:hosted}
-\end{figure}
+We consider a machine model representative of a typical HPC system. 
+The machine is a distributed system comprised of compute nodes with an 
+interconnection network. Each 
+node can host runtime daemons and one or more application processes. Daemons 
+and processes have a unique identifier (e.g., a rank) that can be used
+to establish communication between any given pair. Messages take an unknown,
+but bounded amount of time to be delivered (i.e., the network is pseudo-synchronous~\cite{Chandra96}).
+ The identity and number of daemons and processes participating in the application is known a-priori, 
+or is established through explicit operations that do not require group 
+membership discovery. 
 
-\subsection{Model}
-\texttt{\bf Failure model: } Node failure: the result of node crash, lost the daemon and all processes hosted on this node. Process failure: one or more serial or parallel processes due to a processor or node failure.
+\subsection{Failure Model}
 
-\texttt{\bf System model: } \prrte is a fork of the \ompi runtime, \orte~\cite{Castain05}. It is based on a Module Component Architecture (MCA) which permits easily extend or substitute the core subsystem with experimental features. As shown in in figure~\ref{fig:prrte}, within this architecture, each of the major subsystems is defined as an MCA framework, with a well-defined interface. Also each framework contains one or more components each representing a different implementation. Then the \orte work spun off to its own effort as a ``\verb|shim|`` between the application and the host environment that includes full support for the \pmix \cite{CASTAIN18} - an abstract set of interfaces by which not only applications and tools can interact with the resident system management stack (SMS), but also the various SMS components can interact with each other. 
-
-\prrte provides an easy way of launching, running and monitoring \pmix-based applications outside of a \pmix-enabled environment on distributed systems. The \prrte overall architecture is out the scope of this paper, but we still want to mention some features embraced by it. First of all, \prrte's very first feature is Job controlling and Monitoring~\cite{Ralph15} which enables the application and SMS to coordinate the response to failure: termination of the job or a subset of processes, request replacement of nodes and processes, or continue execution at a lower setting. This provides the foundation of resilience strategy of our work. Another important feature is the \pmix Event Notification~\cite{Ralph002} : the resource manager or server can notify the application of events, the application processes can notify their server or SMS of issues. This provides the channel for locally propagation of error messages. Resilient \prrte mainly embraces two new features of failure detection and reliable broadcast for messages propagation globally and locally. We will give a detail introduction of the two features in the following sections.
-
-\subsection{Detection of Process and Node Failures}
+We strive to report crash failures, that is, when a compute entity stops emitting 
+messages unexpectedly and permanently. A crash failure may manifest as
+the ultimate effect of a variety of underlying conditions, for example, an illegal instruction 
+is performed by a process because of a processor overheating, an entire 
+node, or cabinet looses power, or a software bug manifests by interrupting 
+unexpectedly, or rendering non-responsive some processes. In the context of 
+this work, we further distinguish between two subtypes of crash failures.
+First, application process failures, which may impact any number of 
+hosted application processes without necessarily being concomitant
+with the failure of other processes, even hosted on the same node.
+Second, node failures, which we consider congruent with the observation of a daemon 
+process failure. When a daemon failure occurs, all hosted application processes on
+that node also undergo a process failure. We will discuss in the following 
+sections how this distinction helps improve the scalability of the failure 
+detection algorithm. 
 
 \begin{table}
-  \caption{Parameters and notations}
+  \caption{Parameters and notations}\label{fig:notations}
   \label{tab:parameters}
   \begin{tabular}{ccl}
     \toprule
@@ -400,6 +410,26 @@ In this section, we describe the design of Resilient \prrte, our resilient mecha
   \end{tabular}
 \end{table}
 
+\subsection{Notations}
+
+Table~\ref{fig:notations} summarizes some of the notations we will employ 
+to describe the algorithm. The HNP is the daemon node in charge of 
+starting the initial deployment of the runtime environment and interfacing 
+with the user (e.g., \emph{mpiexec}). The daemon is the infrastructure 
+process deployed on each node to launch and monitor the execution of application 
+processes on that node. The failure detector we propose employs heartbeats 
+between daemons and timeouts to detect node failures.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{server_client.pdf}
+  \caption{Hierarchical notification of hosted processes through \pmix notification routines. The \prrte daemon represents the entire set of hosted processes in the detection and reliable broadcast topology and takes care of issuing local notifications.}\label{fig:hosted}
+\end{figure}
+
+\subsection{Detection of Process and Node Failures}
+
+The design of Resilient \prrte, our resilient mechanism, has two components: a node level observation ring and a reliable broadcast overlay network.
+
 \begin{figure}
 \centering
 \begin{minipage}{.23\textwidth}
@@ -415,7 +445,15 @@ In this section, we describe the design of Resilient \prrte, our resilient mecha
   \label{fig:ReconnectRing}
 \end{minipage}
 \end{figure}
-We provide a strategy to detect both process failure and node failure in different ways. The \orte Daemon's Local Launch Subsystem (ODLS) is responsible for launching and monitoring local processes that are intended to launch the target application's executable. Before the children processes execute the targets' executable, it need to set affinity of children processes according to a complex series of rules. This binding may fail in a myriad of different ways, the children processes will send a message to the parent indicating what happened (rendered error message) and the parent will read the message and analyze if this is a process failure and then use the runtime system's reporting mechanisms to display this error globally. 
+
+We employ two distinct strategies to detect process failures and node failures. 
+To detect process failures that are not congruent with a node failure, we 
+leverage on the direct observation of application processes that can be 
+performed by the node-local daemon. Since a process failure does not 
+impact the execution of the runtime daemon managing that process, that 
+daemon can deploy localized observation strategies that are not 
+
+The \orte Daemon's Local Launch Subsystem (ODLS) is responsible for launching and monitoring local processes that are intended to launch the target application's executable. Before the children processes execute the targets' executable, it need to set affinity of children processes according to a complex series of rules. This binding may fail in a myriad of different ways, the children processes will send a message to the parent indicating what happened (rendered error message) and the parent will read the message and analyze if this is a process failure and then use the runtime system's reporting mechanisms to display this error globally. 
 
 For a general distributed system, nodes can communicate to any other nodes by sending message through communication channels. We arrange all N nodes to a logistic ring topology as in figure \ref{fig:Ring} which means, each particular node \textbf{\textit{p}} has a observer and a predecessor in the ring. The predecessor will send periodic heartbeat messages to \textbf{\textit{p}} with the period of $\delta$, at the same time \textbf{\textit{p}} will send heartbeat messages to its observer. For each node it emits heartbeats $m_1$, $m_2$, ... at time $\tau_1$, $\tau_2$, ... to its observer \textbf{\textit{q}}. Let $\tau_i' = \tau_i + t$. At any time \textbf{\textit{t}} $\in [\tau_i', \tau_{i+1}')$, \textbf{\textit{q}} believe \textbf{\textit{p}} is alive if it receives message $m_i$ or higher. Otherwise, \textbf{\textit{q}} suspects \textbf{\textit{p}} is failed, \textbf{\textit{q}} will prepare error information of \textbf{\textit{p}} and propagate this information. 
 
@@ -504,6 +542,20 @@ Figure \ref{fig:bmg} shows the BMG with 12 nodes, node 0 starts the propagation 
   \item With limited network connection: maintains the upper bound of broadcast to $O(log_2^{N})$. 
 \end{enumerate}
 For inter-node notification, children processes subscribe to a event handler with specific error code and will be triggered by the notification function when a daemon doing the locally notification. Also,applications can register to multiple events which enable the capability to receive notification from different jobs. This reliable broadcast feature is implemented in group communication and propagation component.
+
+
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[trim=0.2cm 9.0cm 0.2cm 9cm,width=\linewidth]{PMIx_PRRTE.pdf}
+  \caption{Resilient \prrte component architecture. The orange boxes represent the component we mainly use to add the resilient features. The dark blue colored boxes are new modules}\label{fig:prrte}
+\end{figure}
+
+\subsection{Implementation}
+
+ \prrte is a fork of the \ompi runtime, \orte~\cite{Castain05}. It is based on a Module Component Architecture (MCA) which permits easily extend or substitute the core subsystem with experimental features. As shown in in figure~\ref{fig:prrte}, within this architecture, each of the major subsystems is defined as an MCA framework, with a well-defined interface. Also each framework contains one or more components each representing a different implementation. Then the \orte work spun off to its own effort as a ``\verb|shim|`` between the application and the host environment that includes full support for the \pmix \cite{CASTAIN18} - an abstract set of interfaces by which not only applications and tools can interact with the resident system management stack (SMS), but also the various SMS components can interact with each other. 
+
+\prrte provides an easy way of launching, running and monitoring \pmix-based applications outside of a \pmix-enabled environment on distributed systems. The \prrte overall architecture is out the scope of this paper, but we still want to mention some features embraced by it. First of all, \prrte's very first feature is Job controlling and Monitoring~\cite{Ralph15} which enables the application and SMS to coordinate the response to failure: termination of the job or a subset of processes, request replacement of nodes and processes, or continue execution at a lower setting. This provides the foundation of resilience strategy of our work. Another important feature is the \pmix Event Notification~\cite{Ralph002} : the resource manager or server can notify the application of events, the application processes can notify their server or SMS of issues. This provides the channel for locally propagation of error messages. Resilient \prrte mainly embraces two new features of failure detection and reliable broadcast for messages propagation globally and locally. We will give a detail introduction of the two features in the following sections.
 
 \section{Experiment Evaluation}\label{sec:experiments}
 
