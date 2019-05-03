@@ -653,7 +653,7 @@ Figure \ref{fig:overhead} illustrates the overhead incurred with P2P and collect
 %All IMB-MPI1 suits can be successfully conducted with no false detection with $ \delta \geq 1 ms $.
 For the P2P setting, we run the benchmark on two nodes with all cores included using the \imb P2P's "multi" option, which pairs cores from each node as groups to ensure that no matter how daemons are binded to cores the heartbeat emissions affect the performance of P2P communication. For the collectives we run the benchmark on 64 nodes using all cores. Any single test we use message size from several bytes to mega bytes, for each message size the test lasts more than 20 seconds to ensure enough heartbeat emissions are occurred during the experiment. The \prrte overhead is calculated by using the latency (LAT) results of benchmark suits: 
 \begin{equation}
-\frac{\( {\ourwork-LAT - PRRTE-LAT} )}{PRRTE-LAT}
+\frac{( {\ourwork-LAT - PRRTE-LAT} )}{PRRTE-LAT}
 \end{equation}
  From the figure we can see that the latency performance and bandwidth performance are barely affected by heartbeats periods from milliseconds to seconds. Notably, when $ \delta \geq 10 ms $, it has trivial influence on the system. When  $ \delta = 1 ms $ the noise overhead for P2P is less than three percentage. As for collective communication (Bcast, Reduce and Allreduce) the noise overhead are less than eight percentage under the circumstance that the standard deviation of the benchmark itself is four percentage. Also we calculate the overhead of \ulfm without fault tolerance compared to \prrte, shows that \ulfm has about two percent overhead for P2P and collective communication respectively for both small and big message sizes.
 
