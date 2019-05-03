@@ -16,6 +16,7 @@
 \newcommand{\ulfm}[0]{\textsc{ULFM}\xspace}
 \newcommand{\mpi}[0]{\textsc{MPI}\xspace}
 \newcommand{\oshmem}[0]{\textsc{OpenSHMEM}\xspace}
+\newcommand{\ourwork}[0]{\textsc{Daemon}$^\#$\xspace}
 
 \newcommand{\imb}[0]{\textsc{IMB}\xspace}
 
@@ -264,8 +265,10 @@ that a generic failure detection solution, provided by an external runtime,
 entity that does not have access to the \mpi context and communication conduits
 can deliver a similar level of service. In order to test that hypothesis, 
 and further, to define how generic one can make the solution, we designed 
-a failure detection component in the \pmix~\cite{CASTAIN18} runtime reference implementation
-(\prrte), which is a fully fledged runtime that can deploy, monitor and 
+a multi-level failure detection algorithm, called \ourwork, that operates
+within the runtime infrastructure to monitor both node and process 
+failures. We implemented that algorithm as a component in the \pmix~\cite{CASTAIN18} runtime reference implementation (\prrte), which is a fully fledged runtime that is 
+used in production to deploy, monitor and 
 serve multiple HPC networking stack clients like \ompi, or the 
 reference \oshmem implementation. We then compare this generic 
 failure detection service with the fully-dedicated \mpi detector from 
@@ -487,25 +490,23 @@ First it needs to reconnect the ring topology, as illustrated in Figure~\ref{fig
   %For all those nodes who received the notification, each node need to forward this information, maintain its own List\{\textit{ID}\} and notify locally. As show in figure \ref{fig:prrte}, we create a new module in error management as detector to enable this feature.
 
 \subsection{Broadcasting Fault Information}
-Considering that the failure detection topology is static, it does not provide 
+Considering that the observation topology is static, it does not provide 
 automatic or probabilistic dissemination of fault information. Thus, to complete 
-the reporting of failures, failures identified by an observer must be broadcast 
+the reporting of failures, failures identified by an observer must be broadcasted
 to inform all other daemons and application processes. An important aspect,
 when considering a runtime that tolerate node/daemon failures, it that the 
 propagation algorithm itself needs to be resilient to failures. 
 
-For broadcasting fault information, we use the scalable and fault tolerant BMG topology~\cite{Angskun07}. BMG has good fault-tolerant properties such as optimal connectivity, low fault-diameter, strongly resilient and good optimal probability in failure cases.
-
-
- In order to continue the job execution rather than aborting, we need let all participated nodes and applications be aware of failures, the three major mechanisms are: 
-\begin{enumerate}
-  \item Observer fetches error information of failed node. Start the propagation globally by calling group communication component for broadcasting.
-  \item Observer node broadcasts the information to all its local children. 
-  \item All nodes forwarding the message upon receiving to make the broadcast reliable. Make sure all alive nodes receive the information at least once. 
-\end{enumerate}
+For broadcasting fault information between daemons, we use the scalable and fault 
+tolerant BMG topology~\cite{Angskun07}. BMG has good fault-tolerant properties such 
+as optimal connectivity, low fault-diameter, strongly resilient and good optimal 
+probability in failure cases. Note that unlike prior works, the propagation 
+algorithm~\ref{fig:2lvlbmg} is not a flat BMG when application processes are considered, but consists of an 
+inner BMG overlay between daemons, and an outer star overlay from each daemon to its 
+local managed processes.
 
 \begin{algorithm}
-\caption{Reliable broadcast algorithm }
+\caption{Two-Level Reliable Broadcast Algorithm}\label{fig:2lvlbmg}
 \textbf{\textit{N}} \Comment{Number of alive nodes}\newline
 \textbf{List\{$EID$\}} \Comment{List of locally known
 failed processes' identifiers}\newline
@@ -542,10 +543,27 @@ failed processes' identifiers}\newline
 \EndIf
 \EndProcedure
 \end{algorithmic}
-
 \end{algorithm}
 
-Group communication use out-of-band non-blocking peer to peer communicate channel as the basic message exchange mechanism, we assume the communication latency from any two directly connected nodes with same message size are equivalent. For node level broadcast, each node sends message to all its neighbours  as in BMG topology, message from any node we follow the sequence as in binomial spanning tree by which means that any node in BMG can always be delivered within $O(log_2^N)$ steps.
+Figure \ref{fig:bmg} shows an example of the execution of the BMG broadcast 
+with 12 nodes. For simplicity, the local start stemming from each daemon are not 
+represented. 
+
+\begin{enumerate}
+ \item In this example, daemon 0 is the initial reporter and its observer component starts the propagation by calling the \textsc{Start Propagation} reliable broadcast algorithm.
+ \item This prepares a broadcast message containing the identifier of the 
+ failed process (or daemon). daemon 0 issues the direct propagation to the local application processes it manages (if any still live).
+ \item Upon receiving a broadcast message, a daemon considers if the message needs 
+ to be forwarded. If the message carries a list of processes that are already known to
+ have failed, then, the daemon already triggered the propagation, and no further 
+ action is needed. 
+ All nodes forwarding the message upon receiving to make the broadcast reliable. Make sure all alive nodes receive the information at least once. 
+\end{enumerate}
+
+
+
+
+
 
 \begin{figure}
   \centering
@@ -553,12 +571,35 @@ Group communication use out-of-band non-blocking peer to peer communicate channe
   \caption{Binomial graph with 12 nodes}
   \label{fig:bmg}
 \end{figure}
+
 \begin{figure}
   \centering
   \includegraphics[width=\linewidth]{reorder_span.pdf}
   \caption{Broadcast using binomial spanning tree from node 0, extra messages to neighbours are colored in blue }
   \label{fig:reorder_span}
 \end{figure}
+
+
+
+
+The broadcast algorithm sends a message to all its six neighbors in the order of the marked sequences. This initiates the following sequence 
+
+
+
+
+And Figure \ref{fig:reorder_span} shows the a spanning tree for broadcast originated from node 0 also with extra messages colored blue for resilient purpose. Those extra messages balanced the trade-offs between high-radix trees that allow more parallelism at each level in the tree with good network, and lower-radix deeper communication trees with reduced network congestion. The advantages of this new broadcast algorithm are:
+\begin{enumerate}
+  \item Excellent network connection brings higher parallelism: message to node \{10, 11, 7\} could arrive from any forwarding nodes at earlier time stamp than routed from spanning tree, this decrease the height of the tree, the average latency and the maximum notification latency are smaller.
+  \item With limited network connection: maintains the upper bound of broadcast to $O(log_2^{N})$. 
+\end{enumerate}
+
+
+
+ 
+
+
+Group communication use out-of-band non-blocking peer to peer communicate channel as the basic message exchange mechanism, we assume the communication latency from any two directly connected nodes with same message size are equivalent. For node level broadcast, each node sends message to all its neighbors  as in BMG topology, message from any node we follow the sequence as in binomial spanning tree by which means that any node in BMG can always be delivered within $O(log_2^N)$ steps.
+
 
 \begin{figure*}[h]
 \centering
@@ -574,11 +615,6 @@ Group communication use out-of-band non-blocking peer to peer communicate channe
 \label{fig:overhead}
 \end{figure*}
 
-Figure \ref{fig:bmg} shows the BMG with 12 nodes, node 0 starts the propagation and sends messages to all its six neighbours with the sequence marked. And Figure \ref{fig:reorder_span} shows the a spanning tree for broadcast originated from node 0 also with extra messages colored blue for resilient purpose. Those extra messages balanced the trade-offs between high-radix trees that allow more parallelism at each level in the tree with good network, and lower-radix deeper communication trees with reduced network congestion. The advantages of this new broadcast algorithm are:
-\begin{enumerate}
-  \item Excellent network connection brings higher parallelism: message to node \{10, 11, 7\} could arrive from any forwarding nodes at earlier time stamp than routed from spanning tree, this decrease the height of the tree, the average latency and the maximum notification latency are smaller.
-  \item With limited network connection: maintains the upper bound of broadcast to $O(log_2^{N})$. 
-\end{enumerate}
 For inter-node notification, children processes subscribe to a event handler with specific error code and will be triggered by the notification function when a daemon doing the locally notification. Also,applications can register to multiple events which enable the capability to receive notification from different jobs. This reliable broadcast feature is implemented in group communication and propagation component.
 
 
