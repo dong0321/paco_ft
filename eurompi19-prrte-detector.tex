@@ -527,12 +527,12 @@ local managed processes.
 \begin{algorithm}
 \caption{Two-Level Reliable Broadcast Algorithm}\label{fig:2lvlbmg}
 
-\textbf{\textit{N}}: value from environment \Comment{Number of nodes}
-\textbf{\textit{Eid}}: parameter \Comment{Identifier of a process observed as failed}
-\textbf{Reported$_i$}: initially empty \Comment{Set of failed process identifiers previously reported, local to daemon \textbf{i}}
-\textbf{\textit{msg}}: initially empty \Comment{Message containing the set of failure affected process identifiers to report}
-\textbf{Hosted\{$Did$\}}: initially empty, obtained from environment \Comment{Set of process identifiers hosted by
-the daemon with identifier $Did$, empty if $Did$ is an application process}
+\textbf{\textit{N}} \Comment{Number of nodes (value from environment)}\\
+\textbf{\textit{Eid}} \Comment{Identifier of a process observed as failed (input parameter)}\\
+\textbf{Reported$_i$} \Comment{Set of identifiers of previously reported failures, local to daemon \textbf{i} (initially empty)}\\
+\textbf{\textit{msg}} \Comment{Message containing the set of process identifiers to report (initially empty)}\\
+\textbf{Hosted\{$Did$\}} \Comment{Set of process identifiers managed by
+the daemon $Did$ (initially empty, obtained from environment)}\\
 
 \begin{algorithmic}[1]
 \Procedure{StartPropagation}{ $Eid$ } \Comment{Daemon \textbf{j} starts the propagation}
