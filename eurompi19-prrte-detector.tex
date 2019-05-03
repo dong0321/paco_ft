@@ -6,6 +6,7 @@
 \usepackage{todonotes}
 \usepackage{xspace}
 \usepackage{listings}
+\usepackage{subcaption}
 
 \newcommand{\mpifunc}[1]{\lstinline"MPI_#1"\xspace}
 \newcommand{\prrte}[0]{\textsc{PRRTE}\xspace}
@@ -420,17 +421,18 @@ process deployed on each node to launch and monitor the execution of application
 processes on that node. The failure detector we propose employs heartbeats 
 between daemons and timeouts to detect node failures.
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\linewidth]{server_client.pdf}
-  \caption{Hierarchical notification of hosted processes through \pmix notification routines. The \prrte daemon represents the entire set of hosted processes in the detection and reliable broadcast topology and takes care of issuing local notifications.}\label{fig:hosted}
-\end{figure}
-
 \subsection{Detection of Process Failures}
 
 As illustrated in Figure~\ref{fig:hosted}, the failure detector we propose 
 employs two distinct strategies to detect process failures on one hand 
 and node failures on the other hand. 
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{server_client.pdf}
+  \caption{Hierarchical notification of hosted processes through \pmix notification routines. The \prrte daemon is in charge of observing, and forward notifications to the node-local managed application processes. The detection and reliable broadcast 
+  topology operates at the node level between daemons.}\label{fig:hosted}
+\end{figure}
 
 To detect process failures that are not congruent with a node failure, we 
 leverage on the direct observation of application processes that can be 
@@ -443,7 +445,7 @@ in the core-binding affinity with respect to the user requested policy.
 %Before the children processes execute the targets' executable, it need to set affinity of children processes according to a complex series of rules. This binding may fail in a myriad of different ways, the children processes will send a message to the parent indicating what happened (rendered error message) and the parent will read the message and analyze if this is a process failure and then use the runtime system's reporting mechanisms to display this error globally. 
 That same signal also permits, from the node-local daemon, an extremely fast and efficient observation
 of the unexpected termination of a local application process. As a substitute, 
-or in complement, a daemon may in also deploy a watchdog mechanism~\cite{pmix-watchdog} 
+or in complement, a daemon may also deploy a watchdog mechanism~\cite{CASTAIN18} 
 to capture non-terminating crash failures that may arise from software 
 defects, like live-locks, deadlocks and infinite loops. 
 
@@ -452,48 +454,63 @@ defects, like live-locks, deadlocks and infinite loops.
 Resilient \prrte's algorithm for node/daemon failure detection has two
 components: a node-level observation ring, and a reliable broadcast overlay network between daemons.
 
-\begin{figure}
-\centering
-\begin{minipage}{.23\textwidth}
-  \centering
-  \includegraphics[trim=3cm 8.0cm 3cm 8cm,width=\linewidth]{ring_detector.pdf}
-  \captionof{figure}{Ring topology}
-  \label{fig:Ring}
-\end{minipage}%
-\begin{minipage}{.23\textwidth}
-  \centering
-  \includegraphics[trim=3cm 8.0cm 3cm 8cm,width=\linewidth]{reconnet_cross.pdf}
-  \captionof{figure}{Reconnect with failures}
-  \label{fig:ReconnectRing}
-\end{minipage}
-\end{figure}
-
-We arrange all N daemons to a logistic ring topology, as in Figure~\ref{fig:Ring}.
+We arrange all N daemons to a logistic ring topology, as illustrated in Figure~\ref{fig:Ring}.
 Thus, each daemon \textbf{\textit{p}} observes its predecessor and is observed by 
 its successor. The predecessor periodically sends heartbeat messages to \textbf{\textit{p}} (with a 
 configurable period $\delta$). At the same time, \textbf{\textit{p}} sends heartbeat messages to its own observer. For each node, a daemon emits heartbeats $m_1$, $m_2$, ... at time $\tau_1$, $\tau_2$, ... to its observer \textbf{\textit{q}}. Let $\tau_i' = \tau_i + t$. At any time \textbf{\textit{t}} $\in [\tau_i', \tau_{i+1}')$, \textbf{\textit{q}} believes \textbf{\textit{p}} is alive if it has received the 
 heartbeat message $m_i$ or higher. Otherwise, \textbf{\textit{q}} suspects \textbf{\textit{p}} has failed and \textbf{\textit{q}} initiates the dissemination of the error information of \textbf{\textit{p}} to all 
 other daemons.
 
-When the observer detects that its predecessor has failed, it undergoes two major steps.
-First it needs to reconnect the ring topology as in figure \ref{fig:ReconnectRing}. \textbf{\textif{q}} considers
- its own list of known failed daemon and elects to observe the first non-known-failed 
- daemon \textbf{\textit{nq} following the predecessor relationship on the ring. It sets \textbf{\textit{nq}} as its predecessor and then send a request to \textbf{\textit{nq}} for starting hearbeating. Z global mapping and binding information and find out all those processes hosted on predecessor node. After we get the list of all those affected processes and node, the observer calls the propagation component to delivery this message on node level to its neighbours, then observer will notify its local processes. Then, the observer updates its local known failure List\{\textit{ID}\}. For all those nodes who received the notification, each node need to forward this information, maintain its own List\{\textit{ID}\} and notify locally. As show in figure \ref{fig:prrte}, we create a new module in error management as detector to enable this feature.
+\begin{figure}[h]
+\centering
+\begin{minipage}[t]{.22\textwidth}
+  \centering
+  \includegraphics[trim=3cm 8.0cm 3cm 8cm,width=\linewidth]{ring_detector.pdf}
+  \captionof{figure}{Daemons monitor one another along a ring topology to detect node failures.}
+  \label{fig:Ring}
+\end{minipage}%
+\hfill
+\begin{minipage}[t]{.22\textwidth}
+  \centering
+  \includegraphics[trim=3cm 8.0cm 3cm 8cm,width=\linewidth]{reconnet_cross.pdf}
+  \captionof{figure}{The algorithm mends the detection ring topology when a node failure occurs by requesting heartbeats from the closest live ancestor in the ring.}
+  \label{fig:ReconnectRing}
+\end{minipage}
+\end{figure}
 
-\subsection{Detection Broadcasting}
-For broadcasting we use the scalable and fault tolerant topology binomial graph (BMG)~\cite{Angskun07}. BMG has good fault-tolerant properties such as optimal connectivity, low fault-diameter, strongly resilient and good optimal probability in failure cases. In order to continuing the job execution rather than aborting, we need let all participated nodes and applications be aware of failures, the three major mechanisms are: 
+
+When the observer detects that its predecessor has failed, it undergoes two major steps.
+First it needs to reconnect the ring topology, as illustrated in Figure~\ref{fig:ReconnectRing}. Daemon \textbf{\textit{q}} considers
+ its own list of known failed daemon and elects to observe the first 
+ daemon \textbf{\textit{nq}} following the predecessor relationship on the ring that does not appear in the failed list. It sets \textbf{\textit{nq}} as its predecessor and then send a request to \textbf{\textit{nq}} for initiating the heartbeat emission. Z global mapping and binding information and find out all those processes hosted on predecessor node.\todo{what?} After we get the list of all those affected processes and nodes, the observer calls the propagation component to broadcast the fault information to other daemons, and then notify its local processes. Then, the observer updates its local known failure List\{\textit{ID}\}.
+ 
+  %For all those nodes who received the notification, each node need to forward this information, maintain its own List\{\textit{ID}\} and notify locally. As show in figure \ref{fig:prrte}, we create a new module in error management as detector to enable this feature.
+
+\subsection{Broadcasting Fault Information}
+Considering that the failure detection topology is static, it does not provide 
+automatic or probabilistic dissemination of fault information. Thus, to complete 
+the reporting of failures, failures identified by an observer must be broadcast 
+to inform all other daemons and application processes. An important aspect,
+when considering a runtime that tolerate node/daemon failures, it that the 
+propagation algorithm itself needs to be resilient to failures. 
+
+For broadcasting fault information, we use the scalable and fault tolerant BMG topology~\cite{Angskun07}. BMG has good fault-tolerant properties such as optimal connectivity, low fault-diameter, strongly resilient and good optimal probability in failure cases.
+
+
+ In order to continue the job execution rather than aborting, we need let all participated nodes and applications be aware of failures, the three major mechanisms are: 
 \begin{enumerate}
   \item Observer fetches error information of failed node. Start the propagation globally by calling group communication component for broadcasting.
   \item Observer node broadcasts the information to all its local children. 
   \item All nodes forwarding the message upon receiving to make the broadcast reliable. Make sure all alive nodes receive the information at least once. 
 \end{enumerate}
 
-\begin{algorithm}implementation
+\begin{algorithm}
 \caption{Reliable broadcast algorithm }
 \textbf{\textit{N}} \Comment{Number of alive nodes}\newline
-\textbf{List\{$EID$\}} \Comment{Local list of known error processes' identifier}\newline
-\textbf{\textit{msg}} \Comment{Message packed with jobid, process identifiers and state}\newline
-\textbf{\textit{flag}} \Comment{Boolean flag indicating forward the message or not}\newline
+\textbf{List\{$EID$\}} \Comment{List of locally known
+failed processes' identifiers}\newline
+\textbf{\textit{msg}} \Comment{Message containing failure affected process identifiers and state}\newline
+\textbf{\textit{flag}} \Comment{Boolean flag indicating whether to forward the message or not}\newline
 \textbf{List\{$AID$\}} \Comment{Processes identifiers' hosted on failed daemon identifier }\newline
 
 \begin{algorithmic}[1]
