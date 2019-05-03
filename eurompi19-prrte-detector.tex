@@ -16,7 +16,7 @@
 \newcommand{\ulfm}[0]{\textsc{ULFM}\xspace}
 \newcommand{\mpi}[0]{\textsc{MPI}\xspace}
 \newcommand{\oshmem}[0]{\textsc{OpenSHMEM}\xspace}
-\newcommand{\ourwork}[0]{\textsc{Daemon}$^\#$\xspace}
+\newcommand{\ourwork}[0]{\textsc{Daemon}\ensuremath{^\#}\xspace}
 
 \newcommand{\imb}[0]{\textsc{IMB}\xspace}
 
@@ -399,17 +399,18 @@ detection algorithm.
 \begin{table}
   \caption{Parameters and notations}\label{fig:notations}
   \label{tab:parameters}
+  \small
   \begin{tabular}{ccl}
     \toprule
     Symbol & Description \\
     \midrule
-    HNP & Head Node Process \\
-    Daemon & Runtime environment process: the link  \\&  between the HNP and the application \\
-    \texttt{\bf N} & Number of Daemon/nodes \\
-    \texttt{Id} & The identifier of a Daemon \\
-    \texttt{LIST\{ID\}} & List of known failed daemons' ID \\
-    $\delta$ & Heartbeat period \\
+    \texttt{\bf N} & Number of Daemons (or nodes) \\
+    Daemon & Runtime environment process; one per node\\
+    Process & Application process; a node may host \\& multiple application processes \\
+    $\delta$ & Heartbeat period between daemons\\
     $\eta$ & Timeout for assuming a daemon failure\\
+    $Reported_i$ & Set of failed daemon and processes identifiers\\
+                 & known at process/daemon $i$ \\
     \bottomrule
   \end{tabular}
 \end{table}
@@ -417,9 +418,7 @@ detection algorithm.
 \subsection{Notations}
 
 Table~\ref{fig:notations} summarizes some of the notations we will employ 
-to describe the algorithm. The HNP is the daemon node in charge of 
-starting the initial deployment of the runtime environment and interfacing 
-with the user (e.g., \emph{mpiexec}). The daemon is the infrastructure 
+to describe the algorithm. The daemon is the infrastructure 
 process deployed on each node to launch and monitor the execution of application 
 processes on that node. The failure detector we propose employs heartbeats 
 between daemons and timeouts to detect node failures.
@@ -458,11 +457,11 @@ Resilient \prrte's algorithm for node/daemon failure detection has two
 components: a node-level observation ring, and a reliable broadcast overlay network between daemons.
 
 We arrange all N daemons to a logistic ring topology, as illustrated in Figure~\ref{fig:Ring}.
-Thus, each daemon \textbf{\textit{p}} observes its predecessor and is observed by 
-its successor. The predecessor periodically sends heartbeat messages to \textbf{\textit{p}} (with a 
-configurable period $\delta$). At the same time, \textbf{\textit{p}} sends heartbeat messages to its own observer. For each node, a daemon emits heartbeats $m_1$, $m_2$, ... at time $\tau_1$, $\tau_2$, ... to its observer \textbf{\textit{q}}. Let $\tau_i' = \tau_i + t$. At any time \textbf{\textit{t}} $\in [\tau_i', \tau_{i+1}')$, \textbf{\textit{q}} believes \textbf{\textit{p}} is alive if it has received the 
-heartbeat message $m_i$ or higher. Otherwise, \textbf{\textit{q}} suspects \textbf{\textit{p}} has failed and \textbf{\textit{q}} initiates the dissemination of the error information of \textbf{\textit{p}} to all 
-other daemons.
+Thus, initially, each daemon \textbf{\textit{d}} observes its predecessor $d-1 \mod{N}$ and is observed by 
+its successor $d+1 \mod{N}$. The predecessor periodically sends heartbeat messages to \textbf{\textit{d}} (with a 
+configurable period $\delta$). At the same time, \textbf{\textit{d}} sends heartbeat messages to its own observer. For each node, a daemon emits heartbeats $m_1$, $m_2$, ... at time $\tau_1$, $\tau_2$, ... to its observer \textbf{\textit{o}}. Let $\tau_i' = \tau_i + t$. At any time \textbf{\textit{t}} $\in [\tau_i', \tau_{i+1}')$, \textbf{\textit{o}} knows that \textbf{\textit{d}} is alive if it has received the 
+heartbeat message $m_i$ or higher. Otherwise, \textbf{\textit{o}} suspects that \textbf{\textit{d}} has failed and initiates the propagation of the
+failure of \textbf{\textit{d}}.
 
 \begin{figure}[h]
 \centering
@@ -481,11 +480,16 @@ other daemons.
 \end{minipage}
 \end{figure}
 
-
 When the observer detects that its predecessor has failed, it undergoes two major steps.
-First it needs to reconnect the ring topology, as illustrated in Figure~\ref{fig:ReconnectRing}. Daemon \textbf{\textit{q}} considers
- its own list of known failed daemon and elects to observe the first 
- daemon \textbf{\textit{nq}} following the predecessor relationship on the ring that does not appear in the failed list. It sets \textbf{\textit{nq}} as its predecessor and then send a request to \textbf{\textit{nq}} for initiating the heartbeat emission. Z global mapping and binding information and find out all those processes hosted on predecessor node.\todo{what?} After we get the list of all those affected processes and nodes, the observer calls the propagation component to broadcast the fault information to other daemons, and then notify its local processes. Then, the observer updates its local known failure List\{\textit{ID}\}.
+First it needs to reconnect the ring topology, as illustrated in Figure~\ref{fig:ReconnectRing}. Daemon \textbf{\textit{o}} tries to 
+observe the precedessor of \textbf{\textit{d}} (the daemon it previously observed). 
+It sets \textbf{\textit{d-1}} as its new predecessor and then send a request to \textbf{\textit{d-1}} to initiate heartbeat emission. Of course, 
+it is possible that \textbf{\textit{d-1}} has also failed, which will be detected at the next timeout. In order 
+to speedup the reconnection process, \textbf{\textit{o}} may skip over 
+daemons that have already been reported as failed in the past (i.e., daemons
+whose identifier is in $Reported_o$ because they have been observed and reported 
+by another daemon). Each time a daemon is marked as failed, all the processes it 
+managed are also marked as failed. After we get the list of all those affected processes and nodes, the observer component calls the propagation component to broadcast the fault information to other daemons, and then notify its local processes.
  
   %For all those nodes who received the notification, each node need to forward this information, maintain its own List\{\textit{ID}\} and notify locally. As show in figure \ref{fig:prrte}, we create a new module in error management as detector to enable this feature.
 
@@ -507,13 +511,13 @@ local managed processes.
 
 \begin{algorithm}
 \caption{Two-Level Reliable Broadcast Algorithm}\label{fig:2lvlbmg}
-\textbf{\textit{N}}: value from environment \Comment{Number of nodes}\newline
-\textbf{\textit{Eid}}: parameter \Comment{Identifier of a process observed as failed}\newline
-\textbf{Reported$_i$}: initially empty \Comment{Set of failed process identifiers 
-previously reported, local to daemon \textbf{i}}\newline
-\textbf{\textit{msg}}: initially empty \Comment{Message containing the set of failure affected process identifiers to report}\newline
+
+\textbf{\textit{N}}: value from environment \Comment{Number of nodes}
+\textbf{\textit{Eid}}: parameter \Comment{Identifier of a process observed as failed}
+\textbf{Reported$_i$}: initially empty \Comment{Set of failed process identifiers previously reported, local to daemon \textbf{i}}
+\textbf{\textit{msg}}: initially empty \Comment{Message containing the set of failure affected process identifiers to report}
 \textbf{Hosted\{$Did$\}}: initially empty, obtained from environment \Comment{Set of process identifiers hosted by
-the daemon with identifier $Did$, empty if $Did$ is an application process}\newline
+the daemon with identifier $Did$, empty if $Did$ is an application process}
 
 \begin{algorithmic}[1]
 \Procedure{StartPropagation}{ $Eid$ } \Comment{Daemon \textbf{j} starts the propagation}
@@ -554,24 +558,21 @@ the daemon with identifier $Did$, empty if $Did$ is an application process}\newl
 
 \end{algorithm}
 
-Figure \ref{fig:bmg} shows an example of the execution of the BMG broadcast 
+Figure~\ref{fig:bmg} shows an example of the execution of the BMG broadcast 
 with 12 nodes. For simplicity, the local start stemming from each daemon are not 
 represented. 
 
 \begin{enumerate}
- \item In this example, daemon 0 is the initial reporter and its observer component starts the propagation by calling the \textsc{Start Propagation} reliable broadcast algorithm.
- \item This prepares a broadcast message containing the identifier of the 
- failed process (or daemon). daemon 0 issues the direct propagation to the local application processes it manages (if any still live).
+ \item In this example, daemon 0 is the initial reporter and its observer component starts the propagation by calling the \textsc{StartPropagation} reliable broadcast algorithm.
+ \item This prepares a broadcast message containing the identifier of the
+ failed process (or daemon), and the associated application processes, when relevant. 
+ daemon 0 issues the message to its neighbors in the BMG topology.
  \item Upon receiving a broadcast message, a daemon considers if the message needs 
  to be forwarded. If the message carries a list of processes that are already known to
  have failed, then, the daemon already triggered the propagation, and no further 
- action is needed. 
- All nodes forwarding the message upon receiving to make the broadcast reliable. Make sure all alive nodes receive the information at least once. 
+ action is needed. Thus every daemon forwards the message once, insuring that 
+ all edges of the BMG will carry exactly one message per detection. 
 \end{enumerate}
-
-
-
-
 
 
 \begin{figure}
@@ -588,26 +589,42 @@ represented.
   \label{fig:reorder_span}
 \end{figure}
 
-
-
-
-The broadcast algorithm sends a message to all its six neighbors in the order of the marked sequences. This initiates the following sequence 
-
-
-
-
-And Figure \ref{fig:reorder_span} shows the a spanning tree for broadcast originated from node 0 also with extra messages colored blue for resilient purpose. Those extra messages balanced the trade-offs between high-radix trees that allow more parallelism at each level in the tree with good network, and lower-radix deeper communication trees with reduced network congestion. The advantages of this new broadcast algorithm are:
+The propagation message issued at each daemon are ordered so that the 
+messages that are part of a binomial spanning tree rooted at the emitter
+are sent first. Figure \ref{fig:reorder_span} shows the a spanning tree
+for a broadcast originating from node 0; the extra messages (5 and 6, colored 
+in blue) are supplementary messages that provide redundancy and ensure that
+any node in the BMG can always be reached within $O(log_2 N)$ steps (given 
+that less than $2 log_2 N$ failures strike, with more failures, 
+statistically rare scenarios can degenerate in a linear propagation time).
+The advantages of this new broadcast algorithm are:
 \begin{enumerate}
-  \item Excellent network connection brings higher parallelism: message to node \{10, 11, 7\} could arrive from any forwarding nodes at earlier time stamp than routed from spanning tree, this decrease the height of the tree, the average latency and the maximum notification latency are smaller.
-  \item With limited network connection: maintains the upper bound of broadcast to $O(log_2^{N})$. 
+  \item Sequence ordering brings higher parallelism: messages to node \{10, 11, 7\} could arrive from any redundant forwarding path rather than only from the 0-rooted spanning tree. This may decrease the apparent height of the tree, the average latency and thus reduce the average notification latency.
+  \item Limited network degree: the maximum degree for every daemon is logarithmic, which avoids hot-spot effects that are common in randomized gossip algorithms. 
+  \item Deterministic number of messages: the total number of messages is 
+  exactly the number of links in the BMG topology, that is, $O(N log_2 N)$ 
+  messages overall. In contrast, random march gossip algorithms have to 
+  balance the overall
+  \item Number of heartbeats and propagation messages is dependent Upon
+  the number of nodes, not the number of managed application processes.
+  In manycore systems, this has the potential to significantly reduce the 
+  effective cost of the algorithm when compared to a flat topology between 
+  application processes. 
 \end{enumerate}
 
+\begin{figure}[h]
+  \centering
+  \includegraphics[trim=0.2cm 9.0cm 0.2cm 9cm,width=\linewidth]{PMIx_PRRTE.pdf}
+  \caption{Resilient \prrte component architecture. The orange boxes represent the component we mainly use to add the resilient features. The dark blue colored boxes are new modules}\label{fig:prrte}
+\end{figure}
 
+\subsection{Implementation}
 
- 
+For inter-node notification, children processes subscribe to a event handler with specific error code and will be triggered by the notification function when a daemon doing the locally notification. Also,applications can register to multiple events which enable the capability to receive notification from different jobs. This reliable broadcast feature is implemented in group communication and propagation component.
 
+ \prrte is a fork of the \ompi runtime, \orte~\cite{Castain05}. It is based on a Module Component Architecture (MCA) which permits easily extend or substitute the core subsystem with experimental features. As shown in in figure~\ref{fig:prrte}, within this architecture, each of the major subsystems is defined as an MCA framework, with a well-defined interface. Also each framework contains one or more components each representing a different implementation. Then the \orte work spun off to its own effort as a ``\verb|shim|`` between the application and the host environment that includes full support for the \pmix \cite{CASTAIN18} - an abstract set of interfaces by which not only applications and tools can interact with the resident system management stack (SMS), but also the various SMS components can interact with each other. 
 
-Group communication use out-of-band non-blocking peer to peer communicate channel as the basic message exchange mechanism, we assume the communication latency from any two directly connected nodes with same message size are equivalent. For node level broadcast, each node sends message to all its neighbors  as in BMG topology, message from any node we follow the sequence as in binomial spanning tree by which means that any node in BMG can always be delivered within $O(log_2^N)$ steps.
+\prrte provides an easy way of launching, running and monitoring \pmix-based applications outside of a \pmix-enabled environment on distributed systems. The \prrte overall architecture is out the scope of this paper, but we still want to mention some features embraced by it. First of all, \prrte's very first feature is Job controlling and Monitoring~\cite{Ralph15} which enables the application and SMS to coordinate the response to failure: termination of the job or a subset of processes, request replacement of nodes and processes, or continue execution at a lower setting. This provides the foundation of resilience strategy of our work. Another important feature is the \pmix Event Notification~\cite{Ralph002} : the resource manager or server can notify the application of events, the application processes can notify their server or SMS of issues. This provides the channel for locally propagation of error messages. Resilient \prrte mainly embraces two new features of failure detection and reliable broadcast for messages propagation globally and locally. We will give a detail introduction of the two features in the following sections.
 
 
 \begin{figure*}[h]
@@ -624,26 +641,10 @@ Group communication use out-of-band non-blocking peer to peer communicate channe
 \label{fig:overhead}
 \end{figure*}
 
-For inter-node notification, children processes subscribe to a event handler with specific error code and will be triggered by the notification function when a daemon doing the locally notification. Also,applications can register to multiple events which enable the capability to receive notification from different jobs. This reliable broadcast feature is implemented in group communication and propagation component.
-
-
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[trim=0.2cm 9.0cm 0.2cm 9cm,width=\linewidth]{PMIx_PRRTE.pdf}
-  \caption{Resilient \prrte component architecture. The orange boxes represent the component we mainly use to add the resilient features. The dark blue colored boxes are new modules}\label{fig:prrte}
-\end{figure}
-
-\subsection{Implementation}
-
- \prrte is a fork of the \ompi runtime, \orte~\cite{Castain05}. It is based on a Module Component Architecture (MCA) which permits easily extend or substitute the core subsystem with experimental features. As shown in in figure~\ref{fig:prrte}, within this architecture, each of the major subsystems is defined as an MCA framework, with a well-defined interface. Also each framework contains one or more components each representing a different implementation. Then the \orte work spun off to its own effort as a ``\verb|shim|`` between the application and the host environment that includes full support for the \pmix \cite{CASTAIN18} - an abstract set of interfaces by which not only applications and tools can interact with the resident system management stack (SMS), but also the various SMS components can interact with each other. 
-
-\prrte provides an easy way of launching, running and monitoring \pmix-based applications outside of a \pmix-enabled environment on distributed systems. The \prrte overall architecture is out the scope of this paper, but we still want to mention some features embraced by it. First of all, \prrte's very first feature is Job controlling and Monitoring~\cite{Ralph15} which enables the application and SMS to coordinate the response to failure: termination of the job or a subset of processes, request replacement of nodes and processes, or continue execution at a lower setting. This provides the foundation of resilience strategy of our work. Another important feature is the \pmix Event Notification~\cite{Ralph002} : the resource manager or server can notify the application of events, the application processes can notify their server or SMS of issues. This provides the channel for locally propagation of error messages. Resilient \prrte mainly embraces two new features of failure detection and reliable broadcast for messages propagation globally and locally. We will give a detail introduction of the two features in the following sections.
-
 \section{Experiment Evaluation}\label{sec:experiments}
 
 \subsection{Experiment Setup}
-Experiments are conducted on two different machines: (1) \todo{more detail about nacl}a local cluster named NaCl, an Intel Xeon X5660 machine with 66 nodes, 12 cores per node. (2) NERSC's Cori
+Experiments are conducted on two different machines: (1) \todo{more detail about nacl} a local cluster named NaCl, an Intel Xeon X5660 machine with 66 nodes, 12 cores per node. (2) NERSC's Cori
 %~\cite{Cori01} 
 -- a Cray XC40 with Intel Xeon "Haswell" processors and the Cray "Aries" high speed inter-node network, 32 cores per node. Our \ourwork is based on \prrte(\#71ef547), with external \pmix(\#21d7c9). The comparison \ulfm is based on(\#77f9157). The experiments is repeated 30 times and we present the average. We use Intel MPI Benchmark (\imb v2019.2) \cite{IMB} for MPI performance measurements for point-to-point (P2P) and collective communications and deploy with one \mpi rank per core. For all experiments we use map-by node, bind-to core binding policy -- put sequential MPI processes on adjacent processor cores. The only exception is the \imb P2P experiment we use map-by node, bind-by node -- put sequential MPI processes on adjacent nodes. \todo{add binding policy}
 
@@ -660,9 +661,9 @@ From all above we can see that the granularity of timeout is 40 milliseconds lim
 
 Figure \ref{fig:overhead} illustrates the overhead incurred with P2P and collective communications running \imb. 
 %All IMB-MPI1 suits can be successfully conducted with no false detection with $ \delta \geq 1 ms $.
-For the P2P setting, we run the benchmark on two nodes with all cores included using the \imb P2P's "multi" option, which pairs cores from each node as groups to ensure that no matter how daemons are binded to cores the heartbeat emissions affect the performance of P2P communication. For the collectives we run the benchmark on 64 nodes using all cores. Any single test we use message size from several bytes to mega bytes, for each message size the test lasts more than 20 seconds to ensure enough heartbeat emissions are occurred during the experiment. Overhead is calculated by using the latency (LAT) results of benchmark suits: 
+For the P2P setting, we run the benchmark on two nodes with all cores included using the \imb P2P's "multi" option, which pairs cores from each node as groups to ensure that no matter how daemons are binded to cores the heartbeat emissions affect the performance of P2P communication. For the collectives we run the benchmark on 64 nodes using all cores. Any single test we use message size from several bytes to mega bytes, for each message size the test lasts more than 20 seconds to ensure enough heartbeat emissions are occurred during the experiment. Overhead is calculated by using the latency results of benchmark suits: 
 \begin{equation}
-Overhead = \frac{ DAEMON^\#\_LAT - PRRTE\_LAT }{PRRTE\_LAT}
+Overhead = \frac{( {\ourwork - \prrte} )}{\prrte}
 \end{equation}
  From the figure we can see that the latency performance and bandwidth performance are barely affected by heartbeats periods from milliseconds to seconds. Notably, when $ \delta \geq 10 ms $, it has trivial influence on the system. When  $ \delta = 1 ms $ the noise overhead for P2P is less than three percentage. As for collective communication (Bcast, Reduce and Allreduce) the noise overhead are less than eight percentage under the circumstance that the standard deviation of the benchmark itself is four percentage. Also we calculate the overhead of \ulfm without fault tolerance compared to \prrte:
  \begin{equation}
