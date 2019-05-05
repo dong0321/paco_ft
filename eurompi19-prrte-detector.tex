@@ -291,12 +291,12 @@ Section~\ref{sec:related} before we conclude.
 \section{Motivation and Background}\label{sec:motivation}
 \todo{this is very rough, needs to be refocused in terms of motivating use cases}
 
-\textbf{\ulfm:} \ourwork supports the functionality in \ulfm of revocation and correction of a broken communicator after node failure. For \ulfm the global communicator could be reconfigured after process failure detection, the failed processes are excluded from the global communicator using the \mpifunc{Comm_shrink} and are re-spawned using the \mpi function \mpifunc{Comm_spawn}, but the job will be aborted with node failure. However, using \ourwork instead of \ompi runtime the job doesn't need to be terminated after node failure,the runtime level propagation mechanism deliver error message to the job scope. With the notification \mpi application can get the consensus knowledge of failure, then application can use the recovery functions (Shrink, Respawn) provided by \ulfm to build new communicator without the processes on the failed node but with those newly spawned processes. 
+\textbf{\ulfm:} \ourwork supports the functionality in \ulfm of revocation and correction of a broken communicator after node failure. For \ulfm the global communicator could be reconfigured after process failure detection, the failed processes are excluded from the global communicator using the \mpifunc{Comm_shrink} and are re-spawned using the \mpi function \mpifunc{Comm_spawn}, but the job will be aborted with node failure. However, using \ourwork instead of \ompi runtime the job doesn't need to be terminated after node failure. And with \ourwork's notification \mpi application can get the consensus knowledge of failure, then application can use the recovery functions (Shrink, Respawn) provided by \ulfm to build new communicator without the failed processes but with those newly spawned ones. 
 \todo{add SHMEM, REINIT; thinking about moving this part as 2. Motivation}
 
 \textbf{\oshmem:} fault tolerance model is based on check-point and restart, that suits to the one-sided nature of PGAS programming model while leveraging features very specific to \oshmem. \ourwork failure detection and propagation attributes provide the flexibility to application developers to modulate the frequency and placement within the application where the checkpoint may be introduced. Also the notification provides the trigger for recovery. 
 
-\textbf{EREINIT:} a global-restart failure recovery model by allowing a fast re-initialization of \mpi. This work is a co-design between MVAPICH and Slurm resource manager to add process and node failure detection and propagation features. The detection is using Slurm's health check mechanism by sending ping messages to nodes, propagation is implemented in a manner of forcing the controller to individually send the notification to children of the failed nodes. However this work is highly depends on one particular resource manager Slurm has the limitation to run only on Slurm machine, also it use a inefficient propagation method. \ourwork work can exceed the bottleneck of EREINIT to run on machines with different resource managers(Slurm, PBS, LSF, TORQUE, etc). Also with our efficient propagation algorithm the notification will be much faster advances the stabilization and recovery time of EREINIT.
+\textbf{EREINIT:} a global-restart failure recovery model by allowing a fast re-initialization of \mpi. This work is a co-design between MVAPICH and Slurm resource manager to add process and node failure detection and propagation features. The detection is using Slurm's health check mechanism by sending ping messages to nodes, propagation is implemented in a manner of forcing the controller to individually send the notification to children of the failed nodes. However this work is highly depends on one particular resource manager Slurm, also it use a inefficient propagation method. \ourwork work can exceed the bottleneck of EREINIT to run on machines with different resource managers(Slurm, PBS, LSF, TORQUE, etc). Also with our efficient propagation algorithm the notification will be much faster advances the stabilization and recovery time of EREINIT.
 
 \section{Related Work}\label{sec:related}
 In this section, we survey related work on large scale distributed runtime environments, different kinds of heartbeat based and random gossip based failure detectors, together with reliable broadcast algorithms to propagate fault information.
@@ -696,6 +696,14 @@ is a Cray XC40 supercomputer with Intel Xeon "Haswell" processors and the Cray "
 the map-by node, bind-by node policy to set communicating \mpi ranks on different nodes.
 
 \subsection{Accuracy}
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{accuracy.pdf}
+  \caption{Heartbeat and Timeout accuracy}
+  \label{fig:accuracy}
+\end{figure}
+\todo{please check if this figure is useful? I set 10s delay when starting the processes, then launching processes will not delay and cause timeout, however daemon also takes care of all process finalize which will cause a delay of timeout, because DVM still running after process finalize}
+
 For the first experiment we want to explore the accuracy of \ourwork's detector with different heartbeat periods. 
 %
 The accuracy experiment is conducted by (1) Starting with a large value for the 
@@ -727,13 +735,13 @@ repetitions for the test to last at a minimum 20 seconds so that multiple heartb
 \begin{equation}
 Overhead = \frac{( {\ourwork - \prrte} )}{\prrte}
 \end{equation}
- From the graph we can see that the latency performance and bandwidth performance are barely affected by heartbeats periods from milliseconds to seconds. Notably, when $ \delta \geq 10 ms $, it has trivial influence on the system, as illustrated by the fact that the average overhead is within the band of natural variability of the benchmark. When  $ \delta = 1 ms $ the noise in PingPong incurs less than three percent overhead. In collective communication the noise overhead is less than eight percent.  under the circumstance that the standard deviation of the benchmark itself is four percentage. 
+ From the graph we can see that the latency performance and bandwidth performance are barely affected by heartbeats periods from milliseconds to seconds. Notably, when $ \delta \geq 10 ms $, it has trivial influence on the system, as illustrated by the fact that the average overhead is within the band of natural variability of the benchmark. When  $ \delta = 1 ms $ the noise in PingPong incurs less than three percent overhead. In collective communication the noise overhead is less than eight percent, under the circumstance that the standard deviation of the benchmark itself is four percent. 
  \todo{from here}
- Also we calculate the overhead of \ulfm without fault tolerance compared to \prrte:
+ Also we calculate the overhead of \ulfm with fault tolerance compared to \ulfm:
  \begin{equation}
-Overhead = \frac{ ULFM\_no\_FT\_LAT - PRRTE\_LAT }{PRRTE\_LAT}
+Overhead = \frac{ \ulfm\ with\ FT - \ulfm }{\ulfm}
 \end{equation}
- shows that \ulfm has about two percent overhead for P2P and collective communication respectively for both small and big message sizes.
+ We can see that \ulfm with fault tolerance shows the same behavior as \ourwork. For P2P communication, when $ \delta \geq 10 ms $ which bring incidental overhead no more than two percent beyond the benchmark error, with $ \delta = 1 ms $ the noise from heartbeat emissions is around three percent. As for collective communication the overhead is about six percent with $ \delta = 1 ms $.
  \todo{to there, the results needs updated and text updated accordingly}
 
 \subsection{Comparison with SWIM}
