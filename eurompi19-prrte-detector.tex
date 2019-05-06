@@ -151,7 +151,8 @@ As the scale of high-performance computing (HPC) systems continues to grow, mean
 % A ring topology is maintained by allowing one node sending and receiving periodically heartbeat to/from another node to detect a node failure(observing another single node). For process failure each host node (is in charge of monitoring) monitors its children processes. The propagation use a reliable broadcast method over a binomial graph(an arbitrary communication topology) to distribute error message to applications, guarantees a logarithmic propagate time.
 The resulting framework has been implemented in the context of a system-level runtime for parallel environments, \pmix Reference RunTime Environment (\prrte), providing efficient and scalable capabilities of fault management to a large range of programming and execution paradigms.
 % the algorithms and strategies proposed have a larger scope of most distributed programming environment.
-This result is supported by an experimental evaluation of the resulting software stack on different machines.
+The experimental evaluation of the resulting software stack on different machines demonstrate that 
+the solution is at the same time generic and efficient.
 \end{abstract}
 
 %
