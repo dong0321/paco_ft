@@ -666,7 +666,7 @@ The advantages of this new broadcast algorithm are:
   messages overall. In contrast, random march gossip algorithms have to
   balance between the probability of not reaching every participant and 
   the number of messages.
-  \item Number of heartbeats and propagation messages is dependent Upon
+  \item Number of heartbeats and propagation messages is dependent upon
   the number of nodes, not the number of managed application processes.
   In manycore systems, this has the potential to significantly reduce the
   effective cost of the algorithm when compared to a flat topology between
@@ -686,7 +686,7 @@ The advantages of this new broadcast algorithm are:
 \subsubsection{\pmix Interface}
 We implemented \ourwork as a set of components in \prrte. \prrte is a fork of the \ompi runtime, \orte~\cite{Castain05}. \prrte is developed and maintained
 by the \pmix community as a demonstrator and enabler technology that demonstrates
-and exercises the features of the \pmix interface~\cite{CASTAIN18} --an abstract set of interfaces by which not only applications and tools can interact with the resident system management stack (SMS), but also the various SMS components can interact with each other.
+and exercises the features of the \pmix interface~\cite{CASTAIN18}---an abstract set of interfaces by which not only applications and tools can interact with the resident system management stack (SMS), but also the various SMS components can interact with each other.
 Many communication libraries, resource managers, and job scheduling systems are currently employing \pmix in production, and many more are under development.
 %remove this down? 
 For example, \ompi has now substituted \orte with a shim layer over \pmix and thus can be launched and monitored by \prrte.
@@ -694,7 +694,7 @@ Similarly, \oshmem uses \prrte as the default launcher.
 Meanwhile, the Slurm batch scheduler and job starter ships with native \pmix support, meaning that an application that interoperate with Slurm through \pmix can be ported  over \prrte without effort.
 %Overall, the fact that \prrte interfaces with the communities of interest highlighted in Section~\ref{sec:motivation} through a well defined and stable interface is a clear benefit for increasing the impact of \ourwork.
 
-In \ourwork, we leverage on the interfaces specified by \pmix~\cite{Ralph15} to interoperate 
+In \ourwork, we leverage the interfaces specified by \pmix~\cite{Ralph15} to interoperate 
 with the client (application or communication library), as well as with the 
 SMS. 
 The outputs of \ourwork are exposed to client libraries (e.g., MPI) through
@@ -702,7 +702,7 @@ these interfaces, and, to the best of our knowledge, \ourwork is the first
 implementation to populate these interfaces with a truly resilient implementation.
 An important feature is the \pmix Event Notification~\cite{Ralph002}: 
 we use it to perform the local propagation of failure information from the 
-daemon to the client processes. the resource manager or server can notify the application of events, the application processes can notify their server or SMS of issues.
+daemon to the client processes. The resource manager or server can notify the application of events; the application processes can notify their server or SMS of issues.
 
 \subsubsection{\ourwork in the \prrte Architecture}
 
@@ -712,7 +712,7 @@ As shown in in figure~\ref{fig:prrte}, within this architecture, each of the maj
 
 We added two new frameworks and four components to \prrte daemons. The \texttt{proc\_failure}
 component is in charge of detecting the failure of locally hosted processes (using
-SIGCHLD signals from the operating system). The \texttt{BMG} components
+SIGCHLD signals from the operating system). The \texttt{BMG} component
 implements a broadcast algorithm in a reliable way; to be noted, this component
 abides by the normal interface for a daemon broadcast and can reliably broadcast 
 any type of information. The \texttt{detector}
@@ -723,7 +723,7 @@ of failed processes).
 An important aspect of the propagate framework is that, for node failures,
 only the daemon that initiates the propagation needs to obtain the list of processes
 hosted by the failed daemon (line 5 of procedure \textsc{StartPropagation} in Algorithm~\ref{fig:2lvlbmg}).
-This information can be queried from the key-value store of \pmix, however, 
+This information can be queried from the key-value store of \pmix; however, 
 triggering the collection of that information from multiple nodes could 
 cause a storm of network activity in the SMS, or require replication of 
 information (memory overhead), which is avoided by obtaining the information 
@@ -766,11 +766,11 @@ detection timeout $\eta$; (2) Verify that no failure is detected when there is n
  %
  Figure~\ref{fig:accuracy} presents the results on NaCl 64 nodes.
  % For  non-communicating benchmarks (SETNAME\todo{name}), all tests succeed until $\delta$ is lower than 20 milliseconds.
- In heavily communicating Benchmarks
+ In heavily communicating benchmarks
  (\imb point-to-point and collective tests), all tests succeed until the
   heartbeat period lower than 20 milliseconds. To further investigate,
   we measured that the heartbeat message is neither delayed by communication
-  congestion nor compute pressure but we found out that daemons need some time to launch the processes when starting the job which causes false detection during job startup.
+  congestion nor compute pressure, but we found out that daemons need some time to launch the processes when starting the job which causes false detection during job startup.
   
   % \todo{remove the heartbeat accuracy, change timeout accuracy to 'false positive present'; for later: do not report finalize errors}
 
@@ -782,7 +782,7 @@ We also investigate the noise overhead incurred on an MPI application by the hea
 and management from \ourwork.
 Figure \ref{fig:overhead} illustrates the overhead incurred with P2P and collective communications running \imb.
 %All IMB-MPI1 suits can be successfully conducted with no false detection with $ \delta \geq 1 ms $.
-In order to contextualized the incurred overhead, we present in shaded grey the band of natural variability
+In order to contextualize the incurred overhead, we present in shaded grey the band of natural variability
 of the benchmark without a failure detector active.
 For the PingPong benchmark, we use the \texttt{-multi} mode of IMB with one rank per core on 2 nodes.
 This ensures that all cores are active with the communication pattern and thus
@@ -792,13 +792,13 @@ repetitions for the test to last at a minimum 20 seconds so that multiple heartb
 \begin{equation}
 Overhead = \frac{( {\ourwork - \prrte} )}{\prrte}
 \end{equation}
- From the graph we can see that the latency performance and bandwidth performance are barely affected by heartbeats periods from milliseconds to seconds. Notably, when $ \delta \geq 10 ms $, it has trivial influence on the system, as illustrated by the fact that the average overhead is within the band of natural variability of the benchmark. When  $ \delta = 1 ms $ the noise in PingPong incurs less than three percent overhead. In collective communication the noise overhead is less than eight percent, slightly higher than the standard deviation of the benchmark itself at four percent.
+ From the graph we can see that the latency performance and bandwidth performance are barely affected by heartbeat periods from milliseconds to seconds. Notably, when $ \delta \geq 10 ms $, it has trivial influence on the system, as illustrated by the fact that the average overhead is within the band of natural variability of the benchmark. When  $ \delta = 1 ms $ the noise in PingPong incurs less than three percent overhead. In collective communication the noise overhead is less than eight percent, slightly higher than the standard deviation of the benchmark itself at four percent.
  In a general comparison with \ulfm (normalized to its performance without failure detection active),
- We can see that \ourwork achieves a similar level of incurred noise for a given
+ we can see that \ourwork achieves a similar level of incurred noise for a given
  heartbeat period.
 
 \subsection{Comparison with SWIM}
-This section compares the failure detection latency and scalability of \ourwork with SWIM~\cite{Abhinandan02} --a random-probing based failure detection protocol and gossip membership updates. To decrease
+This section compares the failure detection latency and scalability of \ourwork with SWIM~\cite{Abhinandan02}---a random-probing based failure detection protocol and gossip membership updates. To decrease
 the chance of false detection, SWIM uses a suspicion mechanism. When a node does not reply to a probing in time, the initiator then judges this node as suspicious (but not yet failed). It then broadcasts
 \begin{figure}[h]
   \centering
@@ -806,7 +806,7 @@ the chance of false detection, SWIM uses a suspicion mechanism. When a node does
   \caption{Detection latency comparison between \ourwork and SWIM with increasing number of processes ($\eta=0.5s)$}
   \label{fig:scale_swim}
 \end{figure}
-this suspicion information within a subgroup, if any node in the subgroup receives an acknowledge before the timeout, it will declare the suspected node as alive, otherwise declare a failure. In order to improve the efficiency of multi-cast, SWIM uses an infection-style dissemination mechanism where information spreads in a manner analogous to the spread of gossip in society, or epidemic in the general population.
+this suspicion information within a subgroup: if any node in the subgroup receives an acknowledge before the timeout, it will declare the suspected node as alive; otherwise it will declare a failure. In order to improve the efficiency of multi-cast, SWIM uses an infection-style dissemination mechanism where information spreads in a manner analogous to the spread of gossip in society, or epidemic in the general population. \todo{you could shorten this since you said it earlier, too}
 For the SWIM implementation, we use Go-Memberlist (\#a8f83c6). We used a go-\mpi interface
 to replicate our \mpi detection benchmark with SWIM.
 
@@ -820,7 +820,7 @@ to replicate our \mpi detection benchmark with SWIM.
 
 Figure \ref{fig:scale_swim} compares the scalability of the two detectors with regard to the number of deployed processes with $\eta = 0.5s$, $\delta = 1s$.
 %For smaller number of processes is stabilizing in approximately 0.75s, while the stabilization delay of SWIM is 5s.
-We could run SWIM tests only up to 256 members, after that limit, some nodes exceed the maximum connection backlog
+We could run SWIM tests only up to 256 members; after that limit, some nodes exceed the maximum connection backlog
 set in the operating system for \texttt{listen} operations on TCP sockets, causing an application crash during
 initialization. For \ourwork,
 % we also synchronize with barrier, and then inject node failure, detection and notification latency is collected on each process.
@@ -831,16 +831,16 @@ For 4K processes, the stabilization of \ourwork is still below the range of the 
 SWIM latency shows a linear increase when the number of processes increase which will be the bottleneck when scaling up (assuming the maximum connection requests limit issue can be solved).
 
 Figure~\ref{fig:hb_prrte_swim} compares single node failure detection and propagation latency between \ourwork and SWIM 
-with different heartbeat periods setting. For all tests we set $ \eta = \delta * 2 $. The 
+with different heartbeat period settings. For all tests we set $ \eta = \delta * 2 $. The 
 experiment uses 64 nodes in both cases; \ourwork deploys on all 768 cores, but SWIM uses only 
 256 cores (due to not being able to deploy with more processes, as discussed above).
- We can clearly see that for \ourwork the detection latency is between ($\delta$, $2*\delta$), and the last notification happens very soon after the detection, which demonstrate the efficiency of our propagation algorithm (variability in the results comes from the randomness of when the node failure happened with respect to the heartbeat period). However, for SWIM, even considering the advantage of managing a 
+ We can clearly see that for \ourwork the detection latency is between ($\delta$, $2*\delta$), and the last notification happens very soon after the detection, which demonstrates the efficiency of our propagation algorithm (variability in the results comes from the randomness of when the node failure happened with respect to the heartbeat period). However, for SWIM, even considering the advantage of managing a 
  smaller number of processes, the latency is still more than $10*\delta$, because after the initial timeout declares a suspicion, the gossip protocol and confirmation mechanism have to be executed
 before the failure is reported.
 
 \subsection{Comparison with \ulfm for Process Failures}
 This section compares \ourwork with the other extreme on the spectrum of
-general versus specialized; \ulfm. The \ulfm implementation also has two
+general versus specialized---\ulfm. The \ulfm implementation also has two
  main components: process level detection ring, and propagation overlay with all launched processes. The detection ring is built at Byte Transfer Layer (BTL) level - which provides the portable low-level transport abstraction in \ompi. \ulfm's current implementation provides several mechanisms to ensure the timely activation and delivery of heartbeats:
 \begin{compactenum}
   \item Using a separate, library internal thread to send the heartbeats in order to be separated from the application's communication. This also mitigates the drift in heartbeat
