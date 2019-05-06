@@ -653,20 +653,21 @@ We implemented \ourwork as a set of components in \prrte. \prrte is a fork of th
 by the \pmix community as a demonstrator and enabler technology that demonstrates
 and exercises the features of the \pmix interface~\cite{CASTAIN18} --an abstract set of interfaces by which not only applications and tools can interact with the resident system management stack (SMS), but also the various SMS components can interact with each other.
 Many communication libraries, resource managers, and job scheduling systems are currently employing \pmix in production, and many more are under development.
+%remove this down? 
 For example, \ompi has now substituted \orte with a shim layer over \pmix and thus can be launched and monitored by \prrte.
 Similarly, \oshmem uses \prrte as the default launcher.
 Meanwhile, the Slurm batch scheduler and job starter ships with native \pmix support, meaning that an application that interoperate with Slurm through \pmix can be ported  over \prrte without effort.
-Overall, the fact that \prrte interfaces with the communities of interest
-highlighted in Section~\ref{sec:motivation} through a well defined and stable interface is a clear benefit for increasing the impact of \ourwork.
+%Overall, the fact that \prrte interfaces with the communities of interest highlighted in Section~\ref{sec:motivation} through a well defined and stable interface is a clear benefit for increasing the impact of \ourwork.
 
-The \pmix specification provides a specified Job controlling and Monitoring interface~\cite{Ralph15} which (in theory) enables the application and SMS to coordinate the response to failure.
-Another important feature is the \pmix Event Notification~\cite{Ralph002} : the resource manager or server can notify the application of events, the application processes can notify their server or SMS of issues.
+In \ourwork, we leverage on the interfaces specified by \pmix~\cite{Ralph15} to interoperate 
+with the client (application or communication library), as well as with the 
+SMS. 
 The outputs of \ourwork are exposed to client libraries (e.g., MPI) through
 these interfaces, and, to the best of our knowledge, \ourwork is the first
 implementation to populate these interfaces with a truly resilient implementation.
-
-Notifications of failures are produced as \pmix Event Notifications, which can be easily subscribed by the client or the SMS to track failures detected by \ourwork.
-We also employ \pmix Even Notifications to perform the internal propagation of failure notifications between daemon processes and application processes.
+An important feature is the \pmix Event Notification~\cite{Ralph002}: 
+we use it to perform the local propagation of failure information from the 
+daemon to the client processes. the resource manager or server can notify the application of events, the application processes can notify their server or SMS of issues.
 
 \subsubsection{\ourwork in the \prrte Architecture}
 
@@ -678,19 +679,20 @@ We added two new frameworks and four components to \prrte daemons. The \texttt{p
 component is in charge of detecting the failure of locally hosted processes (using
 SIGCHLD signals from the operating system). The \texttt{BMG} components
 implements a broadcast algorithm in a reliable way; to be noted, this component
-abides by the normal interface for a daemon broadcast, meaning that it is not
-limited to reliably broadcast fault information. The \texttt{detector}
+abides by the normal interface for a daemon broadcast and can reliably broadcast 
+any type of information. The \texttt{detector}
 component emits heartbeats and monitors timeouts, and last, the \texttt{error\_ppg}
 components prepares the content of the reliable broadcast messages (i.e., the list
 of failed processes).
 
 An important aspect of the propagate framework is that, for node failures,
 only the daemon that initiates the propagation needs to obtain the list of processes
-hosted  by the failed daemon (line 5 of procedure \textsc{StartPropagation} in Algorithm~\ref{fig:2lvlbmg}).
-Since only one process initiates a propagation, this information is obtained
- only once (using \pmix key-value store operations) and does not need to
- be replicated during initiation (memory overhead) or fetch on-demand from
- a large number of daemons (network hot-spot).
+hosted by the failed daemon (line 5 of procedure \textsc{StartPropagation} in Algorithm~\ref{fig:2lvlbmg}).
+This information can be queried from the key-value store of \pmix, however, 
+triggering the collection of that information from multiple nodes could 
+cause a storm of network activity in the SMS, or require replication of 
+information (memory overhead), which is avoided by obtaining the information 
+from only the daemon that initiates the propagation. 
 
 \begin{figure*}[h]
 \centering
