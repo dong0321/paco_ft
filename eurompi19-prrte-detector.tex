@@ -17,7 +17,7 @@
 \newcommand{\ulfm}[0]{\textsc{ULFM}\xspace}
 \newcommand{\mpi}[0]{\textsc{MPI}\xspace}
 \newcommand{\oshmem}[0]{\textsc{OpenSHMEM}\xspace}
-\newcommand{\ourwork}[0]{\textsc{Daemon}\ensuremath{^\#}\xspace}
+\newcommand{\ourwork}[0]{\textsc{RDaemon}\ensuremath{^\#}\xspace}
 
 \newcommand{\imb}[0]{\textsc{IMB}\xspace}
 
@@ -316,28 +316,25 @@ MPICH provides several runtime environments, such as MPD~\cite{Butler00}, Hydra~
 Hydra scales well for large number of processes on a single node and interacts efficiently with hybrid programming models that combine \mpi and threads. While Hydra can monitor
 and report MPI process failures, it does not cope with daemon failures.
 %
- \orte~\cite{Castain05, Jeffrey12} is the \ompi runtime environment to launch, monitor, and kill parallel jobs, as well as managing I/O forwarding. It also connects daemons through various topologies, however the communication is not reliable. In general, these runtimes have limited applicability outside of the related \mpi implementation that has motivated their creation.
+\orte~\cite{Castain05, Jeffrey12} is the \ompi runtime environment to launch, monitor, and kill parallel jobs, as well as managing I/O forwarding. It also connects daemons through various topologies, however the communication is not reliable. In general, these runtimes have limited applicability outside of the related \mpi implementation that has motivated their creation.
 
 The \prrte runtime serves as the demonstrator and reference implementation
 for the \pmix specification~\cite{CASTAIN18}. Technically it is a fork of
 the \orte runtime, and thus inherit most of its capabilities to launch
-and monitor \mpi jobs. Thanks to its well specified \pmix interface. \prrte
-can deploy not only the related \mpi implementation, but also provides a
-generic environment to deploy a wide variety of parallel applications (MPI based or not).
+and monitor \mpi jobs. Thanks to a well documented, and lately standardized \pmix interface, \prrte
+has increased its capabilities, outgrowing the MPI world it has been originally designed for, and is currently capable of
+deploying a wide variety of parallel applications and tools.
 Although \prrte provides rudimentary support for clients fault detection and reporting,
-detection of failed nodes is rudimentary and slow, and the reporting
-broadcast topology is not itself resilient.
+detection of failed nodes is sketchy and slow, and the reporting
+broadcast topology is itself not resilient, allowing at best process fault detection and propagation.
 The current work expands on the existing capabilities of \prrte by adding
-advanced failure detection and reporting methodologies that can operate
+advanced failure detection and reporting methodologies that can efficiently operate
 despite the failure of the runtime daemon themselves.
 
 \subsection{Failure Detection}
-Research in the areas of failure detection has been extensively studied. Chandra and Toueg~\cite{Chandra96} proposed the first unreliable failure detector oracle that could solve consensus and atomic broadcast problem for reliable distributed systems. Many implementations~\cite{Wei02, Larrea00, Kawazoe97} based on this oracle work are using all-to-all heartbeat patterns where every node periodically communicates with all nodes. However, those implementations are not scalable for lager systems with hundreds of nodes. The gossip-style protocol \cite{van98, Ranganathan01, Gupta01, Abhinandan02}, in which nodes pick at random other nodes to monitor and exchange information, is a popular approach for failure detection in unstructured systems were the group membership
-is not a-priori established. However, these gossip methods do not work well with very large number of node crashes, and the time to detect a specific failure is not strictly bounded given the
-random nature of the protocol. Furthermore, the gossip methods have the disadvantage of
-generating a large number of redundant detection and gossip messages that decrease the scalability.
+Research in the areas of failure detection has been extensively studied. Chandra and Toueg~\cite{Chandra96} proposed the first unreliable failure detector oracle that could solve consensus and atomic broadcast problem for reliable distributed systems. Many implementations~\cite{Wei02, Larrea00, Kawazoe97} based on this oracle are using all-to-all heartbeat patterns where every node periodically communicates with all other nodes. However, these implementations, due to the communication patterns employed, are inherently not scalable starting as early as systems with hundreds of nodes. An optimized version, the gossip-style protocol~\cite{van98, Ranganathan01, Gupta01, Abhinandan02}, in which nodes pick at random peers to monitor and exchange information with, is another popular approach for failure detection in unstructured systems were the group membership is not a-priori established, or it dynamically and rapidly varies. Unfortunately, gossip methods perform poorly with large number of simultaneous node crashes, and, given the random nature of the communication pattern, the time to detect a failure is not strictly bounded, leading to non-deterministic detection time. Furthermore, the gossip methods have the disadvantage of generating a large number of redundant detection and gossip messages that decrease the scalability.
 
-Recently, our previous work \cite{George16} propose an observation ring based detector for HPC systems.
+Recently, we proposed a deterministic failure detectors based on network overlays~\cite{George16}, where the failu observation ring based detector for HPC systems.
 the simulation results demonstrate the efficient of the algorithm, however the implementation in \ulfm is an application level failure detection strategy, which can only detect \mpi process failures. The
 implementation employs multiple optimization and shortcuts that are possible because it is
 tightly and deeply integrated within the \mpi library. For example, limitations on the
