@@ -147,9 +147,9 @@
 %
 % The abstract is a short summary of the work to be presented in the article.
 \begin{abstract}
-As the scale of high-performance computing (HPC) systems continues to grow, mean-time-to-failure (MTTF) of these HPC systems is negatively impacted and tend to decrease. In order to efficiently run long computing jobs on these systems, handling system failures become a prime challenge. We present here the design and implementation of an efficient runtime-level failure detection and propagation strategy targeting large scale, dynamic systems able to detect both node and process failures. Multiple, overlapping topologies are used to optimize the detection and propagation, minimizing the incurred overheads and guaranteeing the scalability of the entire framework.
+As the scale of high-performance computing (HPC) systems continues to grow, mean-time-to-failure (MTTF) of these HPC systems is negatively impacted and tends to decrease. In order to efficiently run long computing jobs on these systems, handling system failures becomes a prime challenge. We present here the design and implementation of an efficient runtime-level failure detection and propagation strategy targeting large-scale, dynamic systems that is able to detect both node and process failures. Multiple overlapping topologies are used to optimize the detection and propagation, minimizing the incurred overheads and guaranteeing the scalability of the entire framework.
 % A ring topology is maintained by allowing one node sending and receiving periodically heartbeat to/from another node to detect a node failure(observing another single node). For process failure each host node (is in charge of monitoring) monitors its children processes. The propagation use a reliable broadcast method over a binomial graph(an arbitrary communication topology) to distribute error message to applications, guarantees a logarithmic propagate time.
-The resulting framework has been implemented in the context of a system level runtime for parallel environments, \pmix Reference RunTime Environment(\prrte), providing efficient and scalable capabilities of fault management to a large range of programming and execution paradigms.
+The resulting framework has been implemented in the context of a system-level runtime for parallel environments, \pmix Reference RunTime Environment (\prrte), providing efficient and scalable capabilities of fault management to a large range of programming and execution paradigms.
 % the algorithms and strategies proposed have a larger scope of most distributed programming environment.
 This result is supported by an experimental evaluation of the resulting software stack on different machines.
 \end{abstract}
@@ -213,46 +213,45 @@ This result is supported by an experimental evaluation of the resulting software
 \section{Introduction}\label{sec:intro}
 
 The complexity and vastness of the questions posed by modern science has
-fueled the emergence of an era where exploring the boundaries of mater, life,
-and human knowledge require large instruments, either to perform the
+fueled the emergence of an era where exploring the boundaries of matter, life,
+and human knowledge requires large instruments, either to perform the
 experiments, collect the observation, and in the
-case of High Performance Computing (HPC), perform the compute intensive
+case of high-performance computing (HPC), perform the compute-intensive
 analysis of scientific data. As the march of science continues, small and
-easy problem have already been solved, and significant advances increasingly
-require tackling finer grain, more accurate problems, which entails that the
-compute workloads are getting larger, fueling an unending need for larger
+easy problems have already been solved, and significant advances increasingly
+require tackling finer-grain, more accurate problems, which entails larger compute workloads, fueling an unending need for larger
 HPC systems.
 
 In turn, facing hard limits on power consumption and chip frequency,
 HPC architects have been forced to embrace massive parallelism as well as
 a deeper and more complex component hierarchy (e.g., non-uniform memory architectures,
-GPU accelerated nodes) to continue the growth in available compute capabilities.
+GPU-accelerated nodes) to continue the growth in compute capabilities.
 This has stressed the traditional HPC software infrastructure in different
 ways, but it notably put to prominence two different issues that had been
-largely dormant in the last two decades: fault tolerance and novel programming
+largely disregarded in the last two decades: fault tolerance and novel programming
 models.
 
 The Message Passing Interface (MPI) has been instrumental in
 permitting the efficient programming of massively parallel systems, scaling
-along from early systems with tens of processors to nowadays systems routinely
+along from early systems with tens of processors to current systems routinely
 encompassing hundreds of thousands of cores. As failures become more
 common on large and complex systems, The \mpi standard is in the process of
 evolving to integrate fault tolerance capabilities, as proposed in the
 User-Level Failure Mitigation (\ulfm) specification draft~\cite{Bland2013}, or
 various efforts to integrate tightly checkpoint-restart with \mpi~\cite{reinit18}.
-The second stress comes from programming systems that are inherently
+The second source of stress comes from programming systems that are inherently
 hierarchical. This has brought forth a renaissance in the field of
 programming models, leading to a variety of contenders challenging the
 hegemony of \mpi as the sole method of harnessing the power of parallel systems.
 Naturally, these alternatives to \mpi also have to handle fault tolerance~\cite{7161563, doi:10.1177/1094342016669416, shmem-ft15, 10.1007/978-3-319-50995-2_5, X10-ft16}.
 In addition, the convergence
-between Big-Data infrastructure and the HPC infrastructure, as well as
+between big data infrastructure and the HPC infrastructure, as well as
 the emergence of machine learning as a massive consumer of compute
-capabilities is gathering around HPC systems new communities that
-have long held expectations that the infrastructure provides resilience as a core feature~\cite{hadoop-ft}.
+capabilities, is gathering around HPC systems new communities that
+have long-held expectations that the infrastructure provide resilience as a core feature~\cite{hadoop-ft}.
 
 A feature that's commonly needed by these communities with a vested
-interest in fault tolerance is the capability to efficiently, timely and
+interest in fault tolerance is the capability to efficiently, quickly and
 accurately detect and report failures, so that they can manifest as
 error codes from the programming interface, or trigger implicit recovery
 actions. In prior works~\cite{George16}, we have designed a tailor-made
@@ -264,22 +263,22 @@ access to low-level remote memory access routines, which may not be typically
 available in a less \mpi-centric context. Similar concepts could be
 applied to other HPC networking interfaces (e.g., \oshmem), but at
 the expense of a major infrastructure rewrite for each and every one of
-them. In this paper, we test the hypothesis that a fully-dedicated \mpi
+them. In this paper, we test the hypothesis that a fully dedicated \mpi
 solution is not necessary to achieve great accuracy and performance, and
-that a generic failure detection solution, provided by an external runtime,
+that a generic failure detection solution, provided by an external runtime
 entity that does not have access to the \mpi context and communication conduits
 can deliver a similar level of service. In order to test that hypothesis,
-and further, to define how generic one can make the solution, we designed
-a multi-level failure detection algorithm, called \ourwork, that operates
+and further, to define how a generic one can provide the solution, we designed
+a multi-level failure detection algorithm, called \ourwork, which operates
 within the runtime infrastructure to monitor both node and process
 failures. We implemented that algorithm as a component in the \pmix~\cite{CASTAIN18} runtime reference implementation (\prrte), which is a fully fledged runtime that is
 used in production to deploy, monitor and
 serve multiple HPC networking stack clients like \ompi, or the
 reference \oshmem implementation. We then compare this generic
-failure detection service with the fully-dedicated \mpi detector from
-\ulfm \ompi on one hand, and with the Scalable Weakly-Consistent Infection-style Membership (SWIM) protocol on the other hand, the later standing
+failure detection service with the fully dedicated \mpi detector from
+\ulfm \ompi on one hand, and with the Scalable Weakly-Consistent Infection-style Membership (SWIM) protocol on the other hand, the latter standing
 as a state-of-the-art detector for unstructured peer-to-peer systems. Henceforth
-we highlight that there is a performance tradeoff in generality, but
+we highlight that there is a performance trade-off in generality, but
 satisfactory level of performance can be achieved in a portable and reusable
 component that can satisfy the needs of a variety of HPC networking systems.
 
@@ -290,10 +289,12 @@ related work on failure detectors followed by Section~\ref{sec:design} where we
 describe the algorithm and implementation details of our generic failure
 detector. Section~\ref{sec:experiments} describes the performance and accuracy
 comparison between three different failure detectors providing a distinct
-tradeoff on the general to specific scale.
+trade-off on the general to specific scale.
 
 \section{Motivation and Background}\label{sec:motivation}
 \todo{this is very rough, needs to be refocused in terms of motivating use cases}
+
+Many projects have proposed fault management techniques either automatic or driven by the application or by a intermediary library, and most of these approaches rely on their own infrastructure to detect, propagate and react to failures. This leads to a very large number of partial solutions hardly maintained where no portable and efficient support to build resilient applications or programming models exists. This lack of reliable software infrastructure also make difficult to fairly compare existing or proposed solutions not only in terms of potential capabilities but in terms of performance. We believe it is critical to level the field and provide a resilient, efficient and portable fault detector and propagator, integrated into one of the most widely used parallel execution runtime, that allow other libraries and programming models to more construct and provide resilient capabilities at any scale. Here are some examples of the uage of such a resilient framework that we are actively pursuing.
 
 \textbf{\ulfm:} \ourwork supports the functionality in \ulfm of revocation and correction of a broken communicator after node failure. For \ulfm the global communicator could be reconfigured after process failure detection, the failed processes are excluded from the global communicator using the \mpifunc{Comm_shrink} and are re-spawned using the \mpi function \mpifunc{Comm_spawn}, but the job will be aborted with node failure. However, using \ourwork instead of \ompi runtime the job doesn't need to be terminated after node failure. And with \ourwork's notification \mpi application can get the consensus knowledge of failure, then application can use the recovery functions (Shrink, Respawn) provided by \ulfm to build new communicator without the failed processes but with those newly spawned ones.
 \todo{add SHMEM, REINIT; thinking about moving this part as 2. Motivation}
@@ -301,6 +302,8 @@ tradeoff on the general to specific scale.
 \textbf{\oshmem:} fault tolerance model is based on check-point and restart, that suits to the one-sided nature of PGAS programming model while leveraging features very specific to \oshmem. \ourwork failure detection and propagation attributes provide the flexibility to application developers to modulate the frequency and placement within the application where the checkpoint may be introduced. Also the notification provides the trigger for recovery.
 
 \textbf{EREINIT:} \todo{this reads as related work} a global-restart failure recovery model by allowing a fast re-initialization of \mpi. This work is a co-design between MVAPICH and Slurm resource manager to add process and node failure detection and propagation features. The detection is using Slurm's health check mechanism by sending ping messages to nodes, propagation is implemented in a manner of forcing the controller to individually send the notification to children of the failed nodes. However this work is highly depends on one particular resource manager Slurm, also it use a inefficient propagation method. \ourwork work can exceed the bottleneck of EREINIT to run on machines with different resource managers(Slurm, PBS, LSF, TORQUE, etc). Also with our efficient propagation algorithm the notification will be much faster advances the stabilization and recovery time of EREINIT.
+
+\textbf{DataSpaces and FTI} \todo{add text}
 
 \section{Related Work}\label{sec:related}
 In this section, we survey related work on large scale distributed runtime environments, different kinds of heartbeat based and random gossip based failure detectors, together with reliable broadcast algorithms to propagate fault information.
