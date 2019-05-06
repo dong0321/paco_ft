@@ -892,20 +892,25 @@ Figure \ref{fig:daemon_failure_diffnode} shows single node failure detection and
   \label{fig:daemon_failure_diffnode}
 \end{figure}}
 %
-\todo{the following paragraph seem to not describe what's on the graph anymore}
-However, for \ulfm all affected processes need be detected by their observers independently, this will suffer from the collisions on the reliable broadcast propagation. For the worst case detection, all affected processes are adjacent in the observation ring, for each affected process the ring need to re-connect and update, causes a linear increase of $ \eta $ to the detection latency for every process failure. From the figure see that \ourwork can detect and propagate a node failure between (0.5s, 1s) for all tested number of node.
+From the figure see that \ourwork can detect and propagate a node failure between (0.5s, 1s) for all tested number of node.
 %
 
 The last experiment, presented in Figure~\ref{fig:multi_daemon_failure_nacl}), investigates the effect of multiple concurrent node failures. The experiment is similar to the single node failure case, except for the
-number of processes that inject failures. In the first scenario, we inject failures at random nodes.
-In this case, the detection and propagation are independently conducted by different observer nodes and neatly overlap resulting in a marginal increase in the overall detection latency for
-reporting all failures. We also consider the worst case scenario, in which failures strike
+number of processes that inject failures. 
+We first consider the worst case scenario, in which failures strike
 contiguous nodes. In this case, the daemon that detects the first failure
 undergoes the ring-mending operation, which entails a linear number of timeouts
-before all failures are reported. This indicates that, from a fault
+before all failures are notified. Note that \ulfm exhibit the same behavior, even
+for single node failures: in the map-by-slot binding policy, consecutive ranks
+fail simultaneously with a node failure. From a fault
 tolerance perspective, the ordering of
 daemons on the detection ring should avoid setting nodes that have a
-correlated chance of failure sequentially (e.g., avoid choosing predecessor and successor from the same cabinet).
+correlated chance of failure sequentially (e.g., avoid choosing predecessor and successor from the same cabinet),
+which is easier to achieve when the detection infrastructure is split from 
+the \mpi rank ordering.
+To study the average behavior, we also inject failures at random nodes.
+In this case, the detection and propagation are independently conducted by different observer nodes and neatly overlap resulting in a marginal increase in the overall detection latency for
+reporting all failures. 
 
 \begin{figure}[h]
   \centering
