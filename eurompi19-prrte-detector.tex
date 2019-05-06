@@ -296,14 +296,39 @@ trade-off on the general to specific scale.
 \section{Motivation and Background}\label{sec:motivation}
 \todo{this is very rough, needs to be refocused in terms of motivating use cases}
 
-Many projects have proposed fault management techniques either automatic or driven by the application or by a intermediary library, and most of these approaches rely on their own infrastructure to detect, propagate and react to failures. This leads to a very large number of partial solutions hardly maintained where no portable and efficient support to build resilient applications or programming models exists. This lack of reliable software infrastructure also make difficult to fairly compare existing or proposed solutions not only in terms of potential capabilities but in terms of performance. We believe it is critical to level the field and provide a resilient, efficient and portable fault detector and propagator, integrated into one of the most widely used parallel execution runtime, that allow other libraries and programming models to more construct and provide resilient capabilities at any scale. Here are some examples of potential users of such a resilient framework that we are actively pursuing.
+Many projects have proposed fault management techniques, either automatic,
+ driven by the application, or by a intermediary library. Most of these approaches 
+rely on their own specialized infrastructure to detect, propagate and react to failures. 
+This leads to a very large number of partial solutions hardly maintained where no portable
+and efficient support to build resilient applications or programming models exists.
+ This lack of reliable software infrastructure also makes difficult comparing fairly 
+ existing or proposed solutions, not only in terms of potential capabilities, 
+ but in terms of performance. We believe it is critical to level the field and provide a resilient, efficient and portable fault detector and propagator, integrated into one of the most widely used parallel execution runtime, that allow other libraries and programming models to build upon and supports resilience at any scale. Here are some examples of potential users of such a resilient framework that we are actively pursuing.
 
-\textbf{\ulfm:} \ourwork supports the functionality in \ulfm of revocation and correction of a broken communicator after node failure. For \ulfm the global communicator could be reconfigured after process failure detection, the failed processes are excluded from the global communicator using the \mpifunc{Comm_shrink} and are re-spawned using the \mpi function \mpifunc{Comm_spawn}, but the job will be aborted with node failure. However, using \ourwork instead of \ompi runtime the job doesn't need to be terminated after node failure. And with \ourwork's notification \mpi application can get the consensus knowledge of failure, then application can use the recovery functions (Shrink, Respawn) provided by \ulfm to build new communicator without the failed processes but with those newly spawned ones.
-\todo{add SHMEM, REINIT; thinking about moving this part as 2. Motivation}
+\textbf{\ulfm} repairs \mpi infrastructure after a failure. A communicator can be reconfigured after a 
+process failure detection, with the failed processes excluded with \mpifunc{Comm_shrink}. Missing processes 
+can be re-spawned using the \mpi function \mpifunc{Comm_spawn}. The specialized failure detector provided 
+in \ulfm operates only on the \mpifunc{COMM_WORLD} scope, and relies on non-portable optimization 
+to mitigate issues with accuracy due to being executed in the context of the \mpi process. 
+Using \ourwork alleviates these issues by cleanly splitting the \mpi rank ordering, 
+progress engine, and thread initialization modes from the operation of the failure 
+detector. We will discuss in the experimental section how the generality of 
+\ourwork does not incur a large overhead compared to the specialize \ulfm detector.
 
-\textbf{\oshmem:} fault tolerance model is based on check-point and restart, that suits to the one-sided nature of PGAS programming model while leveraging features very specific to \oshmem. \ourwork failure detection and propagation attributes provide the flexibility to application developers to modulate the frequency and placement within the application where the checkpoint may be introduced. Also the notification provides the trigger for recovery.
-
-\textbf{EREINIT:} \todo{this reads as related work} a global-restart failure recovery model by allowing a fast re-initialization of \mpi. This work is a co-design between MVAPICH and Slurm resource manager to add process and node failure detection and propagation features. The detection is using Slurm's health check mechanism by sending ping messages to nodes, propagation is implemented in a manner of forcing the controller to individually send the notification to children of the failed nodes. However this work is highly depends on one particular resource manager Slurm, also it use a inefficient propagation method. \ourwork work can exceed the bottleneck of EREINIT to run on machines with different resource managers(Slurm, PBS, LSF, TORQUE, etc). Also with our efficient propagation algorithm the notification will be much faster advances the stabilization and recovery time of EREINIT.
+\textbf{\oshmem} is a one-sided PGAS programming model. While \oshmem does 
+not  currently have a fault tolerance model, several teams are exploring checkpoint and restart.
+\ourwork failure detection and propagation attributes can provide the 
+notification to trigger the recovery. For more exploratory works, 
+application developers can experiment with modulating the frequency and
+ placement of restart point within the application and employ the 
+ failure detector directly, or through \oshmem interfaces.
+ 
+\textbf{EREINIT} \todo{this reads as related work} is a global-restart failure recovery model based 
+on a fast re-initialization of \mpi. This work is a co-design between MVAPICH and Slurm resource manager to add process and node failure detection and propagation features. 
+%The detection is using Slurm's health check mechanism by sending ping messages to nodes, propagation is implemented in a manner of forcing the controller to individually send the notification to children of the failed nodes.
+However this work is highly depends on one particular resource manager: Slurm. It also use an innefficient propagation method. \ourwork can substitute a portable capability to enable 
+EREINIT to run on machines with different resource managers (Slurm, PBS, LSF, TORQUE, etc). Also,
+our efficient propagation algorithm can reduce the stabilization and recovery time of EREINIT.
 
 \textbf{DataSpaces and FTI} \todo{add text}
 
