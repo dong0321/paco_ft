@@ -856,7 +856,7 @@ Figure~\ref{fig:node_failure_hb} presents the behavior observed when injecting s
 all application processes on the target node suicide as a group. 
 %However, \ulfm doesn't have the capability of detecting node failure, we simulate "node crash" by kill the last process on that node. With the process ring detector this particular process failure will be detected by its observer on another node, this behavior is the same as \ourwork's node to detect node failure. 
 %Also we assume that the time different between the daemon failure and process failure is trivial which is confirmed later in the experiment. 
-For the heartbeat period setting we start at 30 milliseconds to 0.5 second for both \ourwork and \ulfm. For all heartbeat periods we set $ \eta = \delta * 2 $. From the figure we can see that the detection latency in all cases lands in the interval $\[\delta,\eta\]$.
+For the heartbeat period setting we start at 30 milliseconds to 0.5 second for both \ourwork and \ulfm. For all heartbeat periods we set $ \eta = \delta * 2 $. From the figure we can see that the detection latency in all cases lands in the interval $[\delta,\eta]$.
 
 Figure \ref{fig:daemon_failure_diffnode} shows single node failure detection and propagation performance with a fixed heartbeat period $ \delta = 0.5s $ and an increasing total number of nodes. After a node crash, all processes hosted on this node will be affected, the observer node fetches and packs the information of all affected processes information then distribute the packed message.
 \textbf{
