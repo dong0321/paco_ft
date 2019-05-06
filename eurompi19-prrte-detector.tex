@@ -702,20 +702,19 @@ the map-by node, bind-by node policy to set communicating \mpi ranks on differen
   \caption{Heartbeat and Timeout accuracy}
   \label{fig:accuracy}
 \end{figure}
-\todo{please check if this figure is useful? I set 10s delay when starting the processes, then launching processes will not delay and cause timeout, however daemon also takes care of all process finalize which will cause a delay of timeout}
 
 For the first experiment we want to explore the accuracy of \ourwork's detector with different heartbeat periods. 
 %
 The accuracy experiment is conducted by (1) Starting with a large value for the 
 detection timeout $\eta$; (2) Verify that no failure is detected when there is no injection, and all injected failures are reported; (3) If the previous test is accurate, decrease $\eta$ (and accordingly the heartbeat period $\delta$) until we notice false positive detection. We set a constant ratio $\eta = \delta * 2$.
  %
- Figure~\ref{fig:accuracy} presents the results on NaCl 64 nodes. For 
- non-communicating benchmarks (SETNAME\todo{name}), all tests succeed 
- until $\delta$ is lower than 20 milliseconds. In heavily communicating Benchmarks
+ Figure~\ref{fig:accuracy} presents the results on NaCl 64 nodes.
+ % For  non-communicating benchmarks (SETNAME\todo{name}), all tests succeed until $\delta$ is lower than 20 milliseconds. 
+ In heavily communicating Benchmarks
  (\imb point-to-point and collective tests), all tests succeed until the 
-  heartbeat period lower than 20 milliseconds, as above. To further investigate,
+  heartbeat period lower than 20 milliseconds. To further investigate,
   we measured that the heartbeat message is neither delayed by communication
-  congestion nor compute pressure but we found out that daemons need some time to launch the processes when starting the job which causes false detection during job startup. \todo{redo this experiment starting the detector with a large initial timeout and start injection after some cooldown period}
+  congestion nor compute pressure but we found out that daemons need some time to launch the processes when starting the job which causes false detection during job startup. \todo{remove the heartbeat accuracy, change timeout accuracy to 'false positive present'; for later: do not report finalize errors}
   
   %\item No failure is injected and node missed its heartbeat sending deadline. With a reasonable timeout value, all daemons can send heartbeats successfully with $ \delta $ as low as 0.1 millisecond. 
 %From all above we can see that the granularity of timeout is 40 milliseconds limited by the latency for daemons to launch the application processes. And the granularity of heartbeat period is 0.1 millisecond.  
@@ -735,14 +734,10 @@ repetitions for the test to last at a minimum 20 seconds so that multiple heartb
 \begin{equation}
 Overhead = \frac{( {\ourwork - \prrte} )}{\prrte}
 \end{equation}
- From the graph we can see that the latency performance and bandwidth performance are barely affected by heartbeats periods from milliseconds to seconds. Notably, when $ \delta \geq 10 ms $, it has trivial influence on the system, as illustrated by the fact that the average overhead is within the band of natural variability of the benchmark. When  $ \delta = 1 ms $ the noise in PingPong incurs less than three percent overhead. In collective communication the noise overhead is less than eight percent, under the circumstance that the standard deviation of the benchmark itself is four percent. 
- \todo{from here}
- Also we calculate the overhead of \ulfm with fault tolerance compared to \ulfm:
- \begin{equation}
-Overhead = \frac{ \ulfm\ with\ FT - \ulfm }{\ulfm}
-\end{equation}
- We can see that \ulfm with fault tolerance shows the same behavior as \ourwork. For P2P communication, when $ \delta \geq 10 ms $ which bring incidental overhead no more than two percent beyond the benchmark error, with $ \delta = 1 ms $ the noise from heartbeat emissions is around three percent. As for collective communication the overhead is about six percent with $ \delta = 1 ms $.
- \todo{to there, the results needs updated and text updated accordingly}
+ From the graph we can see that the latency performance and bandwidth performance are barely affected by heartbeats periods from milliseconds to seconds. Notably, when $ \delta \geq 10 ms $, it has trivial influence on the system, as illustrated by the fact that the average overhead is within the band of natural variability of the benchmark. When  $ \delta = 1 ms $ the noise in PingPong incurs less than three percent overhead. In collective communication the noise overhead is less than eight percent, slightly higher than the standard deviation of the benchmark itself at four percent. 
+ In a general comparison with \ulfm (normalized to its performance without failure detection active),
+ We can see that \ourwork achieves a similar level of incurred noise for a given 
+ heartbeat period. 
 
 \subsection{Comparison with SWIM}
 This section compares failure detection latency and scalability of \ourwork with SWIM~\cite{Abhinandan02} --a random-probing based failure detection protocol and gossip membership updates via network multi-cast. To decrease 
