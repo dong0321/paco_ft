@@ -330,9 +330,17 @@ However this work is highly depends on one particular resource manager: Slurm. I
 EREINIT to run on machines with different resource managers (Slurm, PBS, LSF, TORQUE, etc). Also,
 our efficient propagation algorithm can reduce the stabilization and recovery time of EREINIT.
 
-\textbf{DataSpaces and FTI} \todo{add text}
-
- Fault Tolerance Interface (FTI) provides fast and efficient multilevel check-pointing functionality. It is an application level check-pointing offers direct data interface allows users to decide what data sets need to be protected and avoid dealing with files and directory names. It allow users to dedicate one process per node to overlap fault tolerance workload and computation.
+\textbf{DataSpaces and FTI} are persistent data storage services. 
+ Fault Tolerance Interface (FTI) provides a fast and efficient multilevel
+ checkpointing functionality. Its interface lets users decide what data need to be protected. The 
+ checkpointing routine then saves the marked data into a hierarchical storage using a variety of 
+ encoding, caching strategies, and staging to mitigate the cost of checkpointing.
+ DataSpaces ...\todo{expand on dataspaces}
+ In both cases, \ourwork can provide the basic service to detect and report 
+ failures of the distributed infrastructure storage service, which, thus 
+ far, has not been fault tolerant.\todo{is that true for dataspaces} 
+ 
+ 
  
 \section{Related Work}\label{sec:related}
 In this section, we survey related work on large scale distributed runtime environments, different kinds of heartbeat based and random gossip based failure detectors, together with reliable broadcast algorithms to propagate fault information.
