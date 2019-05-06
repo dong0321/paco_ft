@@ -273,8 +273,9 @@ a multi-level failure detection algorithm, called \ourwork, which operates
 within the runtime infrastructure to monitor both node and process
 failures. We implemented that algorithm as a component in the \pmix~\cite{CASTAIN18} runtime reference implementation (\prrte), which is a fully fledged runtime that is
 used in production to deploy, monitor and
-serve multiple HPC networking stack clients like \ompi, or the
-reference \oshmem implementation. We then compare this generic
+serve multiple HPC networking stack clients.
+%like \ompi, or the reference \oshmem implementation. 
+We then compare this generic
 failure detection service with the fully dedicated \mpi detector from
 \ulfm \ompi on one hand, and with the Scalable Weakly-Consistent Infection-style Membership (SWIM) protocol on the other hand, the latter standing
 as a state-of-the-art detector for unstructured peer-to-peer systems. Henceforth
