@@ -280,7 +280,7 @@ We then compare this generic
 failure detection service with the fully dedicated \mpi detector from
 \ulfm \ompi on one hand, and with the Scalable Weakly-Consistent Infection-style Membership (SWIM) protocol on the other hand, the latter standing
 as a state-of-the-art detector for unstructured peer-to-peer systems. Henceforth
-we highlight that there is a performance trade-off in generality, but
+we highlight that there is a performance trade-off in generality, but a
 satisfactory level of performance can be achieved in a portable and reusable
 component that can satisfy the needs of a variety of HPC networking systems.
 
@@ -297,13 +297,13 @@ trade-off on the general to specific scale.
 \todo{this is very rough, needs to be refocused in terms of motivating use cases}
 
 Many projects have proposed fault management techniques, either automatic,
- driven by the application, or by a intermediary library. Most of these approaches 
+ driven by the application, or by an intermediary library. Most of these approaches 
 rely on their own specialized infrastructure to detect, propagate and react to failures. 
 This leads to a very large number of partial solutions hardly maintained where no portable
 and efficient support to build resilient applications or programming models exists.
- This lack of reliable software infrastructure also makes difficult comparing fairly 
- existing or proposed solutions, not only in terms of potential capabilities, 
- but in terms of performance. We believe it is critical to level the field and provide a resilient, efficient and portable fault detector and propagator, integrated into one of the most widely used parallel execution runtime, that allow other libraries and programming models to build upon and supports resilience at any scale. Here are some examples of potential users of such a resilient framework that we are actively pursuing.
+ This lack of reliable software infrastructure also makes comparing fairly 
+ existing or proposed solutions difficult, not only in terms of potential capabilities, 
+ but also in terms of performance. We believe it is critical to level the field and provide a resilient, efficient, and portable fault detector and propagator, integrated into one of the most widely used parallel execution runtimes, that allows other libraries and programming models to build on and support resilience at any scale. Here are some examples of potential users of such a resilient framework that we are actively pursuing.
 
 \textbf{\ulfm} repairs \mpi infrastructure after a failure. A communicator can be reconfigured after a 
 process failure detection, with the failed processes excluded with \mpifunc{Comm_shrink}. Missing processes 
@@ -313,9 +313,9 @@ to mitigate issues with accuracy due to being executed in the context of the \mp
 Using \ourwork alleviates these issues by cleanly splitting the \mpi rank ordering, 
 progress engine, and thread initialization modes from the operation of the failure 
 detector. We will discuss in the experimental section how the generality of 
-\ourwork does not incur a large overhead compared to the specialize \ulfm detector.
+\ourwork does not incur a large overhead compared to the specialized \ulfm detector.
 
-\textbf{\oshmem} is a one-sided PGAS programming model. While \oshmem does 
+\textbf{\oshmem} is a one-sided partitioned global address space (PGAS) programming model. While \oshmem does 
 not  currently have a fault tolerance model, several teams are exploring checkpoint and restart.
 \ourwork failure detection and propagation attributes can provide the 
 notification to trigger the recovery. For more exploratory works, 
@@ -326,7 +326,7 @@ application developers can experiment with modulating the frequency and
 \textbf{EREINIT} \todo{this reads as related work} is a global-restart failure recovery model based 
 on a fast re-initialization of \mpi. This work is a co-design between MVAPICH and Slurm resource manager to add process and node failure detection and propagation features. 
 %The detection is using Slurm's health check mechanism by sending ping messages to nodes, propagation is implemented in a manner of forcing the controller to individually send the notification to children of the failed nodes.
-However this work is highly depends on one particular resource manager: Slurm. It also use an innefficient propagation method. \ourwork can substitute a portable capability to enable 
+However, this work is highly dependent on one particular resource manager: Slurm. It also use an inefficient propagation method. \ourwork can substitute a portable capability to enable 
 EREINIT to run on machines with different resource managers (Slurm, PBS, LSF, TORQUE, etc). Also,
 our efficient propagation algorithm can reduce the stabilization and recovery time of EREINIT.
 
@@ -334,11 +334,11 @@ our efficient propagation algorithm can reduce the stabilization and recovery ti
  Fault Tolerance Interface (FTI) provides a fast and efficient multilevel
  checkpointing functionality. Its interface lets users decide what data need to be protected. The 
  checkpointing routine then saves the marked data into a hierarchical storage using a variety of 
- encoding, caching strategies, and staging to mitigate the cost of checkpointing.
- DataSpaces ...\todo{expand on dataspaces} DataSpaces is a data sharing framework which supports the complex
+ encoding and caching strategies, and staging to mitigate the cost of checkpointing.
+ DataSpaces ...\todo{expand on dataspaces. Yes, and bf} DataSpaces is a data sharing framework which supports the complex
 interaction and coordination patterns required by coupled data-intensive application workflow. It has the capability of 
-asynchronous capturing and online indexing of live data from running application which allows dynamic interactions and in-memory
-data exchanges between applications running independently. DataSpcae targets MPI based applications in which case the reliability comes from related MPI implementations.  
+asynchronous capturing and online indexing of live data from running applications which allows dynamic interactions and in-memory
+data exchanges between applications running independently. DataSpcaes targets MPI-based applications in which case the reliability comes from related MPI implementations. 
  In both cases, \ourwork can provide the basic service to detect and report 
  failures of the distributed infrastructure storage service, which, thus 
  far, has not been fault tolerant.\todo{is that true for dataspaces} 
@@ -346,24 +346,24 @@ data exchanges between applications running independently. DataSpcae targets MPI
  
  
 \section{Related Work}\label{sec:related}
-In this section, we survey related work on large scale distributed runtime environments, different kinds of heartbeat based and random gossip based failure detectors, together with reliable broadcast algorithms to propagate fault information.
+In this section, we survey related work on large-scale distributed runtime environments, different kinds of heartbeat based and random gossip based failure detectors, together with reliable broadcast algorithms to propagate fault information.
 
 \subsection{Runtime Environments}
-A wide range of approaches to the problem of exascale distributed computing runtime environments have been studied, each primarily emphasize a particular key aspect of the overall problem.
+A wide range of approaches to the problem of exascale distributed computing runtime environments has been studied, each primarily emphasizing a particular key aspect of the overall problem.
 
-MPICH provides several runtime environments, such as MPD~\cite{Butler00}, Hydra~\cite{MPICH14} and Gforker~\cite{MPICH14}. MPD connects nodes through a ring topology but it is not resilient, two node failures could separate nodes into two separates groups that prevents communication with one another. Another drawback of MPD is that this approach has proved to be non-scalable~\cite{Bosilca11}.
-Hydra scales well for large number of processes on a single node and interacts efficiently with hybrid programming models that combine \mpi and threads. While Hydra can monitor
+MPICH provides several runtime environments, such as MPD~\cite{Butler00}, Hydra~\cite{MPICH14} and Gforker~\cite{MPICH14}. MPD connects nodes through a ring topology but it is not resilient; two node failures could separate nodes into two separates groups that prevent communication with one another. Another drawback of MPD is that this approach has proved to be non-scalable~\cite{Bosilca11}.
+Hydra scales well for large numbers of processes on a single node and interacts efficiently with hybrid programming models that combine \mpi and threads. While Hydra can monitor
 and report MPI process failures, it does not cope with daemon failures.
 %
 \orte~\cite{Castain05, Jeffrey12} is the \ompi runtime environment to launch, monitor, and kill parallel jobs, as well as managing I/O forwarding. It also connects daemons through various topologies, however the communication is not reliable. In general, these runtimes have limited applicability outside of the related \mpi implementation that has motivated their creation.
 
 The \prrte runtime serves as the demonstrator and reference implementation
-for the \pmix specification~\cite{CASTAIN18}. Technically it is a fork of
-the \orte runtime, and thus inherit most of its capabilities to launch
-and monitor \mpi jobs. Thanks to a well documented, and lately standardized \pmix interface, \prrte
-has increased its capabilities, outgrowing the MPI world it has been originally designed for, and is currently capable of
+for the \pmix specification~\cite{CASTAIN18}. Technically, it is a fork of
+the \orte runtime, and thus inherits most of its capabilities to launch
+and monitor \mpi jobs. Thanks to a well documented, and recently standardized \pmix interface, \prrte
+has increased its capabilities, outgrowing the MPI world it was originally designed for, and is currently capable of
 deploying a wide variety of parallel applications and tools.
-Although \prrte provides rudimentary support for clients fault detection and reporting,
+Although \prrte provides rudimentary support for clients' fault detection and reporting,
 detection of failed nodes is unstable, and the reporting
 broadcast topology is itself not resilient, allowing at best process fault detection and propagation.
 The current work expands on the existing capabilities of \prrte by adding
@@ -371,12 +371,12 @@ advanced failure detection and reporting methodologies that can efficiently oper
 despite the failure of the runtime daemon themselves.
 
 \subsection{Failure Detection}
-Research in the areas of failure detection has been extensively studied. Chandra and Toueg~\cite{Chandra96} proposed the first unreliable failure detector oracle that could solve consensus and atomic broadcast problem for reliable distributed systems. Many implementations~\cite{Wei02, Larrea00, Kawazoe97} based on this oracle are using all-to-all heartbeat patterns where every node periodically communicates with all other nodes. However, these implementations, due to the communication patterns employed, are inherently not scalable starting as early as systems with hundreds of nodes. An optimized version, the gossip-style protocol~\cite{van98, Ranganathan01, Gupta01, Abhinandan02}, in which nodes pick at random peers to monitor and exchange information with, is another popular approach for failure detection in unstructured systems were the group membership is not a-priori established, or it dynamically and rapidly varies. Unfortunately, gossip methods perform poorly with large number of simultaneous node crashes, and, given the random nature of the communication pattern, the time to detect a failure is not strictly bounded, leading to non-deterministic detection time. Furthermore, the gossip methods have the disadvantage of generating a large number of redundant detection and gossip messages that decrease the scalability.
+Research in the areas of failure detection has been extensively studied. Chandra and Toueg~\cite{Chandra96} proposed the first unreliable failure detector oracle that could solve consensus and atomic broadcast problems for reliable distributed systems. Many implementations~\cite{Wei02, Larrea00, Kawazoe97} based on this oracle are using all-to-all heartbeat patterns where every node periodically communicates with all other nodes. However, these implementations, due to the communication patterns employed, are inherently not scalable starting as early as systems with hundreds of nodes. An optimized version, the gossip-style protocol~\cite{van98, Ranganathan01, Gupta01, Abhinandan02}, in which nodes pick at random peers to monitor and exchange information with, is another popular approach for failure detection in unstructured systems where the group membership is not a-priori established, or it dynamically and rapidly varies. Unfortunately, gossip methods perform poorly with large numbers of simultaneous node crashes, and, given the random nature of the communication pattern, the time to detect a failure is not strictly bounded, leading to non-deterministic detection time. Furthermore, the gossip methods have the disadvantage of generating a large number of redundant detection and gossip messages that decrease the scalability.
 
-Recently, we proposed a deterministic failure detectors for HPC systems based on network overlays~\cite{George16}, where each participant only observes a single peer following a recoverable ring topology.
-The simulation results demonstrate the efficient of the algorithm, however the implementation in \ulfm being done at the application level can only detect \mpi process failures. The
+Recently, we proposed a deterministic failure detector for HPC systems based on network overlays~\cite{George16}, where each participant only observes a single peer following a recoverable ring topology.
+The simulation results demonstrate the efficiency of the algorithm; however, the implementation in \ulfm being done at the application level can only detect \mpi process failures. The
 implementation employs multiple optimization and shortcuts that are possible because it is
-tightly and deeply integrated within the \mpi library, and therefore inherit some of its highly optimized communication primitives. For example, limitations on the
+tightly and deeply integrated within the \mpi library, and therefore inherits some of its highly optimized communication primitives. For example, limitations on the
 accuracy of the detector when the \mpi implementation is not actively communicating
 are circumvented by using Remote Memory Access primitives (RMA) which are
 initially provided for supporting the \mpi communication; the operational
@@ -387,20 +387,20 @@ and, in manycore systems, every \mpi process
 is observed and reported as an independent entity, which can impart that the
 overhead scales with the number of \mpi processes rather than the number of
 compute nodes. This resilient \prrte work
-exceed these limitations and has the capability to detect both process and
+avoids these limitations and has the capability to detect both process and
 node failures with a smaller observation topology, and is not limited to
 MPI application only.
 
 \subsection{Reliable Broadcast}
 %Notable efforts have been made for fault-tolerant communication based on logical network typologies~\cite{Luo18}.
-Gossip-style~\cite{infection-style,Abhinandan02} dissemination mechanism emulate the spread of gossip in society. Initially, members are inactive, when a rumor in planted (failure message) at one member, it becomes active as infected. This member will randomly ping others to spread the infection. Anyone who receives the rumor becomes active and shares the rumor in the same way. When an active member pings an already active member, this active member loses interest in sharing the rumor and becomes inactive. The Gossip-style is resilient to process failure and spreads exponentially fast in the group. 
+Gossip-style~\cite{infection-style,Abhinandan02} dissemination mechanisms emulate the spread of gossip in society. Initially, members are inactive, then when a rumor is planted (failure message) at one member, it becomes active as infected \todo{Do you mean it becomes active as it spreads? Yes}. This member will randomly ping others to spread the infection. Anyone who receives the rumor becomes active and shares the rumor in the same way. When an active member pings an already active member, this active member loses interest in sharing the rumor and becomes inactive. The Gossip-style is resilient to process failure and spreads exponentially quickly in the group. 
 
-Regarding deterministic reliable broadcast algorithms, a fully connected topology can handle large number of failures but it cannot be scalable since it sends too many messages. At the other extreme, a mendable ring topology is good for scalability
-but offers a poor propagation latency and suffers in scenarios with multiple node failures.
+Regarding deterministic reliable broadcast algorithms, a fully connected topology can handle a large number of failures but it cannot be scalable since it sends too many messages. At the other extreme, a mendable ring topology is good for scalability
+but offers poor propagation latency and suffers in scenarios with multiple node failures.
 Circulant k-nomial graphs~\cite{Angskun07, Pava11} provide a balance between the previous two methods.
 Among circulant graphs, the binomial graph (BMG) has the lowest diameter, which minimizes the number of hops for a dissemination to reach all
 processes. At the same time, binomial graphs scale well thanks to a regular, fixed degree graph (each node has the same number of neighbors). In this work
-we expand on these foundational work by integrating elements of the
+we expand on these foundational works by integrating elements of the
 architecture hierarchy to reduce the cost of propagation on typical HPC systems.
 
 %
@@ -434,18 +434,18 @@ node can host runtime daemons and one or more application processes. Daemons
 and processes have a unique identifier (e.g., a rank) that can be used
 to establish communication between any given pair. Messages take an unknown,
 but bounded amount of time to be delivered (i.e., the network is pseudo-synchronous~\cite{Chandra96}).
- The identity and number of daemons and processes participating in the application is known a-priori,
+ The identity and number of daemons and processes participating in the application is known a priori,
 or is established through explicit operations that do not require group
 membership discovery.
 
 \subsection{Failure Model}
 
-We strive to report crash failures, that is, when a compute entity stops emitting
+We strive to report crash failures; that is, when a compute entity stops emitting
 messages unexpectedly and permanently. A crash failure may manifest as
-the ultimate effect of a variety of underlying conditions, for example, an illegal instruction
+the ultimate effect of a variety of underlying conditions---for example, an illegal instruction
 is performed by a process because of a processor overheating, an entire
-node, or cabinet looses power, or a software bug manifests by interrupting
-unexpectedly, or rendering non-responsive some processes. In the context of
+node or cabinet loses power, or a software bug manifests by interrupting
+unexpectedly or rendering some processes non-responsive. In the context of
 this work, we further distinguish between two subtypes of crash failures.
 First, application process failures, which may impact any number of
 hosted application processes without necessarily being concomitant
@@ -497,7 +497,7 @@ and node failures on the other hand.
 \end{figure}
 
 To detect process failures that are not congruent with a node failure, we
-leverage on the direct observation of application processes that can be
+leverage the direct observation of application processes that can be
 performed by the node-local daemon. Since a process failure does not
 impact the execution of the runtime daemon managing that process, that
 daemon can execute localized observation strategies which are dependent
