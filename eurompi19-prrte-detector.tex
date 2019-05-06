@@ -732,7 +732,9 @@ detection timeout $\eta$; (2) Verify that no failure is detected when there is n
  (\imb point-to-point and collective tests), all tests succeed until the
   heartbeat period lower than 20 milliseconds. To further investigate,
   we measured that the heartbeat message is neither delayed by communication
-  congestion nor compute pressure but we found out that daemons need some time to launch the processes when starting the job which causes false detection during job startup. \todo{remove the heartbeat accuracy, change timeout accuracy to 'false positive present'; for later: do not report finalize errors}
+  congestion nor compute pressure but we found out that daemons need some time to launch the processes when starting the job which causes false detection during job startup.
+  
+  % \todo{remove the heartbeat accuracy, change timeout accuracy to 'false positive present'; for later: do not report finalize errors}
 
   %\item No failure is injected and node missed its heartbeat sending deadline. With a reasonable timeout value, all daemons can send heartbeats successfully with $ \delta $ as low as 0.1 millisecond.
 %From all above we can see that the granularity of timeout is 40 milliseconds limited by the latency for daemons to launch the application processes. And the granularity of heartbeat period is 0.1 millisecond.
