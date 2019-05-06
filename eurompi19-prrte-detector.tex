@@ -891,7 +891,20 @@ correlated chance of failure sequentially (e.g., avoid choosing predecessor and 
 
 
 \section{Conclusion}\label{sec:conclusion}
-Failure detection and propagation is a critical service for resilient systems. In this work, we present an efficient failure detection and propagation design and implementation for distributed systems integrated within \pmix\_\prrte. The process and node failure detection strategy presented in this work depends on heartbeats and timeouts, and communication bound to provide a reliable solution that works at scale without constraints of the kind of faults. Our design and implementation takes into account of the complicate relationship and trade-off between system overhead, detection efficient and risks: low detection time requires frequent emission of heartbeats messages, increasing the system noise and the risk of false positive. Our solution addresses those concerns and capable of tolerating high frequency node and process failures with the help of high performance reliable broadcast notification can quickly disseminate the fault information, our results from different machines and benchmarks compared to two other related work shows that \ourwork significantly advances the state of art with respect to efficient detection and propagation of failures. This runtime level failure tolerate implementation breaks the limit of running \mpi  application only and support all \pmix-based application which is more extensive than \mpi scope.   
+Failure detection and propagation is a critical service for resilient systems. In this work, we present an efficient failure detection and propagation design and implementation for distributed systems. 
+The algorithm is integrated within \prrte so that the detection service 
+can be employed by a wide variety of clients through a well specified and 
+popular interface (\pmix). The process and node failure detection strategy presented in this work depends on heartbeats and timeouts. Unlike gossip-based algorithms
+it enjoys deterministic communication bounds and overhead to provide a reliable solution that works at scale,
+yet it doesn't require an over-specialization detrimental to applicability. 
+Our design and implementation takes into account of the intricate relationship and trade-offs between system overhead, detection efficiency, and risks: low detection time requires frequent emission of heartbeats messages, increasing the system noise and the risk of false positive. Our solution addresses those concerns and is capable of tolerating high frequency of node and process failures with a low-degree
+topology that scales with the number of nodes rather than the number of 
+managed processes. Our results from different machines and benchmarks 
+compared to related works shows that \ourwork outperforms non-HPC solutions 
+significantly, and is competitive with specialized HPC solutions that can 
+manage only \mpi applications. Thus, this runtime level failure detectors 
+opens the gate for efficient management of failures for an emerging field 
+of libraries, programming models, and runtime systems operating on large scale systems.  
 
 
 %\section{Acknowledgments}
