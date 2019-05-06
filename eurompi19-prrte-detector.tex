@@ -541,11 +541,11 @@ failure of \textbf{\textit{d}}.
 \end{figure}
 
 When the observer detects that its predecessor has failed, it undergoes two major steps.
-First it needs to reconnect the ring topology, as illustrated in Figure~\ref{fig:ReconnectRing}. Daemon \textbf{\textit{o}} tries to
-observe the precedessor of \textbf{\textit{d}} (the daemon it previously observed).
-It sets \textbf{\textit{d-1}} as its new predecessor and then send a request to \textbf{\textit{d-1}} to initiate heartbeat emission. Of course,
+First, it needs to reconnect the ring topology, as illustrated in Figure~\ref{fig:ReconnectRing}. Daemon \textbf{\textit{o}} tries to
+observe the predecessor of \textbf{\textit{d}} (the daemon it previously observed).
+It sets \textbf{\textit{d-1}} as its new predecessor and then sends a request to \textbf{\textit{d-1}} to initiate heartbeat emission. Of course,
 it is possible that \textbf{\textit{d-1}} has also failed, which will be detected at the next timeout. In order
-to speedup the reconnection process, \textbf{\textit{o}} may skip over
+to speed up the reconnection process, \textbf{\textit{o}} may skip over
 daemons that have already been reported as failed in the past (i.e., daemons
 whose identifier is in $Reported_o$ because they have been observed and reported
 by another daemon). Each time a daemon is marked as failed, all the processes it
@@ -557,12 +557,11 @@ managed are also marked as failed. After we get the list of all those affected p
 Considering that the observation topology is static, it does not provide
 automatic or probabilistic dissemination of fault information. Thus, to complete
 the reporting of failures, failures identified by an observer must be broadcasted
-to inform all other daemons and application processes. An important aspect,
-when considering a runtime that tolerate node/daemon failures, it that the
+to inform all other daemons and application processes. An important aspect
+when considering a runtime that tolerates node/daemon failures is that the
 propagation algorithm itself needs to be resilient to failures.
 
-For broadcasting fault information between daemons, we use the scalable and fault
-tolerant BMG topology~\cite{Angskun07}. BMG has good fault-tolerant properties such
+For broadcasting fault information between daemons, we use the scalable and fault-tolerant BMG topology~\cite{Angskun07}. BMG has good fault-tolerant properties such
 as optimal connectivity, low fault-diameter, strongly resilient and good optimal
 probability in failure cases. Note that unlike prior works, the propagation
 algorithm~\ref{fig:2lvlbmg} is not a flat BMG when application processes are considered, but consists of an
@@ -626,11 +625,11 @@ represented.
  \item In this example, daemon 0 is the initial reporter and its observer component starts the propagation by calling the \textsc{StartPropagation} reliable broadcast algorithm.
  \item This prepares a broadcast message containing the identifier of the
  failed process (or daemon), and the associated application processes, when relevant.
- daemon 0 issues the message to its neighbors in the BMG topology.
+ Daemon 0 issues the message to its neighbors in the BMG topology.
  \item Upon receiving a broadcast message, a daemon considers if the message needs
  to be forwarded. If the message carries a list of processes that are already known to
- have failed, then, the daemon already triggered the propagation, and no further
- action is needed. Thus every daemon forwards the message once, insuring that
+ have failed, then the daemon already triggered the propagation, and no further
+ action is needed. Thus every daemon forwards the message once, ensuring that
  all edges of the BMG will carry exactly one message per detection.
 \end{enumerate}
 
@@ -650,7 +649,7 @@ represented.
   \end{minipage}
 \end{figure*}
 
-The propagation message issued at each daemon are ordered so that the
+The propagation message issued at each daemon is ordered so that the
 messages that are part of a binomial spanning tree rooted at the emitter
 are sent first. Figure \ref{fig:reorder_span} shows the a spanning tree
 for a broadcast originating from node 0; the extra messages (5 and 6, colored
