@@ -740,44 +740,53 @@ Overhead = \frac{( {\ourwork - \prrte} )}{\prrte}
  heartbeat period. 
 
 \subsection{Comparison with SWIM}
-This section compares failure detection latency and scalability of \ourwork with SWIM~\cite{Abhinandan02} --a random-probing based failure detection protocol and gossip membership updates via network multi-cast. To decrease 
-the chance of false detection, SWIM uses a suspicion mechanism. When a node does not reply direct or indirect probing in time, the initiator then judges this node as suspicious instead of failure, then broadcasts
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\linewidth]{HB_prrte_swim.pdf}
-  \caption{Detection and Propagation delay compared to SWIM using Go-Memberlist}
-  \label{fig:hb_prrte_swim}
-\end{figure}
-this suspicious information within the subgroup, if any node in the subgroup receives an acknowledge before the timeout, it will unmask the suspected node as alive, otherwise declare a failure. In order to improve the efficiency of multi-cast, SWIM uses an infection-style dissemination mechanism where information spreads in a manner analogous to the spread of gossip in society, or epidemic in the general population.
-
-Figure \ref{fig:hb_prrte_swim} compares single node failure detection and propagation latency between \ourwork and SWIM. For the SWIM implementation, we use Go-Memberlist (\#a8f83c6). We used a go-\mpi binding to replicate 
-our detection benchmark with SWIM. SWIM reports failure through Go-Memberlist callback functions. We could run Memberlist tests only up to 256 members, after that limit, some nodes exceed the maximum connection backlog 
-set in the operating system for \texttt{listen} operations on TCP sockets, causing an application crash.
-
-For \ourwork,
-% we also synchronize with barrier, and then inject node failure, detection and notification latency is collected on each process. 
-we run all tests up to 768 processes on 64 nodes. We run experiments with different heartbeat periods setting, for all tests we set $ \eta = \delta * 2 $. We can clearly see that for \ourwork the detection latency is between ($\delta$, $2*\delta$), and the receive of notification happens immediately after the detection which demonstrate the efficiency of our propagation algorithm ( variation comes from the randomness of when the node failure happened). However for SWIM even with smaller number of processes the latency is still more than $10*\delta$.
-
+This section compares the failure detection latency and scalability of \ourwork with SWIM~\cite{Abhinandan02} --a random-probing based failure detection protocol and gossip membership updates. To decrease 
+the chance of false detection, SWIM uses a suspicion mechanism. When a node does not reply to a probing in time, the initiator then judges this node as suspicious (but not yet failed). It then broadcasts
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{Scale_prrte_swim.pdf}
-  \caption{Detection latency scalability compared to SWIM using Go-Memberlist}
+  \caption{Detection latency comparison between \ourwork and SWIM with increasing number of processes ($\eta=0.5s)$}
   \label{fig:scale_swim}
 \end{figure}
+this suspicion information within a subgroup, if any node in the subgroup receives an acknowledge before the timeout, it will declare the suspected node as alive, otherwise declare a failure. In order to improve the efficiency of multi-cast, SWIM uses an infection-style dissemination mechanism where information spreads in a manner analogous to the spread of gossip in society, or epidemic in the general population.
+For the SWIM implementation, we use Go-Memberlist (\#a8f83c6). We used a go-\mpi interface 
+to replicate our \mpi detection benchmark with SWIM.
 
-Figure \ref{fig:scale_swim} compares the scalability of the two detectors regard to the number of deployed processes with fixed  $\eta = 0.5s$, $\delta = 1s$. 
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{HB_prrte_swim.pdf}
+  \caption{Detection and Propagation delay comparison betwern \ourwork and SWIM with varying heartbeat periods}
+  \label{fig:hb_prrte_swim}
+\end{figure}
+
+
+Figure \ref{fig:scale_swim} compares the scalability of the two detectors with regard to the number of deployed processes with $\eta = 0.5s$, $\delta = 1s$. 
 %For smaller number of processes is stabilizing in approximately 0.75s, while the stabilization delay of SWIM is 5s. 
+We could run SWIM tests only up to 256 members, after that limit, some nodes exceed the maximum connection backlog 
+set in the operating system for \texttt{listen} operations on TCP sockets, causing an application crash during 
+initialization. For \ourwork,
+% we also synchronize with barrier, and then inject node failure, detection and notification latency is collected on each process. 
+we run all tests up to 768 processes on 64 nodes. 
+%
 As the number of processes increases latency of \ourwork remains almost the same. 
-For 4K processes, the stabilization of \ourwork is still beyond the range of heart period and timeout.
-SWIM latency shows a linear increase when the number of processes increase which will be the bottleneck of scaling up (with the assumption it can solve the maximum connection requests limit). 
+For 4K processes, the stabilization of \ourwork is still below the range of the heartbeat period and timeout.
+SWIM latency shows a linear increase when the number of processes increase which will be the bottleneck when scaling up (assuming the maximum connection requests limit issue can be solved). 
 
+Figure \ref{fig:hb_prrte_swim} compares single node failure detection and propagation latency between \ourwork and SWIM\todo{how many nodes/processes in that experiment?}
+with different heartbeat periods setting. For all tests we set $ \eta = \delta * 2 $. We can clearly see that for \ourwork the detection latency is between ($\delta$, $2*\delta$), and the last notification happens very soon after the detection, which demonstrate the efficiency of our propagation algorithm (variability in the results comes from the randomness of when the node failure happened with respect to the heartbeat period). However, for SWIM, even with smaller number of processes the latency is still more than $10*\delta$, because after the initial timeout declares a suspicion, the gossip propocol and confirmation mechanism have to be executed 
+before the failure is reported.
 
 \subsection{Comparison with \ulfm for Process Failures}
-This section compares \ourwork with our previous work \ulfm, the \ulfm implementation also has two main components: process level detection ring, and propagation overlay with all launched processes. The detection ring is built at Byte Transfer Layer (BTL) level - which provides the portable low-level transport abstraction in \ompi. \ulfm's current implementation provides several mechanisms to ensure the timely activation and delivery of heartbeats:
+This section compares \ourwork with the other extreme on the spectrum of 
+general versus specialized; \ulfm. The \ulfm implementation also has two
+ main components: process level detection ring, and propagation overlay with all launched processes. The detection ring is built at Byte Transfer Layer (BTL) level - which provides the portable low-level transport abstraction in \ompi. \ulfm's current implementation provides several mechanisms to ensure the timely activation and delivery of heartbeats:
 \begin{enumerate}
-  \item Using a separate, library internal thread to send the heartbeats in order to be separated from the application's communication, this also avoid the possible heartbeat delay of compute intensive application. For receiver it need to poll BTL engine to check the aliveness of its successor. 
-  \item Using RDMA put to raise a flag in the receiver's registered memory, by using the hardware accelerated put operations solves the problem of active polling BTL engine. 
-  \item Using in-band detection for process to report unreachable error directly to the propagation component.
+  \item Using a separate, library internal thread to send the heartbeats in order to be separated from the application's communication. This also mitigates the drift in heartbeat 
+  emission dates (which would cause false positive detection) in compute intensive application. 
+  For receiver it need to poll BTL engine to check the aliveness of its successor. 
+  \item Using RDMA put to raise a flag in the receiver's registered memory. by using the hardware accelerated put operations, \ulfm avoids the problem of active polling BTL engine. 
+  \item Using in-band detection directly from the high performance network 
+  fabric to report unreachable error directly to the propagation component.
 \end{enumerate}
 
 \begin{figure}[h]
@@ -787,9 +796,22 @@ This section compares \ourwork with our previous work \ulfm, the \ulfm implement
   \label{fig:proc_failure_nacl}
 \end{figure}
 
-The propagation overlay is also built at BTL level, the small message size of propagation information contains a callback function index which ensures that the received process states update information can be analyzed by upon reception. This method provides independence from the \mpi semantic (including matching), however the overlay is constructed with all processes, which means that all participated processes need to propagate/forward the error information, the lower bound of reaching any process is bounded by $\log_2({Number\ of\ Processes})$.  
+The propagation overlay is also built at the BTL level. Reliable broadcast 
+messages are sent using the same active message infrastructure employed to 
+deliver short \mpi messages and matching fragments (however, a different 
+tag is employed to avoid disrupting the \mpi matching). Because the 
+propagation happens at the application process level, all \mpi processes 
+are part of the reliable broadcast algorithm, thus the lower bound for reaching 
+all processes is $\log_2({Number\ of\ Processes})$.  
 
-However, \ourwork process failure detection is implemented as the daemons are monitoring the lifeline of all local processes, this mechanism doesn't bring any pressure to the application' communication resources, also doesn't need RDMA hardware accelerate support. About the propagation strategy of \ourwork, the broadcast overlay is built at daemon level which highly decreases the number of participates, with less participates the total messages transferred and forwarded are much less than the case of \ulfm, the lower bound is $\log_2({Number\ of\ Nodes})$. With the development of more powerful multi-core nodes, the benefit of node level propagation will be much more significant.
+In contrast, \ourwork process failure detection is implemented at the daemon
+level. This mechanism doesn't pressure the application communication resources, 
+and can progress the processing of heartbeats without the need for 
+RDMA hardware. The broadcast overlay in \ourwork is built at the daemon
+level which decreases the number of participants to the number of nodes, a potentially 
+large saving in manycore systems. This helps reduce 
+the total messages transferred and forwarded compared to \ulfm, and the 
+ the lower bound for a full propagation is $\log_2({Number\ of\ Nodes})$.
 
 \begin{figure}[h]
   \centering
@@ -798,7 +820,9 @@ However, \ourwork process failure detection is implemented as the daemons are mo
   \label{fig:proc_failure_cori}
 \end{figure}
 
-Figure \ref{fig:proc_failure_nacl} compares the latency of process failure detection and propagation of \ulfm and \ourwork. The sensitivity of \ulfm heartbeat without false detection is 10 milliseconds, but we want to compare the best performance from \ulfm using high speed in-band detection which is faster than using the lowest heartbeat period. For \ourwork, the daemons are in charge of detecting process failure. \ourwork uses TCP to broadcast among daemons, daemons use \pmix's notification method to distribute the error information to all hosted processes. Experiments are conducted on NaCl from 2 nodes to 64 nodes using all cores on each node, all processes are equalled mapped to node and bind to core, by doing this \ulfm can use the in-band shared communication for detection and propagation. We can see that our implementation gains almost the same performance as \ulfm but highly reduced the complexity, the detection and propagation time is less than 5 milliseconds using TCP. For \ulfm the detection and propagation delay increase from 2 milliseconds to 3 milliseconds as the processes number increases with number of nodes using infiniband. For both \ourwork and \ulfm the latency increase trend fit to $ a*\log_2(N) + b $, which can be easily scale up to hundreds of thousands of nodes. Similar result in figure \ref{fig:proc_failure_cori} from Cori (with more processes on each node) strengthens the efficiency our implementation, we can see that with 4K processes the detection and propagation latency is about 10 milliseconds. Same results from two different machines demonstrate the efficiency of our broadcast and propagation algorithm.  
+Figure \ref{fig:proc_failure_nacl} compares the latency of process failure detection and propagation of \ulfm and \ourwork. The sensitivity of \ulfm heartbeat without false detection is 10 milliseconds, but we want to compare the best performance from \ulfm using high speed in-band detection which is faster than using the lowest heartbeat period. For \ourwork, the daemons are in charge of detecting process failure. \ourwork uses TCP to broadcast among daemons, daemons use \pmix's notification method to distribute the error information to all hosted processes. Experiments are conducted on NaCl from 2 nodes to 64 nodes using all cores on each node. 
+The process mapping results in \ulfm  using the in-band shared communication for detection and propagation\todo{did not understand that}. We can see that our implementation enjoys the same performance as \ulfm but highly reduced the complexity. The detection and propagation time is less than 5 milliseconds despite using TCP. For \ulfm the detection and propagation delay increases from 2 milliseconds to 3 milliseconds as the  number of processes increase. For both \ourwork and \ulfm the latency increase trend fit $ a*\log_2(N) + b $, which can be easily scale up to hundreds of thousands of nodes, but for \ulfm 
+the trend follows the number of processes rather than the nunber of nodes. Figure~\ref{fig:proc_failure_cori} scales the evaluation of \ourwork on the larger Cori system (with more processes per node). We can see that with 4K processes the detection and propagation latency is about 10 milliseconds, and the scalability trend remains logarithmic with the number of nodes (not processes).  
 
 \subsection{Node Failures Detection}
 Future more, we want to extend the performance of our heartbeat detector  for node failure detection and propagation from  three perspectives. 
