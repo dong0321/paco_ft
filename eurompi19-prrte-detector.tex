@@ -623,19 +623,20 @@ any node in the BMG can always be reached within $O(log_2 N)$ steps (given
 that less than $2 log_2 N$ failures strike, with more failures,
 statistically rare scenarios can degenerate in a linear propagation time).
 The advantages of this new broadcast algorithm are:
-\begin{enumerate}
+\begin{compactenum}
   \item Sequence ordering brings higher parallelism: messages to node \{10, 11, 7\} could arrive from any redundant forwarding path rather than only from the 0-rooted spanning tree. This may decrease the apparent height of the tree, the average latency and thus reduce the average notification latency.
   \item Limited network degree: the maximum degree for every daemon is logarithmic, which avoids hot-spot effects that are common in randomized gossip algorithms.
   \item Deterministic number of messages: the total number of messages is
   exactly the number of links in the BMG topology, that is, $O(N log_2 N)$
   messages overall. In contrast, random march gossip algorithms have to
-  balance the overall
+  balance between the probability of not reaching every participant and 
+  the number of messages.
   \item Number of heartbeats and propagation messages is dependent Upon
   the number of nodes, not the number of managed application processes.
   In manycore systems, this has the potential to significantly reduce the
   effective cost of the algorithm when compared to a flat topology between
   application processes.
-\end{enumerate}
+\end{compactenum}
 
 \begin{figure}[h]
   \centering
