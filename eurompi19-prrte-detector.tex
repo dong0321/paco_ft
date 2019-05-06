@@ -305,7 +305,7 @@ Many projects have proposed fault management techniques either automatic or driv
 \textbf{EREINIT:} \todo{this reads as related work} a global-restart failure recovery model by allowing a fast re-initialization of \mpi. This work is a co-design between MVAPICH and Slurm resource manager to add process and node failure detection and propagation features. The detection is using Slurm's health check mechanism by sending ping messages to nodes, propagation is implemented in a manner of forcing the controller to individually send the notification to children of the failed nodes. However this work is highly depends on one particular resource manager Slurm, also it use a inefficient propagation method. \ourwork work can exceed the bottleneck of EREINIT to run on machines with different resource managers(Slurm, PBS, LSF, TORQUE, etc). Also with our efficient propagation algorithm the notification will be much faster advances the stabilization and recovery time of EREINIT.
 
 \textbf{DataSpaces and FTI} \todo{add text}
- Fault Tolerance Interface (FTI) library provides fast and efficient multilevel check-pointing functionality. It 
+ Fault Tolerance Interface (FTI) library provides fast and efficient multilevel check-pointing functionality. It is an application level checkpointing 
 \section{Related Work}\label{sec:related}
 In this section, we survey related work on large scale distributed runtime environments, different kinds of heartbeat based and random gossip based failure detectors, together with reliable broadcast algorithms to propagate fault information.
 
