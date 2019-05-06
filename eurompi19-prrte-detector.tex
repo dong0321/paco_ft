@@ -786,8 +786,8 @@ As the number of processes increases latency of \ourwork remains almost the same
 For 4K processes, the stabilization of \ourwork is still below the range of the heartbeat period and timeout.
 SWIM latency shows a linear increase when the number of processes increase which will be the bottleneck when scaling up (assuming the maximum connection requests limit issue can be solved). 
 
-Figure \ref{fig:hb_prrte_swim} compares single node failure detection and propagation latency between \ourwork and SWIM\todo{how many nodes/processes in that experiment?}
-with different heartbeat periods setting. For all tests we set $ \eta = \delta * 2 $. We can clearly see that for \ourwork the detection latency is between ($\delta$, $2*\delta$), and the last notification happens very soon after the detection, which demonstrate the efficiency of our propagation algorithm (variability in the results comes from the randomness of when the node failure happened with respect to the heartbeat period). However, for SWIM, even with smaller number of processes the latency is still more than $10*\delta$, because after the initial timeout declares a suspicion, the gossip propocol and confirmation mechanism have to be executed 
+Figure~\ref{fig:hb_prrte_swim} compares single node failure detection and propagation latency between \ourwork and SWIM\todo{how many nodes/processes in that experiment?}
+with different heartbeat periods setting. For all tests we set $ \eta = \delta * 2 $. We can clearly see that for \ourwork the detection latency is between ($\delta$, $2*\delta$), and the last notification happens very soon after the detection, which demonstrate the efficiency of our propagation algorithm (variability in the results comes from the randomness of when the node failure happened with respect to the heartbeat period). However, for SWIM, even with smaller number of processes the latency is still more than $10*\delta$, because after the initial timeout declares a suspicion, the gossip protocol and confirmation mechanism have to be executed 
 before the failure is reported.
 
 \subsection{Comparison with \ulfm for Process Failures}
@@ -834,17 +834,16 @@ the total messages transferred and forwarded compared to \ulfm, and the
   \label{fig:proc_failure_cori}
 \end{figure}
 
-Figure \ref{fig:proc_failure_nacl} compares the latency of process failure detection and propagation of \ulfm and \ourwork. The sensitivity of \ulfm heartbeat without false detection is 10 milliseconds, but we want to compare the best performance from \ulfm using high speed in-band detection which is faster than using the lowest heartbeat period. For \ourwork, the daemons are in charge of detecting process failure. \ourwork uses TCP to broadcast among daemons, daemons use \pmix's notification method to distribute the error information to all hosted processes. Experiments are conducted on NaCl from 2 nodes to 64 nodes using all cores on each node. 
+Figure~\ref{fig:proc_failure_nacl} compares the latency of process failure detection and propagation of \ulfm and \ourwork. The sensitivity of \ulfm heartbeat without false detection is 10 milliseconds, but we want to compare the best performance from \ulfm using high speed in-band detection which is faster than using the lowest heartbeat period. For \ourwork, the daemons are in charge of detecting process failure. \ourwork uses TCP to broadcast among daemons, daemons use \pmix's notification method to distribute the error information to all hosted processes. Experiments are conducted on NaCl from 2 nodes to 64 nodes using all cores on each node. 
 The process mapping results in \ulfm  using the in-band shared communication for detection and propagation\todo{did not understand that}. We can see that our implementation enjoys the same performance as \ulfm but highly reduced the complexity. The detection and propagation time is less than 5 milliseconds despite using TCP. For \ulfm the detection and propagation delay increases from 2 milliseconds to 3 milliseconds as the  number of processes increase. For both \ourwork and \ulfm the latency increase trend fit $ a*\log_2(N) + b $, which can be easily scale up to hundreds of thousands of nodes, but for \ulfm 
 the trend follows the number of processes rather than the nunber of nodes. Figure~\ref{fig:proc_failure_cori} scales the evaluation of \ourwork on the larger Cori system (with more processes per node). We can see that with 4K processes the detection and propagation latency is about 10 milliseconds, and the scalability trend remains logarithmic with the number of nodes (not processes).  
 
 \subsection{Node Failures Detection}
-Future more, we want to extend the performance of our heartbeat detector  for node failure detection and propagation from  three perspectives. 
-\begin{enumerate}
-  \item Latency of detection time and propagation time with different heartbeat periods.
-  \item The detection and propagation efficiency using fixed heartbeat and timeout period but with different number of nodes.
-  \item Detection latency of multiple node failures.
-\end{enumerate}
+We now compare the detection latency for full-node failures. In \ourwork
+node failures result in the loss of a daemon, for \ulfm they result in 
+the loss of multiple consecutive processes in the ring topology. In 
+both cases, the node failure is detected by the absence of heartbeats
+before the timeout expiration.
 
 \begin{figure}[h]
   \centering
@@ -853,9 +852,13 @@ Future more, we want to extend the performance of our heartbeat detector  for no
   \label{fig:node_failure_hb}
 \end{figure}
 
-Figure \ref{fig:node_failure_hb} presents the behavior observed when injecting single daemon failure under different heartbeat period setting. We conducted the experiments on 64 nodes with 764 processes. For \ourwork after synchronizing, we inject a node crash by choosing a process to kill its host using the parent process identifier. However, \ulfm doesn't have the capability of detecting node failure, we simulate "node crash" by kill the last process on that node. With the process ring detector this particular process failure will be detected by its observer on another node, this behavior is the same as \ourwork's node to detect node failure. Also we assume that the time different between the daemon failure and process failure is trivial which is confirmed later in the experiment. For the heartbeat period setting we start at 30 milliseconds to 0.5 second for both \ourwork and \ulfm. For all heartbeat periods we set $ \eta = \delta * 2 $. From the figure we can see that the latency for all cases are bound by $ (\delta,\eta) $.
+Figure~\ref{fig:node_failure_hb} presents the behavior observed when injecting single daemon failure under different heartbeat period setting. We conducted the experiments on 64 nodes with 764 processes. For \ourwork after synchronizing, we inject a node crash by ordering a process to kill its host daemon. For \ulfm, 
+all application processes on the target node suicide as a group. 
+%However, \ulfm doesn't have the capability of detecting node failure, we simulate "node crash" by kill the last process on that node. With the process ring detector this particular process failure will be detected by its observer on another node, this behavior is the same as \ourwork's node to detect node failure. 
+%Also we assume that the time different between the daemon failure and process failure is trivial which is confirmed later in the experiment. 
+For the heartbeat period setting we start at 30 milliseconds to 0.5 second for both \ourwork and \ulfm. For all heartbeat periods we set $ \eta = \delta * 2 $. From the figure we can see that the detection latency in all cases lands in the interval $\[\delta,\eta\]$.
 
-Figure \ref{fig:daemon_failure_diffnode} shows single node failure detection and propagation performance with fixed heartbeat period $ \delta = 0.5s $ tested with different number of nodes. After a node crash, all processes hosted on this node will be affected, the observer node fetches and packs the information of all affected processes information then distribute the packed message.
+Figure \ref{fig:daemon_failure_diffnode} shows single node failure detection and propagation performance with a fixed heartbeat period $ \delta = 0.5s $ and an increasing total number of nodes. After a node crash, all processes hosted on this node will be affected, the observer node fetches and packs the information of all affected processes information then distribute the packed message.
 \textbf{
 \begin{figure}[h]
   \centering
@@ -863,9 +866,21 @@ Figure \ref{fig:daemon_failure_diffnode} shows single node failure detection and
   \caption{Single Daemon Failure Detection and Propagation delay with different number of nodes}
   \label{fig:daemon_failure_diffnode}
 \end{figure}}
+%
+\todo{the following paragraph seem to not describe what's on the graph anymore}
 However, for \ulfm all affected processes need be detected by their observers independently, this will suffer from the collisions on the reliable broadcast propagation. For the worst case detection, all affected processes are adjacent in the observation ring, for each affected process the ring need to re-connect and update, causes a linear increase of $ \eta $ to the detection latency for every process failure. From the figure see that \ourwork can detect and propagate a node failure between (0.5s, 1s) for all tested number of node. 
+%
 
-The last experiment (figure \ref{fig:multi_daemon_failure_nacl}) investigates the effect of multiple node failures happened in the system. The test setting is the same as single node failure case, except we inject multiple node failures from processes. For the first scenario, injecting failures to random nodes, the detection and propagation are independently conducted by different observer nodes which is a parallel execution. And the results in the figure show that the latency is a constant value which is barely affected by the number node failures. The worst scenario is to inject failures to contiguous nodes, all failures are detected by a single observer (switches to observing the predecessor of the detected failed node). This shows a serial execution. For each node failure will cause an extra delay of $ \eta $ to the detection latency of the following node failures. From the figure we can see the result matches a linear increase. This extrapolate that from fault tolerance perspective the system will be more stable and reliable by building the detection ring in a arbitrary layout of nodes, avoid choosing predecessor and successor from the same cabinet.  
+The last experiment, presented in Figure~\ref{fig:multi_daemon_failure_nacl}), investigates the effect of multiple concurrent node failures. The experiment is similar to the single node failure case, except for the 
+number of processes that inject failures. In the first scenario, we inject failures at random nodes. 
+In this case, the detection and propagation are independently conducted by different observer nodes and neatly overlap resulting in a marginal increase in the overall detection latency for 
+reporting all failures. We also consider the worst case scenario, in which failures strike 
+contiguous nodes. In this case, the daemon that detects the first failure 
+undergoes the ring-mending operation, which entails a linear number of timeouts
+before all failures are reported. This indicates that, from a fault 
+tolerance perspective, the ordering of 
+daemons on the detection ring should avoid setting nodes that have a 
+correlated chance of failure sequentially (e.g., avoid choosing predecessor and successor from the same cabinet).
 
 \begin{figure}[h]
   \centering
