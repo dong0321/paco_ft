@@ -669,15 +669,24 @@ While a full depiction of the architecture and feature set of \prrte is out of t
 \prrte is based on a Modular Component Architecture (MCA) which permits easily extending or substituting the core subsystem with experimental features.
 As shown in in figure~\ref{fig:prrte}, within this architecture, each of the major subsystems is defined as an MCA framework, with a well-defined interface, and multiple components implementing that framework can coexist. 
 
-We added three new components to \prrte
-\todo{WIP}
-...
-The reliable broadcast feature is implemented in group communication and propagation component.
+We added two new frameworks and four components to \prrte daemons. The \texttt{proc\_failure}
+component is in charge of detecting the failure of locally hosted processes (using 
+SIGCHLD signals from the operating system). The \texttt{BMG} components 
+implements a broadcast algorithm in a reliable way; to be noted, this component 
+abides by the normal interface for a daemon broadcast, meaning that it is not 
+limited to reliably broadcast fault information. The \texttt{detector} 
+component emits heartbeats and monitors timeouts, and last, the \texttt{error\_ppg}
+components prepares the content of the reliable broadcast messages (i.e., the list 
+of failed processes).
 
-\todo{talk about 'OBTAIN HOSTED(i)'}
-
-
-
+An important aspect of the propagate framework is that, for node failures, 
+only the daemon that initiates the propagation needs to obtain the list of processes 
+hosted  by the failed daemon (line 5 of procedure \textsc{StartPropagation} in Algorithm~\ref{fig:2lvlbmg}).
+Since only one process initiates a propagation, this information is obtained
+ only once (using \pmix key-value store operations) and does not need to 
+ be replicated during initiation (memory overhead) or fetch on-demand from 
+ a large number of daemons (network hot-spot).
+ 
 \begin{figure*}[h]
 \centering
 \begin{minipage}{.37\textwidth}
