@@ -337,12 +337,12 @@ checkpointing functionality. Its interface lets users decide what data need to b
 checkpointing routine then saves the marked data into a hierarchical storage using a variety of 
 encoding and caching strategies, and staging to mitigate the cost of checkpointing.
 DataSpaces is a data sharing framework which supports the complex
-interaction and coordination patterns required by coupled data-intensive application workflows. It has the capability of 
-asynchronous capturing and online indexing of live data from running applications which allows dynamic interactions and in-memory
-data exchanges between applications running separately. DataSpaces can be used to couple different types of parallel applications, including MPI in which case the reliability comes from the underlying MPI library. For both these software, \ourwork can provide the basic service to detect and report  failures of the distributed infrastructure storage service, which, thus far, has not been fault tolerant.
+interaction and coordination patterns required by coupled data-intensive application workflows. 
+It can asynchronously capture and index data  which allows for dynamic interactions and in-memory
+data exchanges between coupled applications. For both these software, \ourwork can provide the basic service to 
+detect and report  failures of the distributed infrastructure storage service, which, thus far, has not been 
+fault tolerant.
 % Data Spaces is not currently reliable, at least not until the data is safely pushed into the file system.
- 
- 
  
 \section{Related Work}\label{sec:related}
 In this section, we survey related work on large-scale distributed runtime environments, different kinds of heartbeat based and random gossip based failure detectors, together with reliable broadcast algorithms to propagate fault information.
