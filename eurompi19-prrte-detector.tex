@@ -455,7 +455,7 @@ messages unexpectedly and permanently. A crash failure may manifest as
 the ultimate effect of a variety of underlying conditions---for example, an illegal instruction
 is performed by a process because of a processor overheating, an entire
 node or cabinet loses power, or a software bug manifests by interrupting
-unexpectedly or rendering some processes non-responsive. In the context of
+unexpectedly or rendering some processes permanently non-responsive. In the context of
 this work, we further distinguish between two subtypes of crash failures.
 First, application process failures, which may impact any number of
 hosted application processes without necessarily being concomitant
@@ -510,7 +510,7 @@ To detect process failures that are not congruent with a node failure, we
 leverage the direct observation of application processes that can be
 performed by the node-local daemon. Since a process failure does not
 impact the execution of the runtime daemon managing that process, that
-daemon can execute localized observation strategies which are dependent
+daemon can execute localized observation operations which are dependent
 upon node-local operating system services. For example, the \orte Daemon
 Local Launch Subsystem (ODLS) monitors SIGCHLD signals to detect discrepancies
 in the core-binding affinity with respect to the user requested policy.
@@ -574,12 +574,12 @@ propagation algorithm itself needs to be resilient to failures.
 For broadcasting fault information between daemons, we use the scalable and fault-tolerant BMG topology~\cite{Angskun07}. BMG has good fault-tolerant properties such
 as optimal connectivity, low fault-diameter, strongly resilient and good optimal
 probability in failure cases. Note that unlike prior works, the propagation
-algorithm~\ref{fig:2lvlbmg} is not a flat BMG when application processes are considered, but consists of an
+algorithm~\ref{fig:2lvlbmg} is not a flat BMG between application processes, but consists of an
 inner BMG overlay between daemons, and an outer star overlay from each daemon to its
 local managed processes.
 
 \begin{algorithm}
-\caption{Two-Level Reliable Broadcast Algorithm}\label{fig:2lvlbmg}
+\caption{Two-Level Reliable Broadcast Algorithm.}\label{fig:2lvlbmg}
 
 \textbf{\textit{N}} \Comment{Number of nodes (value from environment)}\\
 \textbf{\textit{Eid}} \Comment{Identifier of a process observed as failed (input parameter)}\\
@@ -628,10 +628,10 @@ the daemon $Did$ (initially empty, obtained from environment)}\\
 \end{algorithm}
 
 Figure~\ref{fig:bmg} shows an example of the execution of the BMG broadcast
-with 12 nodes. For simplicity, the local start stemming from each daemon are not
-represented.
+with 12 nodes. For simplicity, the local stars connecting each daemon to 
+its local processes are not represented.
 
-\begin{enumerate}
+\begin{compactenum}
  \item In this example, daemon 0 is the initial reporter and its observer component starts the propagation by calling the \textsc{StartPropagation} reliable broadcast algorithm.
  \item This prepares a broadcast message containing the identifier of the
  failed process (or daemon), and the associated application processes, when relevant.
@@ -641,20 +641,20 @@ represented.
  have failed, then the daemon already triggered the propagation, and no further
  action is needed. Thus every daemon forwards the message once, ensuring that
  all edges of the BMG will carry exactly one message per detection.
-\end{enumerate}
+\end{compactenum}
 
 
 \begin{figure*}[ht!]
   \begin{minipage}{.45\textwidth}
     \centering
     \includegraphics[scale=.3]{BMG_seq.pdf}
-    \caption{Binomial graph with 12 nodes}
+    \caption{Binomial graph with 12 nodes.}
     \label{fig:bmg}
   \end{minipage}
   \begin{minipage}{.45\textwidth}
     \centering
     \includegraphics[scale=.3]{reorder_span.pdf}
-    \caption{Broadcast using binomial spanning tree from node 0, redundant messages from 0 are also pictured, colored in blue}
+    \caption{Broadcast using binomial spanning tree from node 0, redundant messages from 0 are also pictured, colored in blue.}
     \label{fig:reorder_span}
   \end{minipage}
 \end{figure*}
@@ -662,23 +662,23 @@ represented.
 The propagation message issued at each daemon is ordered so that the
 messages that are part of a binomial spanning tree rooted at the emitter
 are sent first. Figure \ref{fig:reorder_span} shows the a spanning tree
-for a broadcast originating from node 0; the extra messages (5 and 6, colored
-in blue) are supplementary messages that provide redundancy and ensure that
+for a broadcast originating from node 0; the redundant messages (5 and 6, colored
+in blue) are extra messages that provide reliablility and ensure that
 any node in the BMG can always be reached within $O(log_2 N)$ steps (given
 that less than $2 log_2 N$ failures strike, with more failures,
 statistically rare scenarios can degenerate in a linear propagation time).
 The advantages of this new broadcast algorithm are:
 \begin{compactenum}
-  \item Sequence ordering brings higher parallelism: messages to node \{10, 11, 7\} could arrive from any redundant forwarding path rather than only from the 0-rooted spanning tree. This may decrease the apparent height of the tree, the average latency and thus reduce the average notification latency.
+  \item Sequence ordering brings higher parallelism: messages to node \{10, 11, 7\} can arrive from any redundant forwarding path rather than only from the 0-rooted spanning tree. This may decrease the apparent height of the tree, and thus reduce the average notification latency.
   \item Limited network degree: the maximum degree for every daemon is logarithmic, which avoids hot-spot effects that are common in randomized gossip algorithms.
   \item Deterministic number of messages: the total number of messages is
   exactly the number of links in the BMG topology, that is, $O(N log_2 N)$
   messages overall. In contrast, random march gossip algorithms have to
   balance between the probability of not reaching every participant and 
   the number of messages.
-  \item Number of heartbeats and propagation messages is dependent upon
+  \item The number of heartbeats and propagation messages is dependent upon
   the number of nodes, not the number of managed application processes.
-  In manycore systems, this has the potential to significantly reduce the
+  In manycore systems, this can significantly reduce the
   effective cost of the algorithm when compared to a flat topology between
   application processes.
 \end{compactenum}
@@ -686,14 +686,15 @@ The advantages of this new broadcast algorithm are:
 \begin{figure}[h]
   \centering
   \includegraphics[trim=0.2cm 9.0cm 0.2cm 9cm,width=\linewidth]{PMIx_PRRTE.pdf}
-  \caption{Resilient \prrte component architecture. The orange boxes represent the component we mainly use to add the resilient features. The dark blue colored boxes are new modules}\label{fig:prrte}
+  \caption{Resilient \prrte component architecture. The orange boxes represent the component we mainly use to add the resilient features. The dark blue colored boxes are new modules.}\label{fig:prrte}
 \end{figure}
 
 \subsection{Implementation}
 
-\todo{this paragraph too verbose}
+%\todo{this paragraph too verbose}
 
 \subsubsection{\pmix Interface}
+\todo{if space needed, get it from here}
 We implemented \ourwork as a set of components in \prrte. \prrte is a fork of the \ompi runtime, \orte~\cite{Castain05}. \prrte is developed and maintained
 by the \pmix community as a demonstrator and enabler technology that demonstrates
 and exercises the features of the \pmix interface~\cite{CASTAIN18}---an abstract set of interfaces by which not only applications and tools can interact with the resident system management stack (SMS), but also the various SMS components can interact with each other.
@@ -705,14 +706,14 @@ Meanwhile, the Slurm batch scheduler and job starter ships with native \pmix sup
 %Overall, the fact that \prrte interfaces with the communities of interest highlighted in Section~\ref{sec:motivation} through a well defined and stable interface is a clear benefit for increasing the impact of \ourwork.
 
 In \ourwork, we leverage the interfaces specified by \pmix~\cite{Ralph15} to interoperate 
-with the client (application or communication library), as well as with the 
+with the client application, communication library, or programming language, as well as with the 
 SMS. 
-The outputs of \ourwork are exposed to client libraries (e.g., MPI) through
-these interfaces, and, to the best of our knowledge, \ourwork is the first
-implementation to populate these interfaces with a truly resilient implementation.
-An important feature is the \pmix Event Notification~\cite{Ralph002}: 
+To the best of our knowledge, \ourwork is the first
+implementation to populate the \pmix interfaces with a truly resilient implementation.
+An important feature of the interface is the \pmix Event Notification~\cite{Ralph002}: 
 we use it to perform the local propagation of failure information from the 
-daemon to the client processes. The resource manager or server can notify the application of events; the application processes can notify their server or SMS of issues.
+daemon to the client processes. 
+%The resource manager or server can notify the application of events; the application processes can notify their server or SMS of issues.
 
 \subsubsection{\ourwork in the \prrte Architecture}
 
@@ -729,15 +730,17 @@ any type of information. The \texttt{detector}
 component emits heartbeats and monitors timeouts, and last, the \texttt{error\_ppg}
 components prepares the content of the reliable broadcast messages (i.e., the list
 of failed processes).
-
-An important aspect of the propagate framework is that, for node failures,
-only the daemon that initiates the propagation needs to obtain the list of processes
-hosted by the failed daemon (line 5 of procedure \textsc{StartPropagation} in Algorithm~\ref{fig:2lvlbmg}).
-This information can be queried from the key-value store of \pmix; however, 
-triggering the collection of that information from multiple nodes could 
-cause a storm of network activity in the SMS, or require replication of 
-information (memory overhead), which is avoided by obtaining the information 
-from only the daemon that initiates the propagation. 
+%
+In order to populate the list of failed processes in node failure cases, 
+the list of processes hosted by a particular daemon needs to be obtained
+(line 5 of procedure \textsc{StartPropagation} in Algorithm~\ref{fig:2lvlbmg}).
+This information is queried from the key-value store of \pmix. Note 
+however that multiple daemons querying that information could cause 
+a storm of network activity within the SMS in order to fetch this information,
+or require its replication (memory overhead). Fortunately, as a given 
+daemon is observed by a single other daemon, there is a single initiator 
+to the propagation routine and this potential non-scalable usage of 
+the \pmix key-value store can be avoided. 
 
 \begin{figure*}[h]
 \centering
