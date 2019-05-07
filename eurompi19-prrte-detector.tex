@@ -816,7 +816,7 @@ the chance of false detection, SWIM uses a suspicion mechanism. When a node does
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{Scale_prrte_swim.pdf}
-  \caption{Detection latency comparison between \ourwork and SWIM with increasing number of processes ($\eta=0.5s)$}
+  \caption{Detection latency comparison between \ourwork and SWIM with increasing number of processes ($\delta=0.5s)$}
   \label{fig:scale_swim}
 \end{figure}
 this suspicion information within a subgroup: if any node in the subgroup receives an acknowledge before the timeout, it will declare the suspected node as alive; otherwise it will declare a failure. In order to improve the efficiency of multi-cast, SWIM uses the infection-style dissemination mechanism and piggybacks the information to be disseminated in the detection's pings and acknowledgements messages.
@@ -831,7 +831,7 @@ to replicate our \mpi detection benchmark with SWIM.
 \end{figure}
 
 
-Figure \ref{fig:scale_swim} compares the scalability of the two detectors with regard to the number of deployed processes with $\eta = 0.5s$, $\delta = 1s$.
+Figure \ref{fig:scale_swim} compares the scalability of the two detectors with regard to the number of deployed processes with $\eta = 1s$, $\delta = 0.5s$.
 %For smaller number of processes is stabilizing in approximately 0.75s, while the stabilization delay of SWIM is 5s.
 We could run SWIM tests only up to 256 members; after that limit, some nodes exceed the maximum connection backlog
 set in the operating system for \texttt{listen} operations on TCP sockets, causing an application crash during
