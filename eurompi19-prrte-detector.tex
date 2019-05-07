@@ -796,7 +796,7 @@ and management from \ourwork.
 Figure \ref{fig:overhead} illustrates the overhead incurred with P2P and collective communications running \imb.
 %All IMB-MPI1 suits can be successfully conducted with no false detection with $ \delta \geq 1 ms $.
 In order to contextualize the incurred overhead, we present, in shaded grey, the band of natural variability
-of the benchmark without a failure detector active.
+of the benchmark without a failure detector active ($average \pm \sigma$).
 For the PingPong benchmark, we use the \texttt{-multi} mode of IMB with one rank per core on 2 nodes.
 This ensures that all cores are active with the communication pattern and thus
 compete for resources with \ourwork activities.
@@ -805,7 +805,7 @@ repetitions for the test to last at a minimum 20 seconds so that multiple heartb
 \begin{equation}
 Overhead = \frac{( {\ourwork - \prrte} )}{\prrte}
 \end{equation}
- From the graph we can see that the latency performance and bandwidth performance are barely affected by heartbeat periods from milliseconds to seconds. Notably, when $ \delta \geq 10 ms $, it has trivial influence on the system, as illustrated by the fact that the average overhead is within the band of natural variability of the benchmark. When  $ \delta = 1 ms $ the noise in PingPong incurs less than three percent overhead. In collective communication the noise overhead is less than eight percent, slightly higher than the standard deviation of the benchmark itself at four percent.
+ From the graph we can see that the latency performance and bandwidth performance are barely affected by heartbeat period from milliseconds to seconds. Notably, when $ \delta \geq 10 ms $, it has trivial influence on the system, as illustrated by the fact that the average overhead is within the band of natural variability of the benchmark. When  $ \delta = 1 ms $ the noise in PingPong incurs less than three percent overhead. In collective communication the noise overhead is less than eight percent, slightly higher than the standard deviation of the benchmark itself at four percent.
  In a general comparison with \ulfm (normalized to its performance without failure detection active),
  we can see that \ourwork achieves a similar level of incurred noise for a given
  heartbeat period and communication pattern.
@@ -826,7 +826,7 @@ to replicate our \mpi detection benchmark with SWIM.
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{HB_prrte_swim.pdf}
-  \caption{Detection and Propagation delay comparison betwern \ourwork and SWIM with varying heartbeat periods.}
+  \caption{Detection and Propagation delay comparison betwern \ourwork and SWIM with varying heartbeat period.}
   \label{fig:hb_prrte_swim}
 \end{figure}
 
@@ -928,7 +928,7 @@ before the timeout expiration.
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{PRRTE_ULFM_comparision.pdf}
-  \caption{Single Daemon Failure detection and propagation delay compared to \ulfm with different heartbeat periods.}
+  \caption{Single Daemon Failure detection and propagation delay compared to \ulfm with different heartbeat period.}
   \label{fig:node_failure_hb}
 \end{figure}
 
@@ -936,14 +936,14 @@ Figure~\ref{fig:node_failure_hb} presents the behavior observed when injecting a
 all application processes on the target node suicide as a group.
 %However, \ulfm doesn't have the capability of detecting node failure, we simulate "node crash" by kill the last process on that node. With the process ring detector this particular process failure will be detected by its observer on another node, this behavior is the same as \ourwork's node to detect node failure.
 %Also we assume that the time different between the daemon failure and process failure is trivial which is confirmed later in the experiment.
-For the heartbeat period setting we start from 30 milliseconds to 0.5 second for both \ourwork and \ulfm. For all heartbeat periods we set $ \eta = \delta * 2 $. From the figure, we can see that the detection latency in all cases lands in the interval $[\delta,\eta]$.
+For the heartbeat period setting we start from 30 milliseconds to 0.5 second for both \ourwork and \ulfm. For all heartbeat period, we set $ \eta = \delta * 2 $. From the figure, we can see that the detection latency in all cases lands in the interval $[\delta,\eta]$.
 
 Figure~\ref{fig:daemon_failure_diffnode} shows single node failure detection and propagation performance with a fixed heartbeat period $ \delta = 0.5s $ and an increasing total number of nodes. After a node crash, all processes hosted on this node will be affected, the observer node fetches and packs the information of all affected processes information, then distributes the packed message.
 \textbf{
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{Daemon_prrte_only.pdf}
-  \caption{Single Daemon Failure Detection and Propagation delay with different number of nodes}
+  \caption{Single Daemon Failure Detection and Propagation delay with different number of nodes.}
   \label{fig:daemon_failure_diffnode}
 \end{figure}}
 %
@@ -970,7 +970,7 @@ reporting all failures.
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{multi_daemon_failures.pdf}
-  \caption{Multiple daemon failures at the same time}
+  \caption{Multiple daemon failures at the same time.}
   \label{fig:multi_daemon_failure_nacl}
 \end{figure}
 
