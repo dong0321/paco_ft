@@ -305,7 +305,7 @@ This lack of portable reliable software infrastructure also makes comparing fair
 existing or proposed solutions difficult, not necessary in terms of potential capabilities
 but in terms of performance. We believe it is critical to level the field and provide a resilient, efficient, and portable fault detector and propagator, integrated into one of the most widely used parallel execution runtimes, that allows other libraries and programming models to build on and support resilience at any scale. Here are some examples of usages of such a resilient framework that we are actively pursuing.
 
-\textbf{\ulfm} repairs \mpi infrastructure after a failure. A communicator can be reconfigured after a 
+\textbf{\ulfm} repairs the \mpi infrastructure after a failure. A communicator can be reconfigured after a 
 process failure detection, with the failed processes excluded with \mpifunc{Comm_shrink}. Missing processes 
 can be re-spawned using the \mpi function \mpifunc{Comm_spawn}. The specialized failure detector provided 
 in \ulfm operates only on the \mpifunc{COMM_WORLD} scope, and relies on non-portable optimization 
@@ -370,14 +370,15 @@ advanced failure detection and reporting methodologies that can efficiently oper
 despite the failure of the runtime daemon themselves.
 
 \subsection{Failure Detection}
-Research in the areas of failure detection has been extensively studied. Chandra and Toueg~\cite{Chandra96} proposed the first unreliable failure detector oracle that could solve consensus and atomic broadcast problems for reliable distributed systems. Many implementations~\cite{Wei02, Larrea00, Kawazoe97} based on this oracle are using all-to-all heartbeat patterns where every node periodically communicates with all other nodes. However, these implementations, due to the communication patterns employed, are inherently not scalable starting as early as systems with hundreds of nodes. An optimized version, the gossip-style protocol~\cite{van98, Ranganathan01, Gupta01, Abhinandan02}, in which nodes pick at random peers to monitor and exchange information with, is another popular approach for failure detection in unstructured systems where the group membership is not a-priori established, or it dynamically and rapidly varies. Unfortunately, gossip methods perform poorly with large numbers of simultaneous node crashes, and, given the random nature of the communication pattern, the time to detect a failure is not strictly bounded, leading to non-deterministic detection time. Furthermore, the gossip methods have the disadvantage of generating a large number of redundant detection and gossip messages that decrease the scalability.
+Research in the areas of failure detection has been extensively studied. Chandra and Toueg~\cite{Chandra96} proposed the first unreliable failure detector oracle that could solve consensus and atomic broadcast problems for unreliable distributed systems. Many implementations~\cite{Wei02, Larrea00, Kawazoe97} based on this oracle are using all-to-all heartbeat patterns where every node periodically communicates with all other nodes. However, these implementations, due to the communication patterns employed, are inherently not scalable beyond  systems with low hundreds of nodes. An optimized version, the gossip-style protocol~\cite{van98, Ranganathan01, Gupta01, Abhinandan02}, in which nodes pick at random peers to monitor and exchange information with, is another popular approach for failure detection in unstructured systems where the group membership is not a-priori established, or dynamically and rapidly varies. Unfortunately, gossip methods perform poorly with large numbers of simultaneous node crashes, and, given the random nature of the communication pattern, the time to detect a failure is not strictly bounded, leading to non-deterministic detection time. Furthermore, the gossip methods have the disadvantage of generating a large number of redundant detection and gossip messages that decrease the scalability.
 
 Recently, we proposed a deterministic failure detector for HPC systems based on network overlays~\cite{George16}, where each participant only observes a single peer following a recoverable ring topology.
-The simulation results demonstrate the efficiency of the algorithm; however, the implementation in \ulfm being done at the application level can only detect \mpi process failures. The
-implementation employs multiple optimization and shortcuts that are possible because it is
-tightly and deeply integrated within the \mpi library, and therefore inherits some of its highly optimized communication primitives. For example, limitations on the
+The experimentation results demonstrate the efficiency of the algorithm; however, the implementation in \ulfm being done at the application level can only detect \mpi process failures. The
+implementation employs multiple optimization and shortcuts that are only possible due to 
+its tight and deep integration within the \mpi library and the availability of
+ its highly optimized communication primitives. For example, limitations on the
 accuracy of the detector when the \mpi implementation is not actively communicating
-are circumvented by using Remote Memory Access primitives (RMA) which are
+are circumvented by using passive target Remote Memory Access primitives (RMA) which are
 initially provided for supporting the \mpi communication; the operational
 mode, overhead, and accuracy of the detector are impacted by the thread model used
 during the \mpi initialization (i.e., \mpifunc{THREAD_SINGLE} results
@@ -385,7 +386,9 @@ in lower overhead but a higher chance of false positive than \mpifunc{THREAD_MUL
 and, in manycore systems, every \mpi process
 is observed and reported as an independent entity, which can impart that the
 overhead scales with the number of \mpi processes rather than the number of
-compute nodes. This resilient \prrte work
+compute nodes; last, the detection topology is tied to the \mpifunc{COMM_WORLD} 
+handle which limits the type of topologies that can be employed. 
+This resilient \prrte work
 avoids these limitations and has the capability to detect both process and
 node failures with a smaller observation topology, and is not limited to
 MPI application only.
@@ -396,8 +399,7 @@ MPI application only.
 % This reads more like a measles outbreak than a gossip dissemination. I comment it out for now
 %
 %Gossip-style~\cite{infection-style,Abhinandan02} dissemination mechanisms emulate the spread of gossip in society. Initially, members are inactive, then when a rumor is planted (failure message) at one member, it becomes active as infected \todo{Do you mean it becomes active as it spreads? Yes}. This member will randomly ping others to spread the infection. Anyone who receives the rumor becomes active and shares the rumor in the same way. When an active member pings an already active member, this active member loses interest in sharing the rumor and becomes inactive. The Gossip-style is resilient to process failure and spreads exponentially quickly in the group. 
-\todo{ check if this is a better explanation? }
-Gossip-style~\cite{infection-style,Abhinandan02} dissemination mechanisms emulate the spread of gossip in society. Initially, members are inactive except one member is aware of failure and need to propagate this information. It propagates this information by randomly ping other members until it pings someone who already get notified. Notified members use the same strategy to distribute information. Gossip-style is resilient to process failure and spreads exponentially quickly in the group, however the worst case could be some members never get notified.   
+Gossip-style~\cite{infection-style,Abhinandan02} dissemination mechanisms emulate the spread of gossip in society. Initially, members are inactive except for one member which is aware of an event of interest. It propagates this information by randomly pinging other members, until it pings someone who already was already notified. Notified members use the same strategy to gossip the information. Gossip-style is resilient to process failure and spreads exponentially quickly in the group, however, in the worst case, some members may never get notified.   
 
 Regarding deterministic reliable broadcast algorithms, a fully connected topology can handle a large number of failures but has scalability issues since it generate too many messages. At the other extreme, a mendable ring topology might be good for scalability (as each process only has 2 neighbors)
 but offers poor propagation latency and suffers in scenarios with multiple node failures.
