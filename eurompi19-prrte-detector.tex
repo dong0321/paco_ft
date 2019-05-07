@@ -879,7 +879,7 @@ propagation happens at the application process level, all \mpi processes
 are part of the reliable broadcast algorithm, thus the lower bound for reaching
 all processes is $\log_2({Number\ of\ Processes})$.
 
-In contrast, \ourwork's daemon failure detection is implemented at the daemon
+In contrast, \ourwork's process failure detection is implemented at the daemon
 level. This mechanism doesn't pressure the application communication resources,
 and can progress the processing of heartbeats without the need for
 RDMA hardware. The broadcast overlay in \ourwork is built at the daemon
