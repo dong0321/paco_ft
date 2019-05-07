@@ -761,18 +761,18 @@ the \pmix key-value store can be avoided.
 \subsection{Experimental Setup}
 Experiments are conducted on two different machines: (1) ICL's NaCl is an Infiniband QDR Linux cluster comprising 66 Intel Xeon X5660 compute nodes, 12 cores per node; (2) NERSC's Cori
 %~\cite{Cori01}
-is a Cray XC40 supercomputer with Intel Xeon "Haswell" processors and the Cray "Aries" high speed inter-node network, 32 cores per node. Our \ourwork is based upon \prrte (\#71ef547), with external \pmix (\#21d7c9). We compare with \ulfm revision \#77f9157, which is based on the same base version of \ompi we use to evaluate \ourwork in MPI workloads. Each experiment is repeated 30 times and we present the average. We use Intel MPI Benchmark (\imb v2019.2)~\cite{IMB} for MPI performance measurements for point-to-point (P2P) and collective communications (one \mpi rank per core). For all experiments we use map-by node, bind-to core binding policy which puts sequential MPI ranks on adjacent cores. The only exception is the \imb P2P experiment where we use
+is a Cray XC40 supercomputer with Intel Xeon "Haswell" processors and the Cray "Aries" high speed inter-node network, 32 cores per node. Our \ourwork is based upon \prrte (\#71ef547), with external \pmix (\#21d7c9). We compare with \ulfm revision \#77f9157, which is based on the same base version of \ompi we use to evaluate \ourwork in MPI workloads. Each experiment is repeated 30 times and we present the average. We use Intel MPI Benchmark (\imb v2019.2)~\cite{IMB} for MPI performance measurements for point-to-point (P2P) and collective communications (one \mpi rank per core). For all experiments we use the map-by node, bind-to core binding policy which puts sequential MPI ranks on adjacent cores. The only exception is the \imb P2P experiment where we use
 the map-by node, bind-by node policy to set communicating \mpi ranks on different nodes.
 
 \subsection{Accuracy}
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{accuracy.pdf}
-  \caption{Heartbeat and Timeout accuracy}
+  \caption{Accuracy under short timeout and heartbeat period.}
   \label{fig:accuracy}
 \end{figure}
 
-For the first experiment we want to explore the accuracy of \ourwork's detector with different heartbeat periods.
+For the first experiment, we explore the accuracy of \ourwork's detector with a short $\delta$ timeout.
 %
 The accuracy experiment is conducted by (1) Starting with a large value for the
 detection timeout $\eta$; (2) Verify that no failure is detected when there is no injection, and all injected failures are reported; (3) If the previous test is accurate, decrease $\eta$ (and accordingly the heartbeat period $\delta$) until we notice false positive detection. We set a constant ratio $\eta = \delta * 2$.
@@ -781,9 +781,9 @@ detection timeout $\eta$; (2) Verify that no failure is detected when there is n
  % For  non-communicating benchmarks (SETNAME\todo{name}), all tests succeed until $\delta$ is lower than 20 milliseconds.
  In heavily communicating benchmarks
  (\imb point-to-point and collective tests), all tests succeed until the
-  heartbeat period lower than 20 milliseconds. To further investigate,
+  heartbeat period is lower than 20 milliseconds. To further investigate,
   we measured that the heartbeat message is neither delayed by communication
-  congestion nor compute pressure, but we found out that daemons need some time to launch the processes when starting the job which causes false detection during job startup.
+  congestion nor compute pressure, but we found out that daemons need some time to launch the processes when starting the job which causes heartbeat delay and false detection during job startup.
   
   % \todo{remove the heartbeat accuracy, change timeout accuracy to 'false positive present'; for later: do not report finalize errors}
 
@@ -791,11 +791,11 @@ detection timeout $\eta$; (2) Verify that no failure is detected when there is n
 %From all above we can see that the granularity of timeout is 40 milliseconds limited by the latency for daemons to launch the application processes. And the granularity of heartbeat period is 0.1 millisecond.
 
 \subsection{Noise}
-We also investigate the noise overhead incurred on an MPI application by the heartbeat emissions
+We also investigate the noise overhead incurred on an MPI application by the heartbeat emission
 and management from \ourwork.
 Figure \ref{fig:overhead} illustrates the overhead incurred with P2P and collective communications running \imb.
 %All IMB-MPI1 suits can be successfully conducted with no false detection with $ \delta \geq 1 ms $.
-In order to contextualize the incurred overhead, we present in shaded grey the band of natural variability
+In order to contextualize the incurred overhead, we present, in shaded grey, the band of natural variability
 of the benchmark without a failure detector active.
 For the PingPong benchmark, we use the \texttt{-multi} mode of IMB with one rank per core on 2 nodes.
 This ensures that all cores are active with the communication pattern and thus
@@ -808,7 +808,7 @@ Overhead = \frac{( {\ourwork - \prrte} )}{\prrte}
  From the graph we can see that the latency performance and bandwidth performance are barely affected by heartbeat periods from milliseconds to seconds. Notably, when $ \delta \geq 10 ms $, it has trivial influence on the system, as illustrated by the fact that the average overhead is within the band of natural variability of the benchmark. When  $ \delta = 1 ms $ the noise in PingPong incurs less than three percent overhead. In collective communication the noise overhead is less than eight percent, slightly higher than the standard deviation of the benchmark itself at four percent.
  In a general comparison with \ulfm (normalized to its performance without failure detection active),
  we can see that \ourwork achieves a similar level of incurred noise for a given
- heartbeat period.
+ heartbeat period and communication pattern.
 
 \subsection{Comparison with SWIM}
 This section compares the failure detection latency and scalability of \ourwork with SWIM~\cite{Abhinandan02}---a random-probing based failure detection protocol and gossip membership updates. To decrease
