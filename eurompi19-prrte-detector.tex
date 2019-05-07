@@ -816,7 +816,7 @@ the chance of false detection, SWIM uses a suspicion mechanism. When a node does
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{Scale_prrte_swim.pdf}
-  \caption{Detection latency comparison between \ourwork and SWIM with increasing number of processes ($\delta=0.5s)$}
+  \caption{Detection latency comparison between \ourwork and SWIM with increasing number of processes ($\delta=0.5s).$}
   \label{fig:scale_swim}
 \end{figure}
 this suspicion information within a subgroup: if any node in the subgroup receives an acknowledge before the timeout, it will declare the suspected node as alive; otherwise it will declare a failure. In order to improve the efficiency of multi-cast, SWIM uses the infection-style dissemination mechanism and piggybacks the information to be disseminated in the detection's pings and acknowledgements messages.
@@ -826,7 +826,7 @@ to replicate our \mpi detection benchmark with SWIM.
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{HB_prrte_swim.pdf}
-  \caption{Detection and Propagation delay comparison betwern \ourwork and SWIM with varying heartbeat periods}
+  \caption{Detection and Propagation delay comparison betwern \ourwork and SWIM with varying heartbeat periods.}
   \label{fig:hb_prrte_swim}
 \end{figure}
 
@@ -867,7 +867,7 @@ general versus specialized---\ulfm. The \ulfm implementation also has two
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{Process_Failure_log_fit.pdf}
-  \caption{Process failure detection and propagation delay compared to \ulfm}
+  \caption{Process failure detection and propagation delay compared to \ulfm.}
   \label{fig:proc_failure_nacl}
 \end{figure}
 
@@ -891,7 +891,7 @@ the total messages transferred and forwarded compared to \ulfm, and the
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{Cori_Process_Failure_fit.pdf}
-  \caption{Process failure detection and propagation delay on Cori}
+  \caption{Process failure detection and propagation delay on Cori.}
   \label{fig:proc_failure_cori}
 \end{figure}
 
@@ -928,7 +928,7 @@ before the timeout expiration.
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{PRRTE_ULFM_comparision.pdf}
-  \caption{Single Daemon Failure detection and propagation delay compared to \ulfm with different heartbeat period}
+  \caption{Single Daemon Failure detection and propagation delay compared to \ulfm with different heartbeat periods.}
   \label{fig:node_failure_hb}
 \end{figure}
 
@@ -936,9 +936,9 @@ Figure~\ref{fig:node_failure_hb} presents the behavior observed when injecting a
 all application processes on the target node suicide as a group.
 %However, \ulfm doesn't have the capability of detecting node failure, we simulate "node crash" by kill the last process on that node. With the process ring detector this particular process failure will be detected by its observer on another node, this behavior is the same as \ourwork's node to detect node failure.
 %Also we assume that the time different between the daemon failure and process failure is trivial which is confirmed later in the experiment.
-For the heartbeat period setting we start at 30 milliseconds to 0.5 second for both \ourwork and \ulfm. For all heartbeat periods we set $ \eta = \delta * 2 $. From the figure we can see that the detection latency in all cases lands in the interval $[\delta,\eta]$.
+For the heartbeat period setting we start from 30 milliseconds to 0.5 second for both \ourwork and \ulfm. For all heartbeat periods we set $ \eta = \delta * 2 $. From the figure, we can see that the detection latency in all cases lands in the interval $[\delta,\eta]$.
 
-Figure \ref{fig:daemon_failure_diffnode} shows single node failure detection and propagation performance with a fixed heartbeat period $ \delta = 0.5s $ and an increasing total number of nodes. After a node crash, all processes hosted on this node will be affected, the observer node fetches and packs the information of all affected processes information, then distributes the packed message.
+Figure~\ref{fig:daemon_failure_diffnode} shows single node failure detection and propagation performance with a fixed heartbeat period $ \delta = 0.5s $ and an increasing total number of nodes. After a node crash, all processes hosted on this node will be affected, the observer node fetches and packs the information of all affected processes information, then distributes the packed message.
 \textbf{
 \begin{figure}[h]
   \centering
