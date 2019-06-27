@@ -1,0 +1,152 @@
+SUBMISSION: 20
+TITLE: Runtime Level Failure Detection and Propagation in HPC Systems
+
+
+----------------------- REVIEW 1 ---------------------
+SUBMISSION: 20
+TITLE: Runtime Level Failure Detection and Propagation in HPC Systems
+AUTHORS: Dong Zhong, Aurelien Bouteiller, Xi Luo and George Bosilca
+
+----------- Overall evaluation -----------
+SCORE: 2 (accept)
+----- TEXT:
+This paper presents RDEAMON# a runtime system for failure detection.
+
+The paper provides an extensive study of the performance of this detector and a lot of convincing experiments that shows that the provide solution is highly effective. 
+
+I have two remarks: in section 4.5 you say : "Otherwise, o suspects that d has failed and initiates the propagation of the failure of d." I am not sure what you mean by "initiate" : is it related to what follows in the next paragraph (if yes this should ne emphasized) or to something else that is well known in gossiping algorithms (if yes, you should give a reference)
+
+You also say that there is two kinds of failures: node failure (which is equivalent to daemon failure) and application failure. In this paper you do nothing about the second kind a failure. Why? This limitation should be highlighted and maybe you could discussed how your proposed technique could apply to this kind of failure.
+
+Overall, this is a very strong work.
+----------- Clarity -----------
+SCORE: 5 (excellent)
+
+
+
+----------------------- REVIEW 2 ---------------------
+SUBMISSION: 20
+TITLE: Runtime Level Failure Detection and Propagation in HPC Systems
+AUTHORS: Dong Zhong, Aurelien Bouteiller, Xi Luo and George Bosilca
+
+----------- Overall evaluation -----------
+SCORE: 0 (borderline paper)
+----- TEXT:
+Summary:
+
+The paper deals with the problem of detecting and propogating failures (e.g., due to hardware crashes) in a hierarchical (multiple nodes of multiple cores) HPC runtime.  This is a necessary ingredient for building fault-tolerant applications.   Existing solutions to this problem, such as ULFM and EREINIT, exhibit two kinds of limitations: (1) they can be slow, have a high performance overhead, or not scale well; and (2) they are tied to specific tools/APIs, e.g., they only work for MPI, or with a specific MPI implementation, or a specific resource manager.  This paper discusses RDaemon#, a new tool which attempts to overcome both problems.  The paper describes the basic alogrithms used by RDaemon#, its architecture, and the results of multiple experiments that compare it with other solutions and that measure its accuracy, scalability, and overhead.
+
+Evaluation:
+
+Overall, the paper makes a convincing case for the approach taken by RDaemon#. Specifically, it makes sense to run daemon processes at the node level, and to keep these separate from the MPI (or other) layer.  It is more scalable and less likely to interfere with the application.  It makes sense to carry out the broadcast notifications at the node level, which will scale better than doing this at the process level, and to have each node daemon communicate through some other means with its processes.  There are a good number of experiments, which mostly make sense, and they show RDaemon# to have a reasonable overhead (though slightly higher latency than ULFM), high accuracy in fault detection, and good scability.  The paper is quite readable, with sufficient background even for a non-expert to understand.
+
+My criticisms are with some of the background, some inconsistencies in the technical details, and some of the conclusions drawn from the experiments.
+
+The introduction provides a lot of background, but does not provide hard evidence for the seriousness of the problem the paper deals with.    I was expecting to see at least a passing reference to observed failure rates in actual HPC systems, which would demonstrate the need for solutions like RDaemon#.    And the specifics matter --- if there are systems with several failures per second, that would potentially require different solutions than when there are hours or days between failures.    Along those lines, I was surprised in Sec. 5.2. to see that the heartbeat period was on the order of milliseconds.   Wouldn't once per second, or once every few seconds, be sufficient for most realistic failure rates?   If nodes are failing so often that they require millisecond detection, is the machine useful for anything?    It may be that experts in this area are already familiar with this data, but it's something that could be easily cleared up for non-specialists in the background!
+  sections.
+
+I would also like to have seen in the background more information about how an MPI runtime and application can respond to the fault detected and reported by RDademon#.  I realize that is a different part of the problem, but a clear picture of how this fits in to the larger ecosystem and workflow would improve the paper.
+
+In Sec. 4.5, the ideas of organizing the nodes in a ring, and for splicing out failed nodes (Figs. 2-3), seem to be standard.   There is a huge literature on token rings and the like, protocols for joining and leaving the ring, etc., going back 20--30 years, that deal with these very problems and failure-robust solutions to them.   See for example Chap. 1 of this thesis: https://www.cs.vu.nl/~tcs/mt/mehta.pdf.    However this paper does not cite any earlier work for this part, leaving the impression that it is something new.   If there is something new here, you should explain exactly what it is and how it differs from earlier work.
+
+In Alg. 1, line 1: why is it daemon "j" that starts the propagation (according to the comment), but the pseudocode for this procedure uses "i"?   Is it Daemon i or Daemon j that is running the procedure?
+
+In procedure ReliableBroadcast, it seems that the Daemon is doing more sends than you would expect in a binomial graph.   For example, Fig. 4 correctly shows 6 neighbors for node 0 in the binomial graph for N=12.  However ReliableBroadcast executes 8 sends --- two of them (4 and 8) repeated.   Also, log_2(N) on line 2 needs at least a ceiling or floor operator.   But if this loop is supposed to align with the degree of a node in a binomial graph, the actual formula is a bit more complicated. 
+
+In Sec. 4.6, "The propagation message issued at each daemon is ordered so that the messages that are part of a binomial spanning tree rooted at the emitter are sent first."    Do you mean a single message is ordered, or that the sequence of messages sent from one deamon is ordered?  That is what Fig. 5 suggests.   But then the pseudocode shows the messages being sent in a different order: for the N=12 case, if i=0, the pseudcode sends are, in order: 1, 11, 2, 10, 4, 8, 8, 4.  This is different than what is shown in Fig. 5: 1, 2, 4, 8, 10, 11. 
+
+The propagation algorithm is described as new, but of course the binomial spanning tree broadcast is well-known (and earlier work of one of the authors).  The new part seems to be the redundant sends (sends not in the spanning tree).   The paper gives an explanation for this change that is unclear and not supported by evidence --- if redundancy provides "reliability", why not even more redundancy (or less)?  Why is this the right amount of redundancy?  It seems arbitrary.    The claim that any node in the BMG can be reached within O(log_2(N)) steps is already true of the binomial spanning tree, but maybe this part is new --- "given that less that 2log(N) failures strike, with more failures, statistically rare scenarios...."?   I could not understand this claim, and didn't understand if this was supposed to be obvious, a result of prior work, or something new.   In short, it wasn't clear to me which aspects of the algorithm are new, and the benefits of the parts that are poss!
+ ibly new aren't clearly described.
+
+In Sec. 5.1, you say NaCl has 66 nodes, but never say how many nodes comprise Cori.  A later figure shows scaling up to 128 nodes.   Is this enough to draw conclusions about what happens on the largest HPC systems?
+
+In Sec. 5.5, you claim the experiments indicate that the latency "scalability trend remains logarithmic with the number of nodes (not processes)", in contrast with ULFM, where, the trend fits a*log_2(N)+b  (N is number of nodes).  But how can you conclude that from this data?  In the experiment of Fig. 12, the number of processes per node is fixed at 32.  Therefore the number of processes, p, is 32*n.  Hence
+
+a*log_2(p)+b = a*log_2(N) + (b+5*a)
+
+so a curve "fits" a*log_2(p)+b if and only if it "fits" a*log_2(N)+b, assuming by "fit" you mean "exists constants a and b such that the curve closely matches this function".
+
+Put another way, there is no way you can tell if RDaemon# latency scales with log(N) and not with log(p), using only an experiment in which the number of processes per node (ppn) is fixed.  You should also do an experiment in which the number of nodes is fixed, and you vary ppn.  You would then expect to see the latency of RDaemon# hold relatively constant with increasing ppn, whereas the latency of ULFM should increase.  It could be that I'm completely missing something here, but in that case I doubt I'm the only one who will be confused by this.
+----------- Clarity -----------
+SCORE: 4 (good)
+
+
+
+----------------------- REVIEW 3 ---------------------
+SUBMISSION: 20
+TITLE: Runtime Level Failure Detection and Propagation in HPC Systems
+AUTHORS: Dong Zhong, Aurelien Bouteiller, Xi Luo and George Bosilca
+
+----------- Overall evaluation -----------
+SCORE: 2 (accept)
+----- TEXT:
+This paper presents a failure detection and propagation system built with PMIx that has applicability to MPI.
+
+The basic idea of detecting and propagating failures is useful and solutions in this space are needed. Overall this is interesting work that is useful and should interest the EuroMPI audience.
+
+Overall I thought the paper was well written, but there are a few area that could be improved. Section 2 reviews current solutions in this space, but neglects to include any references. Please include some references in this section for completeness.
+
+The experimental evaluation was good and I appreciate the effort to include candlestick plots and use a larger system for the analysis. The inclusion of Cori was an excellent idea. You probably could have gotten larger node and process scale using the Phi nodes, but I understand the choice of the haswell nodes given the current status of the Phi architecture. One figure that stood out to me in this analysis was Figure 7. While I appreciate that you've included the usual noise range in expected values from the benchmarks, what is the range of values from ULFM and Rdaemon#? If they are also +/-4% from where your data points lie, that would imply that the overhead of some of the solutions would be observable in most cases.  It seems odd to overlay expected variance in results for the base case and not include it in your results under examination. Including this would be very helpful to understanding the costs of resilience.
+
+A small nitpick, but it's been in the back of my mind the entire time I've been reading this paper. Why RDaemon#? I didn't see a reasoning behind the name in the paper and it would be nice to know if it's completely arbitrary or has some design behind it. How do you pronounce it? It's useful to name these things for easy memory recall for researchers, so I'd recommend making this more clear and even maybe adding it to the title of the paper for future easy reference.
+----------- Clarity -----------
+SCORE: 4 (good)
+
+
+
+----------------------- REVIEW 4 ---------------------
+SUBMISSION: 20
+TITLE: Runtime Level Failure Detection and Propagation in HPC Systems
+AUTHORS: Dong Zhong, Aurelien Bouteiller, Xi Luo and George Bosilca
+
+----------- Overall evaluation -----------
+SCORE: 2 (accept)
+----- TEXT:
+This paper describes a generalized failure detection library that can be used in parallel systems in combination with (theoretical) any parallel programming system. The introduction shows this potential for generalization on several use cases and the rest of the paper then illustrates its use on MPI. In particular it gets packaged into PMIx and then compared with existing integrated solutions like ULFM.
+
+The generalization is an interesting step and offers potential for the growing number of parallel runtime systems. The solution seems sound (although not overall novel in its components) and the results show good performance. Further, the evaluation is thorough - it even provides noise impact measurements caused by the extra daemon.
+
+One items missing are an evaluation with real applications (do the results on the benchmark carry forward?). Further, it would have been nice to see at least a brief discussion on the workflow when used with two separate programming models running on the same system.
+
+Minor comment:
+- Figure 7 misses axis labels for the x axis
+----------- Clarity -----------
+SCORE: 5 (excellent)
+
+
+
+----------------------- REVIEW 5 ---------------------
+SUBMISSION: 20
+TITLE: Runtime Level Failure Detection and Propagation in HPC Systems
+AUTHORS: Dong Zhong, Aurelien Bouteiller, Xi Luo and George Bosilca
+
+----------- Overall evaluation -----------
+SCORE: 1 (weak accept)
+----- TEXT:
+The authors build upon their previous work to create a runtime failure
+and detection mechanism and attempt to make it more generic. To this
+end, they have designed a multi-level failure detection algorithm,
+called RDaemon#, which operates within the runtime infrastructure to
+monitor both node and process failures. The authors implemented
+RDaemon# as a component in the PMIx runtime reference implementation
+(PRRTE).
+
+To detect node/daemon failures, the authors propose to use a heartbeat
+based detection mechanism where the heartbeat is exchanged between the
+daemon processes using a ring they create. This is followed by a
+step that broadcasts the fault information between daemons.
+
+In section 3.1, the authors claim that MPD, because it implements a ring
+between the daemons, does not have very good scalability. However, later
+in Section 4.5, they go ahead and implement a similar ring based connection
+between the daemons. So, I assume this will equally not be scalable. Given
+that the authors are probably designing this failure detection/recovery
+mechanism for large scale systems, this choice of implementation seems
+very odd given that the authors already know the scalability limits.
+
+Apart from this, the paper seems to be well written and the experiments
+are fairly well thought out.
+----------- Clarity -----------
+SCORE: 4 (good)
+
+
