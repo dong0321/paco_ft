@@ -43,13 +43,13 @@
 % the commands and values with those provided to you when you complete the rights form.
 %
 % These commands are for a PROCEEDINGS abstract or paper.
-\copyrightyear{2019}
-\acmYear{2019}
-\setcopyright{licensedusgovmixed}
-\acmConference[EuroMPI '19]{EuroMPI '19: ACM International Conference Proceeding Series}{September 11th-13th, 2019}{Zurich, Switzerland}
+\copyrightyear{2019} 
+\acmYear{2019} 
+\acmConference[EuroMPI 2019]{26th European MPI Users' Group Meeting}{September 11--13, 2019}{Zürich, Switzerland}
+\acmBooktitle{26th European MPI Users' Group Meeting (EuroMPI 2019), September 11--13, 2019, Zürich, Switzerland}
 \acmPrice{15.00}
-\acmDOI{10.1145/1122445.1122456}
-\acmISBN{978-1-4503-9999-9/18/06}
+\acmDOI{10.1145/3343211.3343225}
+\acmISBN{978-1-4503-7175-9/19/09}
 
 %
 % These commands are for a JOURNAL article.
@@ -271,7 +271,7 @@ that a generic failure detection solution, provided by an external runtime
 entity that does not have access to the \mpi context and communication conduits
 can deliver a similar level of service. In order to test that hypothesis,
 and further, to define how a generic a solution can be, we designed
-a multi-level failure detection algorithm, called \ourwork, which operates
+a multi-level failure detection algorithm, for reference purpose we call \ourwork, which operates
 within the runtime infrastructure to monitor both node and process
 failures. We implemented that algorithm as a component in the \pmix~\cite{CASTAIN18} runtime reference implementation (\prrte), which is a fully fledged runtime that is
 used in production to deploy, monitor and
@@ -589,7 +589,7 @@ local managed processes.
 the daemon $Did$ (initially empty, obtained from environment)}\\
 
 \begin{algorithmic}[1]
-\Procedure{StartPropagation}{ $Eid$ } \Comment{Daemon \textbf{j} starts the propagation}
+\Procedure{StartPropagation}{ $Eid$ } \Comment{Daemon \textbf{i} starts the propagation}
 \If {( $Eid$ $\notin$ $Reported_i$ )}
   \State Add $Eid$ to $msg$
   \If {$Eid$ is a daemon}
@@ -647,13 +647,13 @@ its local processes are not represented.
 \begin{figure*}[ht!]
   \begin{minipage}{.45\textwidth}
     \centering
-    \includegraphics[scale=.3]{BMG_seq.pdf}
+    \includegraphics[scale=.3]{review_BMG_seq.pdf}
     \caption{Binomial graph with 12 nodes.}
     \label{fig:bmg}
   \end{minipage}
   \begin{minipage}{.45\textwidth}
     \centering
-    \includegraphics[scale=.3]{reorder_span.pdf}
+    \includegraphics[scale=.3]{review_reorder_span.pdf}
     \caption{Broadcast using binomial spanning tree from node 0, redundant messages from 0 are also pictured, colored in blue.}
     \label{fig:reorder_span}
   \end{minipage}
@@ -662,7 +662,7 @@ its local processes are not represented.
 The propagation message issued at each daemon is ordered so that the
 messages that are part of a binomial spanning tree rooted at the emitter
 are sent first. Figure \ref{fig:reorder_span} shows the a spanning tree
-for a broadcast originating from node 0; the redundant messages (5 and 6, colored
+for a broadcast originating from node 0; the redundant messages (5,6,7 and 8, colored
 in blue) are extra messages that provide reliablility and ensure that
 any node in the BMG can always be reached within $O(log_2 N)$ steps (given
 that less than $2 log_2 N$ failures strike, with more failures,
@@ -746,11 +746,12 @@ the \pmix key-value store can be avoided.
 \centering
 \begin{minipage}{.37\textwidth}
   \centering
-  \includegraphics[width=\linewidth]{multi_pingping_pingpong_overhead.pdf}
+  \includegraphics[width=\linewidth]{errorbar_multi_pingping_pingpong_overhead.pdf}
 \end{minipage}%
 \begin{minipage}{.63\textwidth}
   \centering
-  \includegraphics[width=\linewidth]{Bcast_overhead_with_ulfm_max_col.pdf}
+  \includegraphics[width=\linewidth]{errorbar_Bcast_overhead_with_ulfm_max_col.pdf}
+  \vspace*{-0.7cm}\hspace*{0cm}\textcolor{black}{}
 \end{minipage}
 \captionof{figure}{\prrte with fault tolerance overhead over \prrte and \ulfm using IMB}
 \label{fig:overhead}
@@ -866,7 +867,7 @@ general versus specialized---\ulfm. The \ulfm implementation also has two
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{Process_Failure_log_fit.pdf}
+  \includegraphics[width=\linewidth]{review_Process_Failure_comparision.pdf}
   \caption{Process failure detection and propagation delay compared to \ulfm.}
   \label{fig:proc_failure_nacl}
 \end{figure}
