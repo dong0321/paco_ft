@@ -271,7 +271,8 @@ that a generic failure detection solution, provided by an external runtime
 entity that does not have access to the \mpi context and communication conduits
 can deliver a similar level of service. In order to test that hypothesis,
 and further, to define how a generic a solution can be, we designed
-a multi-level failure detection algorithm, for reference purpose we call \ourwork, which operates
+a multi-level failure detection algorithm, which we refer to as 
+\ourwork in this paper, which operates
 within the runtime infrastructure to monitor both node and process
 failures. We implemented that algorithm as a component in the \pmix~\cite{CASTAIN18} runtime reference implementation (\prrte), which is a fully fledged runtime that is
 used in production to deploy, monitor and
@@ -457,12 +458,13 @@ is performed by a process because of a processor overheating, an entire
 node or cabinet loses power, or a software bug manifests by interrupting
 unexpectedly or rendering some processes permanently non-responsive. In the context of
 this work, we further distinguish between two subtypes of crash failures.
-First, application process failures, which may impact any number of
+First, application process failures\footnote{Note that application process failures are crash failures; this paper does not dwell with other types of application failures like incorrect code or dataset corruption resulting in wrong results or silent errors.}, which may impact any number of
 hosted application processes without necessarily being concomitant
 with the failure of other processes, even hosted on the same node.
 Second, node failures, which we consider congruent with the observation of a daemon
 process failure. When a daemon failure occurs, all hosted application processes on
-that node also undergo a process failure. We will discuss in the following
+that node also undergo a process failure. Our work detects both types of 
+failures. We will discuss in the following
 sections how this distinction helps improve the scalability of the failure
 detection algorithm.
 
