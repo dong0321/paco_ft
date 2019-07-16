@@ -775,10 +775,12 @@ the map-by node, bind-by node policy to set communicating \mpi ranks on differen
   \label{fig:accuracy}
 \end{figure}
 
-For the first experiment, we explore the accuracy of \ourwork's detector with a short $\eta$ timeout, in the sense of milliseconds because we want to explore the limitation.
+For the first experiment, we explore the accuracy of \ourwork's detector.
 %
 The accuracy experiment is conducted by (1) Starting with a large value for the
 detection timeout $\eta$; (2) Verify that no failure is detected when there is no injection, and all injected failures are reported; (3) If the previous test is accurate, decrease $\eta$ (and accordingly the heartbeat period $\delta$) until we notice false positive detection. We set a constant ratio $\eta = \delta * 2$.
+This methodology exposes the behavior in normal deployment (100ms period) as well 
+as the behavior at the limit for very short $\eta$ timeout values (in the order of milliseconds).
  %
  Figure~\ref{fig:accuracy} presents the results on NaCl 64 nodes.
  % For  non-communicating benchmarks (SETNAME\todo{name}), all tests succeed until $\delta$ is lower than 20 milliseconds.
@@ -799,7 +801,7 @@ and management from \ourwork.
 Figure \ref{fig:overhead} illustrates the overhead incurred with P2P and collective communications running \imb.
 %All IMB-MPI1 suits can be successfully conducted with no false detection with $ \delta \geq 1 ms $.
 In order to contextualize the incurred overhead, we present, in shaded grey, the band of natural variability
-of the benchmark without a failure detector active ($average \pm \sigma$).
+of the benchmark without a failure detector active ($average \pm \sigma$), and, for clarity, we plot error bars for $ \delta = 1 ms$, the only case where the variability sometime exceeds the natural variability of the benchmark.
 For the PingPong benchmark, we use the \texttt{-multi} mode of IMB with one rank per core on 2 nodes.
 This ensures that all cores are active with the communication pattern and thus
 compete for resources with \ourwork activities.
@@ -808,7 +810,7 @@ repetitions for the test to last at a minimum 20 seconds so that multiple heartb
 \begin{equation}
 Overhead = \frac{( {\ourwork - \prrte} )}{\prrte}
 \end{equation}
- From the graph we can see that the latency performance and bandwidth performance are barely affected by heartbeat period from milliseconds to seconds. Notably, when $ \delta \geq 10 ms $, it has trivial influence on the system, as illustrated by the fact that the average overhead with negligible error range is within the band of natural variability of the benchmark. When  $ \delta = 1 ms $ the noise with noticeable error range in PingPong incurs less than three percent overhead. In collective communication the noise overhead is less than eight percent, slightly higher than the standard deviation of the benchmark itself at four percent. For clear and concise reason we only plot error bar for $ \delta = 1 ms $.
+ From the graph we can see that the latency performance and bandwidth performance are barely affected with heartbeat period ranging from milliseconds to seconds. Notably, when $ \delta \geq 10 ms $, it has trivial influence on the system, as illustrated by the fact that the average overhead is within the band of natural variability of the benchmark. When  $ \delta = 1 ms $ the incurred noise varies in a band that increases the PingPong latency by up to three percent. In collective communication, the noise overhead is less than eight percent, slightly higher than the standard deviation of the benchmark itself, at four percent. 
  In a general comparison with \ulfm (normalized to its performance without failure detection active),
  we can see that \ourwork achieves a similar level of incurred noise for a given
  heartbeat period and communication pattern.
