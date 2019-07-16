@@ -664,7 +664,7 @@ its local processes are not represented.
 The propagation message issued at each daemon is ordered so that the
 messages that are part of a binomial spanning tree rooted at the emitter
 are sent first. Figure \ref{fig:reorder_span} shows the a spanning tree
-for a broadcast originating from node 0; the redundant messages (5,6,7 and 8, colored
+for a broadcast originating from node 0; the redundant messages (colored
 in blue) are extra messages that provide reliablility and ensure that
 any node in the BMG can always be reached within $O(log_2 N)$ steps (given
 that less than $2 log_2 N$ failures strike, with more failures,
