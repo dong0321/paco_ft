@@ -43,8 +43,8 @@
 % the commands and values with those provided to you when you complete the rights form.
 %
 % These commands are for a PROCEEDINGS abstract or paper.
-\copyrightyear{2019} 
-\acmYear{2019} 
+\copyrightyear{2019}
+\acmYear{2019}
 \acmConference[EuroMPI 2019]{26th European MPI Users' Group Meeting}{September 11--13, 2019}{Zürich, Switzerland}
 \acmBooktitle{26th European MPI Users' Group Meeting (EuroMPI 2019), September 11--13, 2019, Zürich, Switzerland}
 \acmPrice{15.00}
@@ -152,7 +152,7 @@ As the scale of high-performance computing (HPC) systems continues to grow, mean
 % A ring topology is maintained by allowing one node sending and receiving periodically heartbeat to/from another node to detect a node failure(observing another single node). For process failure each host node (is in charge of monitoring) monitors its children processes. The propagation use a reliable broadcast method over a binomial graph(an arbitrary communication topology) to distribute error message to applications, guarantees a logarithmic propagate time.
 The resulting framework has been implemented in the context of a system-level runtime for parallel environments, \pmix Reference RunTime Environment (\prrte), providing efficient and scalable capabilities of fault management to a large range of programming and execution paradigms.
 % the algorithms and strategies proposed have a larger scope of most distributed programming environment.
-The experimental evaluation of the resulting software stack on different machines demonstrate that 
+The experimental evaluation of the resulting software stack on different machines demonstrate that
 the solution is at the same time generic and efficient.
 \end{abstract}
 
@@ -271,13 +271,13 @@ that a generic failure detection solution, provided by an external runtime
 entity that does not have access to the \mpi context and communication conduits
 can deliver a similar level of service. In order to test that hypothesis,
 and further, to define how a generic a solution can be, we designed
-a multi-level failure detection algorithm, which we refer to as 
+a multi-level failure detection algorithm, which we refer to as
 \ourwork in this paper, which operates
 within the runtime infrastructure to monitor both node and process
 failures. We implemented that algorithm as a component in the \pmix~\cite{CASTAIN18} runtime reference implementation (\prrte), which is a fully fledged runtime that is
 used in production to deploy, monitor and
 serve multiple HPC networking stack clients.
-%like \ompi, or the reference \oshmem implementation. 
+%like \ompi, or the reference \oshmem implementation.
 We then compare this generic
 failure detection service with the fully dedicated \mpi detector from
 \ulfm \ompi on one hand, and with the Scalable Weakly-Consistent Infection-style Membership (SWIM) protocol on the other hand, the latter standing
@@ -298,50 +298,50 @@ trade-off on the general to specific scale.
 \section{Motivation and Background}\label{sec:motivation}
 
 Many projects have proposed fault management techniques, either automatic,
- driven by the application, or by an intermediary library. Most of these approaches 
-rely on their own specialized infrastructure to detect, propagate and react to failures. 
+ driven by the application, or by an intermediary library. Most of these approaches
+rely on their own specialized infrastructure to detect, propagate and react to failures.
 This leads to a large number of partial solutions, insufficiently maintained where no portable
 and efficient support to build resilient applications or programming models exists.
-This lack of portable reliable software infrastructure also makes comparing fairly 
+This lack of portable reliable software infrastructure also makes comparing fairly
 existing or proposed solutions difficult, not necessary in terms of potential capabilities
 but in terms of performance. We believe it is critical to level the field and provide a resilient, efficient, and portable fault detector and propagator, integrated into one of the most widely used parallel execution runtimes, that allows other libraries and programming models to build on and support resilience at any scale. Here are some examples of usages of such a resilient framework that we are actively pursuing.
 
-\textbf{\ulfm} repairs the \mpi infrastructure after a failure~\cite{Bland2013}. A communicator can be reconfigured after a 
-process failure detection, with the failed processes excluded with \mpifunc{Comm_shrink}. Missing processes 
-can be re-spawned using the \mpi function \mpifunc{Comm_spawn}. The specialized failure detector provided 
-in \ulfm operates only on the \mpifunc{COMM_WORLD} scope, and relies on non-portable optimization 
-to mitigate issues with accuracy due to being executed in the context of the \mpi process. 
-Using \ourwork alleviates these issues by cleanly splitting the \mpi rank ordering, 
-progress engine, and thread initialization modes from the operation of the failure 
-detector. We will discuss in the experimental section how the generality of 
+\textbf{\ulfm} repairs the \mpi infrastructure after a failure~\cite{Bland2013}. A communicator can be reconfigured after a
+process failure detection, with the failed processes excluded with \mpifunc{Comm_shrink}. Missing processes
+can be re-spawned using the \mpi function \mpifunc{Comm_spawn}. The specialized failure detector provided
+in \ulfm operates only on the \mpifunc{COMM_WORLD} scope, and relies on non-portable optimization
+to mitigate issues with accuracy due to being executed in the context of the \mpi process.
+Using \ourwork alleviates these issues by cleanly splitting the \mpi rank ordering,
+progress engine, and thread initialization modes from the operation of the failure
+detector. We will discuss in the experimental section how the generality of
 \ourwork does not incur a large overhead compared to the specialized \ulfm detector.
 
-\textbf{\oshmem} is a one-sided partitioned global address space (PGAS) programming model. While \oshmem does 
+\textbf{\oshmem} is a one-sided partitioned global address space (PGAS) programming model. While \oshmem does
 not  currently have a fault tolerance model, several teams are exploring checkpoint and restart~\cite{shmem-ft15}.
-\ourwork failure detection and propagation attributes can provide the 
-notification to trigger the recovery. For more exploratory works, 
+\ourwork failure detection and propagation attributes can provide the
+notification to trigger the recovery. For more exploratory works,
 application developers can experiment with modulating the frequency and
- placement of restart point within the application and employ the 
+ placement of restart point within the application and employ the
  failure detector directly, or through \oshmem interfaces.
- 
-\textbf{EREINIT} is a global-restart failure recovery model based 
+
+\textbf{EREINIT} is a global-restart failure recovery model based
 on a fast re-initialization of \mpi~\cite{reinit18}. This work is a co-design between MVAPICH and Slurm resource manager to add process and node failure detection and propagation features.
 %The detection is using Slurm's health check mechanism by sending ping messages to nodes, propagation is implemented in a manner of forcing the controller to individually send the notification to children of the failed nodes.
 % However, this work is highly dependent on one particular resource manager: Slurm.
-It exhibit interesting detection capabilities, but unfortunately it use an inefficient propagation method and is tied to a single resource manager (Slurm). \ourwork can substitute a portable fault detection capability to enable 
+It exhibit interesting detection capabilities, but unfortunately it use an inefficient propagation method and is tied to a single resource manager (Slurm). \ourwork can substitute a portable fault detection capability to enable
 EREINIT to run on machines with different resource managers (Slurm, PBS, LSF, TORQUE, etc) and a more efficient propagation
 to reduce the stabilization and recovery time of EREINIT.
 
-\textbf{DataSpaces and FTI} are persistent data storage services. 
+\textbf{DataSpaces and FTI} are persistent data storage services.
 Fault Tolerance Interface (FTI) provides a fast and efficient multilevel
-checkpointing functionality. Its interface lets users decide what data need to be protected and when it is reasonable to do so. The 
-checkpointing routine then saves the marked data into a hierarchical storage using a variety of 
+checkpointing functionality. Its interface lets users decide what data need to be protected and when it is reasonable to do so. The
+checkpointing routine then saves the marked data into a hierarchical storage using a variety of
 encoding and caching strategies, and staging to mitigate the cost of checkpointing.
 DataSpaces is a data sharing framework which supports the complex
-interaction and coordination patterns required by coupled data-intensive application workflows. 
+interaction and coordination patterns required by coupled data-intensive application workflows.
 It can asynchronously capture and index data  which allows for dynamic interactions and in-memory
-data exchanges between coupled applications. For both these software, \ourwork can provide the basic service to 
-detect and report  failures of the distributed infrastructure storage service, which, thus far, has not been 
+data exchanges between coupled applications. For both these software, \ourwork can provide the basic service to
+detect and report  failures of the distributed infrastructure storage service, which, thus far, has not been
 fault tolerant.
 % Data Spaces is not currently reliable, at least not until the data is safely pushed into the file system.
 
@@ -375,7 +375,7 @@ Research in the areas of failure detection has been extensively studied. Chandra
 
 Recently, we proposed a deterministic failure detector for HPC systems based on network overlays~\cite{George16}, where each participant only observes a single peer following a recoverable ring topology.
 The experimentation results demonstrate the efficiency of the algorithm; however, the implementation in \ulfm being done at the application level can only detect \mpi process failures. The
-implementation employs multiple optimization and shortcuts that are only possible due to 
+implementation employs multiple optimization and shortcuts that are only possible due to
 its tight and deep integration within the \mpi library and the availability of
  its highly optimized communication primitives. For example, limitations on the
 accuracy of the detector when the \mpi implementation is not actively communicating
@@ -387,8 +387,8 @@ in lower overhead but a higher chance of false positive than \mpifunc{THREAD_MUL
 and, in manycore systems, every \mpi process
 is observed and reported as an independent entity, which can impart that the
 overhead scales with the number of \mpi processes rather than the number of
-compute nodes; last, the detection topology is tied to the \mpifunc{COMM_WORLD} 
-handle which limits the type of topologies that can be employed. 
+compute nodes; last, the detection topology is tied to the \mpifunc{COMM_WORLD}
+handle which limits the type of topologies that can be employed.
 This resilient \prrte work
 avoids these limitations and has the capability to detect both process and
 node failures with a smaller observation topology, and is not limited to
@@ -399,8 +399,8 @@ MPI application only.
 %
 % This reads more like a measles outbreak than a gossip dissemination. I comment it out for now
 %
-%Gossip-style~\cite{infection-style,Abhinandan02} dissemination mechanisms emulate the spread of gossip in society. Initially, members are inactive, then when a rumor is planted (failure message) at one member, it becomes active as infected \todo{Do you mean it becomes active as it spreads? Yes}. This member will randomly ping others to spread the infection. Anyone who receives the rumor becomes active and shares the rumor in the same way. When an active member pings an already active member, this active member loses interest in sharing the rumor and becomes inactive. The Gossip-style is resilient to process failure and spreads exponentially quickly in the group. 
-Gossip-style~\cite{infection-style,Abhinandan02} dissemination mechanisms emulate the spread of gossip in society. Initially, members are inactive except for one member which is aware of an event of interest. It propagates this information by randomly pinging other members, until it pings someone who already was already notified. Notified members use the same strategy to gossip the information. Gossip-style is resilient to process failure and spreads exponentially quickly in the group, however, in the worst case, some members may never get notified.   
+%Gossip-style~\cite{infection-style,Abhinandan02} dissemination mechanisms emulate the spread of gossip in society. Initially, members are inactive, then when a rumor is planted (failure message) at one member, it becomes active as infected \todo{Do you mean it becomes active as it spreads? Yes}. This member will randomly ping others to spread the infection. Anyone who receives the rumor becomes active and shares the rumor in the same way. When an active member pings an already active member, this active member loses interest in sharing the rumor and becomes inactive. The Gossip-style is resilient to process failure and spreads exponentially quickly in the group.
+Gossip-style~\cite{infection-style,Abhinandan02} dissemination mechanisms emulate the spread of gossip in society. Initially, members are inactive except for one member which is aware of an event of interest. It propagates this information by randomly pinging other members, until it pings someone who already was already notified. Notified members use the same strategy to gossip the information. Gossip-style is resilient to process failure and spreads exponentially quickly in the group, however, in the worst case, some members may never get notified.
 
 Regarding deterministic reliable broadcast algorithms, a fully connected topology can handle a large number of failures but has scalability issues since it generate too many messages. At the other extreme, a mendable ring topology might be good for scalability (as each process only has 2 neighbors)
 but offers poor propagation latency and suffers in scenarios with multiple node failures.
@@ -411,7 +411,7 @@ processes and the smallest fault diameter, which guarantee the number of hops in
 % number of neihibors.
 %At the same time, binomial graphs scale well thanks to a regular, fixed degree graph (each node has the same number of neighbors).
 In this work we expand on these properties to maintain the efficiency of the dissemination by integrating elements of the
-architecture hierarchy to design a multi-level propagation strategy that 
+architecture hierarchy to design a multi-level propagation strategy that
 reduces the cost of propagation on typical HPC systems.
 
 %
@@ -430,11 +430,12 @@ reduces the cost of propagation on typical HPC systems.
 
 \section{A Generic HPC Failure Detection Service}\label{sec:design}
 
-In this section, we describe how we design a generic failure detector that can
-be provided
-as an infrastructure service in the context of PPRTE (that we call \ourwork), while at the same time exploiting the
-specificities of the HPC machine model to sustain high detection accuracy
-and speed, while incurring a limited amount of noise on the monitored application.
+In this section, we describe the design of a generic failure detector (called
+\ourwork in the remainder of this paper) that we have implemented and delivered
+as an infrastructure service in the context of PPRTE. The overarching goal is to
+deliver a flexible and accurate failure detector while exploiting the
+specificities of the HPC machine model to sustain high detection accuracy and
+speed, while incurring a limited amount of noise on the monitored application.
 
 \subsection{Machine Model}
 
@@ -463,7 +464,7 @@ hosted application processes without necessarily being concomitant
 with the failure of other processes, even hosted on the same node.
 Second, node failures, which we consider congruent with the observation of a daemon
 process failure. When a daemon failure occurs, all hosted application processes on
-that node also undergo a process failure. Our work detects both types of 
+that node also undergo a process failure. Our work detects both types of
 failures. We will discuss in the following
 sections how this distinction helps improve the scalability of the failure
 detection algorithm.
@@ -630,7 +631,7 @@ the daemon $Did$ (initially empty, obtained from environment)}\\
 \end{algorithm}
 
 Figure~\ref{fig:bmg} shows an example of the execution of the BMG broadcast
-with 12 nodes. For simplicity, the local stars connecting each daemon to 
+with 12 nodes. For simplicity, the local stars connecting each daemon to
 its local processes are not represented.
 
 \begin{compactenum}
@@ -676,7 +677,7 @@ The advantages of this new broadcast algorithm are:
   \item Deterministic number of messages: the total number of messages is
   exactly the number of links in the BMG topology, that is, $O(N log_2 N)$
   messages overall. In contrast, random march gossip algorithms have to
-  balance between the probability of not reaching every participant and 
+  balance between the probability of not reaching every participant and
   the number of messages.
   \item The number of heartbeats and propagation messages is dependent upon
   the number of nodes, not the number of managed application processes.
@@ -701,20 +702,20 @@ We implemented \ourwork as a set of components in \prrte. \prrte is a fork of th
 by the \pmix community as a demonstrator and enabler technology that demonstrates
 and exercises the features of the \pmix interface~\cite{CASTAIN18}---an abstract set of interfaces by which not only applications and tools can interact with the resident system management stack (SMS), but also the various SMS components can interact with each other.
 Many communication libraries, resource managers, and job scheduling systems are currently employing \pmix in production, and many more are under development.
-%remove this down? 
+%remove this down?
 For example, \ompi has now substituted \orte with a shim layer over \pmix and thus can be launched and monitored by \prrte.
 Similarly, \oshmem uses \prrte as the default launcher.
 Meanwhile, the Slurm batch scheduler and job starter ships with native \pmix support, meaning that an application that interoperate with Slurm through \pmix can be ported  over \prrte without effort.
 %Overall, the fact that \prrte interfaces with the communities of interest highlighted in Section~\ref{sec:motivation} through a well defined and stable interface is a clear benefit for increasing the impact of \ourwork.
 
-In \ourwork, we leverage the interfaces specified by \pmix~\cite{Ralph15} to interoperate 
-with the client application, communication library, or programming language, as well as with the 
-SMS. 
+In \ourwork, we leverage the interfaces specified by \pmix~\cite{Ralph15} to interoperate
+with the client application, communication library, or programming language, as well as with the
+SMS.
 To the best of our knowledge, \ourwork is the first
 implementation to populate the \pmix interfaces with a truly resilient implementation.
-An important feature of the interface is the \pmix Event Notification~\cite{Ralph002}: 
-we use it to perform the local propagation of failure information from the 
-daemon to the client processes. 
+An important feature of the interface is the \pmix Event Notification~\cite{Ralph002}:
+we use it to perform the local propagation of failure information from the
+daemon to the client processes.
 %The resource manager or server can notify the application of events; the application processes can notify their server or SMS of issues.
 
 \subsubsection{\ourwork in the \prrte Architecture}
@@ -727,22 +728,22 @@ We added two new frameworks and four components to \prrte daemons. The \texttt{p
 component is in charge of detecting the failure of locally hosted processes (using
 SIGCHLD signals from the operating system). The \texttt{BMG} component
 implements a broadcast algorithm in a reliable way; to be noted, this component
-abides by the normal interface for a daemon broadcast and can reliably broadcast 
+abides by the normal interface for a daemon broadcast and can reliably broadcast
 any type of information. The \texttt{detector}
 component emits heartbeats and monitors timeouts, and last, the \texttt{error\_ppg}
 component prepares the content of the reliable broadcast messages (i.e., the list
 of failed processes).
 %
-In order to populate the list of failed processes in node failure cases, 
+In order to populate the list of failed processes in node failure cases,
 the list of processes hosted by a particular daemon needs to be obtained
 (line 5 of procedure \textsc{StartPropagation} in Algorithm~\ref{fig:2lvlbmg}).
-This information is queried from the key-value store of \pmix. Note 
-however that multiple daemons querying that information could cause 
+This information is queried from the key-value store of \pmix. Note
+however that multiple daemons querying that information could cause
 a storm of network activity within the SMS in order to fetch this information,
-or require its replication (memory overhead). Fortunately, as a given 
-daemon is observed by a single other daemon, there is a single initiator 
-to the propagation routine and this potential non-scalable usage of 
-the \pmix key-value store can be avoided. 
+or require its replication (memory overhead). Fortunately, as a given
+daemon is observed by a single other daemon, there is a single initiator
+to the propagation routine and this potential non-scalable usage of
+the \pmix key-value store can be avoided.
 
 \begin{figure*}[h]
 \centering
@@ -779,7 +780,7 @@ For the first experiment, we explore the accuracy of \ourwork's detector.
 %
 The accuracy experiment is conducted by (1) Starting with a large value for the
 detection timeout $\eta$; (2) Verify that no failure is detected when there is no injection, and all injected failures are reported; (3) If the previous test is accurate, decrease $\eta$ (and accordingly the heartbeat period $\delta$) until we notice false positive detection. We set a constant ratio $\eta = \delta * 2$.
-This methodology exposes the behavior in normal deployment (100ms period) as well 
+This methodology exposes the behavior in normal deployment (100ms period) as well
 as the behavior at the limit for very short $\eta$ timeout values (in the order of milliseconds).
  %
  Figure~\ref{fig:accuracy} presents the results on NaCl 64 nodes.
@@ -789,7 +790,7 @@ as the behavior at the limit for very short $\eta$ timeout values (in the order 
   heartbeat period is lower than 20 milliseconds. To further investigate,
   we measured that the heartbeat message is neither delayed by communication
   congestion nor compute pressure, but we found out that daemons need some time to launch the processes when starting the job which causes heartbeat delay and false detection during job startup.
-  
+
   % \todo{remove the heartbeat accuracy, change timeout accuracy to 'false positive present'; for later: do not report finalize errors}
 
   %\item No failure is injected and node missed its heartbeat sending deadline. With a reasonable timeout value, all daemons can send heartbeats successfully with $ \delta $ as low as 0.1 millisecond.
@@ -810,7 +811,7 @@ repetitions for the test to last at a minimum 20 seconds so that multiple heartb
 \begin{equation}
 Overhead = \frac{( {\ourwork - \prrte} )}{\prrte}
 \end{equation}
- From the graph we can see that the latency performance and bandwidth performance are barely affected with heartbeat period ranging from milliseconds to seconds. Notably, when $ \delta \geq 10 ms $, it has trivial influence on the system, as illustrated by the fact that the average overhead is within the band of natural variability of the benchmark. When  $ \delta = 1 ms $ the incurred noise varies in a band that increases the PingPong latency by up to three percent. In collective communication, the noise overhead is less than eight percent, slightly higher than the standard deviation of the benchmark itself, at four percent. 
+ From the graph we can see that the latency performance and bandwidth performance are barely affected with heartbeat period ranging from milliseconds to seconds. Notably, when $ \delta \geq 10 ms $, it has trivial influence on the system, as illustrated by the fact that the average overhead is within the band of natural variability of the benchmark. When  $ \delta = 1 ms $ the incurred noise varies in a band that increases the PingPong latency by up to three percent. In collective communication, the noise overhead is less than eight percent, slightly higher than the standard deviation of the benchmark itself, at four percent.
  In a general comparison with \ulfm (normalized to its performance without failure detection active),
  we can see that \ourwork achieves a similar level of incurred noise for a given
  heartbeat period and communication pattern.
@@ -847,11 +848,11 @@ As the number of processes increases latency of \ourwork remains almost the same
 For 4K processes, the stabilization of \ourwork is still below the range of the heartbeat period and timeout.
 SWIM latency shows a linear increase when the number of processes increase which will be the bottleneck when scaling up (assuming the maximum connection requests limit issue can be solved).
 
-Figure~\ref{fig:hb_prrte_swim} compares single node failure detection and propagation latency between \ourwork and SWIM 
-with different heartbeat period settings. For all tests we set $ \eta = \delta * 2 $. The 
-experiment uses 64 nodes in both cases; \ourwork deploys on all 768 cores, but SWIM uses only 
+Figure~\ref{fig:hb_prrte_swim} compares single node failure detection and propagation latency between \ourwork and SWIM
+with different heartbeat period settings. For all tests we set $ \eta = \delta * 2 $. The
+experiment uses 64 nodes in both cases; \ourwork deploys on all 768 cores, but SWIM uses only
 256 cores (due to not being able to deploy with more processes, as discussed above).
- We can clearly see that for \ourwork the detection latency is between ($\delta$, $\eta$), and the last notification happens very soon after the detection, which demonstrates the efficiency of our propagation algorithm (variability in the results comes from the randomness of when the node failure happened with respect to the heartbeat period). However, for SWIM, even considering the advantage of managing a 
+ We can clearly see that for \ourwork the detection latency is between ($\delta$, $\eta$), and the last notification happens very soon after the detection, which demonstrates the efficiency of our propagation algorithm (variability in the results comes from the randomness of when the node failure happened with respect to the heartbeat period). However, for SWIM, even considering the advantage of managing a
  smaller number of processes, the latency is still more than $10*\delta$, because after the initial timeout declares a suspicion, the gossip protocol and confirmation mechanism have to be executed
 before the failure is reported.
 
@@ -890,7 +891,7 @@ level which decreases the number of participants to the number of nodes---a pote
 large saving in manycore systems. This helps reduce
 the total messages transferred and forwarded compared to \ulfm, and the
  the lower bound for a full propagation is $\log_2({Number\ of\ Nodes})$.
- 
+
 %\begin{figure}[h]
 %  \centering
 %  \includegraphics[width=\linewidth]{Cori_Process_Failure_fit.pdf}
@@ -898,23 +899,23 @@ the total messages transferred and forwarded compared to \ulfm, and the
 %  \label{fig:proc_failure_cori}
 %\end{figure}
 
-Figure~\ref{fig:proc_failure_nacl} compares the latency of process failure detection and propagation between \ulfm and \ourwork. For process failures (as opposed to node failures), both 
-\ourwork and \ulfm rely on non-heartbeat--based detection. 
+Figure~\ref{fig:proc_failure_nacl} compares the latency of process failure detection and propagation between \ulfm and \ourwork. For process failures (as opposed to node failures), both
+\ourwork and \ulfm rely on non-heartbeat--based detection.
 %
-\ulfm uses the 
-shared-memory transport (SM BTL) between co-hosted processes, and this BTL 
-features a very rapid (almost instantaneous) in-band reporting of the 
+\ulfm uses the
+shared-memory transport (SM BTL) between co-hosted processes, and this BTL
+features a very rapid (almost instantaneous) in-band reporting of the
 endpoint failure. For \ourwork, the daemons detect process failures
-with operating system signals. 
+with operating system signals.
 %
-So, in this process failure experiment, we do not measure 
-the effectiveness of the heartbeat mechanism (and timeout). Instead, we  
+So, in this process failure experiment, we do not measure
+the effectiveness of the heartbeat mechanism (and timeout). Instead, we
 stress the broadcast component exclusively.
 
-Experiments are conducted on NaCl from 2 nodes to 64 nodes using all cores on each node.
-The process mapping results in \ulfm performing a large part of the 
-propagation between co-hosted processes (using the SM BTL transport) 
-and employs InfiniBand communication for inter-node messages. 
+Experiments are conducted on NaCl up to 64 nodes using all 12 cores on each node.
+The process mapping results in \ulfm performing a large part of the
+propagation between co-hosted processes (using the SM BTL transport)
+and employs InfiniBand communication for inter-node messages.
 \ourwork uses TCP to broadcast between daemons, and each daemon uses a
 \pmix's notification to distribute the error information to all hosted processes.
  We can see that our implementation enjoys the same performance as \ulfm but greatly reduces the complexity.
@@ -925,8 +926,10 @@ and employs InfiniBand communication for inter-node messages.
   \caption{Process failure detection and propagation delay on Cori.}
   \label{fig:proc_failure_cori}
 \end{figure}
- The detection and propagation time is less than 5 milliseconds despite using TCP. For \ulfm the detection and propagation delay increases from 2 milliseconds to 3 milliseconds as the  number of processes increases. For both \ourwork and \ulfm the latency increase trend fit $ a*\log_2(N) + b $, which can be easily scale up to hundreds of thousands of nodes, but for \ulfm
-the trend follows the number of processes rather than the number of nodes. Figure~\ref{fig:proc_failure_cori} scales the evaluation of \ourwork on the larger Cori system (with more processes per node). We can see that with 4K processes the detection and propagation latency is about 10 milliseconds, and the scalability trend remains logarithmic with the number of nodes (not processes).
+The detection and propagation time is less than 5 milliseconds despite using TCP. For \ulfm the detection and propagation delay increases from 2 milliseconds to 3 milliseconds as the  number of processes increases. For both \ourwork and \ulfm the latency increase trend fit $ a*\log_2(N) + b $, which can be easily scale up to hundreds of thousands of nodes, but for \ulfm
+the trend follows the number of processes rather than the number of nodes.
+
+To further validate the logarithmic trend of \ourwork scalability, we scales the evaluation on the larger Cori system (with more processes per node). We can see in Figure~\ref{fig:proc_failure_cori} that with 4K processes the detection and propagation latency is about 10 milliseconds, and the scalability trend remains logarithmic with the number of nodes (not processes).
 
 \subsection{Node Failures Detection}
 We now compare the detection latency for full-node failures. In \ourwork
@@ -961,7 +964,7 @@ From the figure see that \ourwork can detect and propagate a node failure betwee
 %
 
 The last experiment, presented in Figure~\ref{fig:multi_daemon_failure_nacl}), investigates the effect of multiple concurrent node failures. The experiment is similar to the single node failure case, except for the
-number of processes that inject failures. 
+number of processes that inject failures.
 We first consider the worst-case scenario, in which failures strike
 contiguous nodes. In this case, the daemon that detects the first failure
 undergoes the ring-mending operation, which entails a linear number of timeouts
@@ -971,11 +974,11 @@ fail simultaneously with a node failure. From a fault
 tolerance perspective, the ordering of
 daemons on the detection ring should avoid setting nodes that have a
 correlated chance of failure sequentially (e.g., avoid choosing predecessor and successor from the same cabinet),
-which is easier to achieve when the detection infrastructure is split from 
+which is easier to achieve when the detection infrastructure is split from
 the \mpi rank ordering.
 To study the average behavior, we also inject failures at random nodes.
 In this case, the detection and propagation are independently conducted by different observer nodes and neatly overlap, resulting in a marginal increase in the overall detection latency for
-reporting all failures. 
+reporting all failures.
 
 \begin{figure}[h]
   \centering
