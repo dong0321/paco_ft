@@ -9,6 +9,7 @@
 %\usepackage{subcaption}
 \usepackage{paralist}
 \usepackage[compact]{titlesec}
+\usepackage{balance}
 
 \newcommand{\mpifunc}[1]{\lstinline"MPI_#1"\xspace}
 \newcommand{\prrte}[0]{\textsc{PRRTE}\xspace}
@@ -334,11 +335,11 @@ to reduce the stabilization and recovery time of EREINIT.
 
 \textbf{DataSpaces and FTI} are persistent data storage services.
 Fault Tolerance Interface (FTI) provides a fast and efficient multilevel
-checkpointing functionality. Its interface lets users decide what data need to be protected and when it is reasonable to do so. The
+checkpointing functionality~\cite{Bautista-Gomez:2011:FHP:2063384.2063427}. Its interface lets users decide what data need to be protected and when it is reasonable to do so. The
 checkpointing routine then saves the marked data into a hierarchical storage using a variety of
 encoding and caching strategies, and staging to mitigate the cost of checkpointing.
 DataSpaces is a data sharing framework which supports the complex
-interaction and coordination patterns required by coupled data-intensive application workflows.
+interaction and coordination patterns required by coupled data-intensive application workflows~\cite{Sun:2016:IDP:3018814.3018816}.
 It can asynchronously capture and index data  which allows for dynamic interactions and in-memory
 data exchanges between coupled applications. For both these software, \ourwork can provide the basic service to
 detect and report  failures of the distributed infrastructure storage service, which, thus far, has not been
@@ -470,7 +471,7 @@ sections how this distinction helps improve the scalability of the failure
 detection algorithm.
 
 \begin{table}
-  \caption{Parameters and notations}\label{fig:notations}
+  \caption{Parameters and notations.}\label{fig:notations}
   \label{tab:parameters}
   \small
   \begin{tabular}{ccl}
@@ -503,8 +504,8 @@ employs two distinct strategies to detect process failures on one hand
 and node failures on the other hand.
 
 \begin{figure}[h]
-  \centering
-  \includegraphics[width=\linewidth]{server_client.pdf}
+  \centering\vspace{-1em}
+  \includegraphics[width=\linewidth]{server_client.pdf}\vspace{-2em}
   \caption{Hierarchical notification of hosted processes through \pmix notification routines. The \prrte daemon is in charge of observing, and forward notifications to the node-local managed application processes. The detection and reliable broadcast
   topology operates at the node level between daemons.}\label{fig:hosted}
 \end{figure}
@@ -540,14 +541,14 @@ failure of \textbf{\textit{d}}.
 \centering
 \begin{minipage}[t]{.22\textwidth}
   \centering
-  \includegraphics[trim=3cm 8.0cm 3cm 8cm,width=\linewidth]{ring_detector.pdf}
+  \includegraphics[trim=3cm 8.0cm 3cm 8cm,width=\linewidth]{ring_detector.pdf}\vspace{-1em}
   \captionof{figure}{Daemons monitor one another along a ring topology to detect node failures.}
   \label{fig:Ring}
 \end{minipage}%
 \hfill
 \begin{minipage}[t]{.22\textwidth}
   \centering
-  \includegraphics[trim=3cm 8.0cm 3cm 8cm,width=\linewidth]{reconnet_cross.pdf}
+  \includegraphics[trim=3cm 8.0cm 3cm 8cm,width=\linewidth]{reconnet_cross.pdf}\vspace{-1em}
   \captionof{figure}{The algorithm mends the detection ring topology when a node failure occurs by requesting heartbeats from the closest live ancestor in the ring.}
   \label{fig:ReconnectRing}
 \end{minipage}
@@ -627,7 +628,6 @@ the daemon $Did$ (initially empty, obtained from environment)}\\
 \EndIf
 \EndProcedure
 \end{algorithmic}
-
 \end{algorithm}
 
 Figure~\ref{fig:bmg} shows an example of the execution of the BMG broadcast
@@ -648,16 +648,17 @@ its local processes are not represented.
 
 
 \begin{figure*}[ht!]
-  \begin{minipage}{.45\textwidth}
+  \begin{minipage}[t]{.48\linewidth}
     \centering
-    \includegraphics[scale=.3]{review_BMG_seq.pdf}
-    \caption{Binomial graph with 12 nodes.}
+    \includegraphics[scale=.3]{review_BMG_seq.pdf}\vspace{-2em}
+    \caption{Binomial graph with 12 nodes with messages sent from 0 highlighted.}
     \label{fig:bmg}
   \end{minipage}
-  \begin{minipage}{.45\textwidth}
+  \hfill
+  \begin{minipage}[t]{.48\linewidth}
     \centering
-    \includegraphics[scale=.3]{review_reorder_span.pdf}
-    \caption{Broadcast using binomial spanning tree from node 0, redundant messages from 0 are also pictured, colored in blue.}
+    \includegraphics[scale=.3]{review_reorder_span.pdf}\vspace{-2em}
+    \caption{Binomial spanning tree in broadcast from node 0, redundant messages from 0 are colored in blue.}
     \label{fig:reorder_span}
   \end{minipage}
 \end{figure*}
@@ -688,8 +689,8 @@ The advantages of this new broadcast algorithm are:
 
 \begin{figure}[h]
   \centering
-  \includegraphics[trim=0.2cm 9.0cm 0.2cm 9cm,width=\linewidth]{PMIx_PRRTE.pdf}
-  \caption{Resilient \prrte component architecture. The orange boxes represent the component we mainly use to add the resilient features. The dark blue colored boxes are new modules.}\label{fig:prrte}
+  \includegraphics[trim=0.2cm 9.0cm 0.2cm 9cm,width=\linewidth]{PMIx_PRRTE.pdf}\vspace{-1em}
+  \caption{Resilient \prrte architecture. The orange boxes represent components with added resilience features. The dark blue colored boxes are new modules.}\label{fig:prrte}
 \end{figure}
 
 \subsection{Implementation}
@@ -756,7 +757,7 @@ the \pmix key-value store can be avoided.
   \includegraphics[width=\linewidth]{errorbar_Bcast_overhead_with_ulfm_max_col.pdf}
   \vspace*{-0.7cm}\hspace*{0cm}\textcolor{black}{}
 \end{minipage}
-\captionof{figure}{\prrte with fault tolerance overhead over \prrte and \ulfm using IMB}
+\captionof{figure}{\prrte with fault tolerance overhead over \prrte and \ulfm using IMB.}
 \label{fig:overhead}
 \end{figure*}
 
@@ -771,8 +772,8 @@ the map-by node, bind-by node policy to set communicating \mpi ranks on differen
 \subsection{Accuracy}
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{accuracy.pdf}
-  \caption{Accuracy under short timeout and heartbeat period.}
+  \includegraphics[width=\linewidth]{accuracy.pdf}\vspace{-1em}
+  \caption{Accuracy with short detection timeout.}
   \label{fig:accuracy}
 \end{figure}
 
@@ -821,8 +822,8 @@ This section compares the failure detection latency and scalability of \ourwork 
 the chance of false detection, SWIM uses a suspicion mechanism. When a node does not reply to a probing in time, the initiator then judges this node as suspicious (but not yet failed). It then broadcasts
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{Scale_prrte_swim.pdf}
-  \caption{Detection latency comparison between \ourwork and SWIM with increasing number of processes ($\delta=0.5s).$}
+  \includegraphics[width=\linewidth]{Scale_prrte_swim.pdf}\vspace{-1em}
+  \caption{Detection latency comparison between \ourwork and SWIM with increasing number of processes ($\delta=0.5s$).}
   \label{fig:scale_swim}
 \end{figure}
 this suspicion information within a subgroup: if any node in the subgroup receives an acknowledge before the timeout, it will declare the suspected node as alive; otherwise it will declare a failure. In order to improve the efficiency of multi-cast, SWIM uses the infection-style dissemination mechanism and piggybacks the information to be disseminated in the detection's pings and acknowledgements messages.
@@ -831,8 +832,8 @@ to replicate our \mpi detection benchmark with SWIM.
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{HB_prrte_swim.pdf}
-  \caption{Detection and Propagation delay comparison betwern \ourwork and SWIM with varying heartbeat period.}
+  \includegraphics[width=\linewidth]{HB_prrte_swim.pdf}\vspace{-1em}
+  \caption{Detection and Propagation delay comparison between \ourwork and SWIM with varying heartbeat period.}
   \label{fig:hb_prrte_swim}
 \end{figure}
 
@@ -871,7 +872,7 @@ general versus specialized---\ulfm. The \ulfm implementation also has two
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{review_Process_Failure_comparision.pdf}
+  \includegraphics[width=\linewidth]{review_Process_Failure_comparision.pdf}\vspace{-1em}
   \caption{Process failure detection and propagation delay compared to \ulfm.}
   \label{fig:proc_failure_nacl}
 \end{figure}
@@ -922,7 +923,7 @@ and employs InfiniBand communication for inter-node messages.
 %
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{Cori_Process_Failure_fit.pdf}
+  \includegraphics[width=\linewidth]{Cori_Process_Failure_fit.pdf}\vspace{-1em}
   \caption{Process failure detection and propagation delay on Cori.}
   \label{fig:proc_failure_cori}
 \end{figure}
@@ -940,7 +941,7 @@ before the timeout expiration.
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{PRRTE_ULFM_comparision.pdf}
+  \includegraphics[width=\linewidth]{PRRTE_ULFM_comparision.pdf}\vspace{-1em}
   \caption{Single Daemon Failure detection and propagation delay compared to \ulfm with different heartbeat period.}
   \label{fig:node_failure_hb}
 \end{figure}
@@ -955,7 +956,7 @@ Figure~\ref{fig:daemon_failure_diffnode} shows single node failure detection and
 \textbf{
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{Daemon_prrte_only.pdf}
+  \includegraphics[width=\linewidth]{Daemon_prrte_only.pdf}\vspace{-1em}
   \caption{Single Daemon Failure Detection and Propagation delay with different number of nodes.}
   \label{fig:daemon_failure_diffnode}
 \end{figure}}
@@ -982,7 +983,7 @@ reporting all failures.
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{multi_daemon_failures.pdf}
+  \includegraphics[width=\linewidth]{multi_daemon_failures.pdf}\vspace{-1em}
   \caption{Multiple daemon failures at the same time.}
   \label{fig:multi_daemon_failure_nacl}
 \end{figure}
@@ -1013,6 +1014,8 @@ of libraries, programming models, and runtime systems operating on large-scale s
 This material is based upon work supported by the National Science Foundation under Grant No. (1725692); and the Exascale Computing Project (17-SC-20-SC), a collaborative effort of the
 U.S. Department of Energy Office of Science and the National Nuclear Security Administration.
 \end{acks}
+
+\balance
 
 %
 % The next two lines define the bibliography style to be used, and the bibliography file.
