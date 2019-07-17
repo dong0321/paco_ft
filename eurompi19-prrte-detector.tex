@@ -306,7 +306,7 @@ This lack of portable reliable software infrastructure also makes comparing fair
 existing or proposed solutions difficult, not necessary in terms of potential capabilities
 but in terms of performance. We believe it is critical to level the field and provide a resilient, efficient, and portable fault detector and propagator, integrated into one of the most widely used parallel execution runtimes, that allows other libraries and programming models to build on and support resilience at any scale. Here are some examples of usages of such a resilient framework that we are actively pursuing.
 
-\textbf{\ulfm} repairs the \mpi infrastructure after a failure. A communicator can be reconfigured after a 
+\textbf{\ulfm} repairs the \mpi infrastructure after a failure~\cite{Bland2013}. A communicator can be reconfigured after a 
 process failure detection, with the failed processes excluded with \mpifunc{Comm_shrink}. Missing processes 
 can be re-spawned using the \mpi function \mpifunc{Comm_spawn}. The specialized failure detector provided 
 in \ulfm operates only on the \mpifunc{COMM_WORLD} scope, and relies on non-portable optimization 
@@ -317,7 +317,7 @@ detector. We will discuss in the experimental section how the generality of
 \ourwork does not incur a large overhead compared to the specialized \ulfm detector.
 
 \textbf{\oshmem} is a one-sided partitioned global address space (PGAS) programming model. While \oshmem does 
-not  currently have a fault tolerance model, several teams are exploring checkpoint and restart.
+not  currently have a fault tolerance model, several teams are exploring checkpoint and restart~\cite{shmem-ft15}.
 \ourwork failure detection and propagation attributes can provide the 
 notification to trigger the recovery. For more exploratory works, 
 application developers can experiment with modulating the frequency and
@@ -325,7 +325,7 @@ application developers can experiment with modulating the frequency and
  failure detector directly, or through \oshmem interfaces.
  
 \textbf{EREINIT} is a global-restart failure recovery model based 
-on a fast re-initialization of \mpi. This work is a co-design between MVAPICH and Slurm resource manager to add process and node failure detection and propagation features.
+on a fast re-initialization of \mpi~\cite{reinit18}. This work is a co-design between MVAPICH and Slurm resource manager to add process and node failure detection and propagation features.
 %The detection is using Slurm's health check mechanism by sending ping messages to nodes, propagation is implemented in a manner of forcing the controller to individually send the notification to children of the failed nodes.
 % However, this work is highly dependent on one particular resource manager: Slurm.
 It exhibit interesting detection capabilities, but unfortunately it use an inefficient propagation method and is tied to a single resource manager (Slurm). \ourwork can substitute a portable fault detection capability to enable 
@@ -344,7 +344,7 @@ data exchanges between coupled applications. For both these software, \ourwork c
 detect and report  failures of the distributed infrastructure storage service, which, thus far, has not been 
 fault tolerant.
 % Data Spaces is not currently reliable, at least not until the data is safely pushed into the file system.
- 
+
 \section{Related Work}\label{sec:related}
 In this section, we survey related work on large-scale distributed runtime environments, different kinds of heartbeat based and random gossip based failure detectors, together with reliable broadcast algorithms to propagate fault information.
 
@@ -432,7 +432,7 @@ reduces the cost of propagation on typical HPC systems.
 
 In this section, we describe how we design a generic failure detector that can
 be provided
-as an infrastructure service (that we call \ourwork), while at the same time exploiting the
+as an infrastructure service in the context of PPRTE (that we call \ourwork), while at the same time exploiting the
 specificities of the HPC machine model to sustain high detection accuracy
 and speed, while incurring a limited amount of noise on the monitored application.
 
@@ -835,7 +835,6 @@ to replicate our \mpi detection benchmark with SWIM.
   \label{fig:hb_prrte_swim}
 \end{figure}
 
-
 Figure \ref{fig:scale_swim} compares the scalability of the two detectors with regard to the number of deployed processes with $\eta = 1s$, $\delta = 0.5s$.
 %For smaller number of processes is stabilizing in approximately 0.75s, while the stabilization delay of SWIM is 5s.
 We could run SWIM tests only up to 256 members; after that limit, some nodes exceed the maximum connection backlog
@@ -875,7 +874,6 @@ general versus specialized---\ulfm. The \ulfm implementation also has two
   \caption{Process failure detection and propagation delay compared to \ulfm.}
   \label{fig:proc_failure_nacl}
 \end{figure}
-
 The propagation overlay is also built at the BTL level. Reliable broadcast
 messages are sent using the same active message infrastructure employed to
 deliver short \mpi messages and matching fragments (however, a different
@@ -892,13 +890,13 @@ level which decreases the number of participants to the number of nodes---a pote
 large saving in manycore systems. This helps reduce
 the total messages transferred and forwarded compared to \ulfm, and the
  the lower bound for a full propagation is $\log_2({Number\ of\ Nodes})$.
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\linewidth]{Cori_Process_Failure_fit.pdf}
-  \caption{Process failure detection and propagation delay on Cori.}
-  \label{fig:proc_failure_cori}
-\end{figure}
+ 
+%\begin{figure}[h]
+%  \centering
+%  \includegraphics[width=\linewidth]{Cori_Process_Failure_fit.pdf}
+%  \caption{Process failure detection and propagation delay on Cori.}
+%  \label{fig:proc_failure_cori}
+%\end{figure}
 
 Figure~\ref{fig:proc_failure_nacl} compares the latency of process failure detection and propagation between \ulfm and \ourwork. For process failures (as opposed to node failures), both 
 \ourwork and \ulfm rely on non-heartbeat--based detection. 
@@ -919,8 +917,15 @@ propagation between co-hosted processes (using the SM BTL transport)
 and employs InfiniBand communication for inter-node messages. 
 \ourwork uses TCP to broadcast between daemons, and each daemon uses a
 \pmix's notification to distribute the error information to all hosted processes.
+ We can see that our implementation enjoys the same performance as \ulfm but greatly reduces the complexity.
 %
- We can see that our implementation enjoys the same performance as \ulfm but greatly reduces the complexity. The detection and propagation time is less than 5 milliseconds despite using TCP. For \ulfm the detection and propagation delay increases from 2 milliseconds to 3 milliseconds as the  number of processes increases. For both \ourwork and \ulfm the latency increase trend fit $ a*\log_2(N) + b $, which can be easily scale up to hundreds of thousands of nodes, but for \ulfm
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{Cori_Process_Failure_fit.pdf}
+  \caption{Process failure detection and propagation delay on Cori.}
+  \label{fig:proc_failure_cori}
+\end{figure}
+ The detection and propagation time is less than 5 milliseconds despite using TCP. For \ulfm the detection and propagation delay increases from 2 milliseconds to 3 milliseconds as the  number of processes increases. For both \ourwork and \ulfm the latency increase trend fit $ a*\log_2(N) + b $, which can be easily scale up to hundreds of thousands of nodes, but for \ulfm
 the trend follows the number of processes rather than the number of nodes. Figure~\ref{fig:proc_failure_cori} scales the evaluation of \ourwork on the larger Cori system (with more processes per node). We can see that with 4K processes the detection and propagation latency is about 10 milliseconds, and the scalability trend remains logarithmic with the number of nodes (not processes).
 
 \subsection{Node Failures Detection}
@@ -978,7 +983,6 @@ reporting all failures.
   \caption{Multiple daemon failures at the same time.}
   \label{fig:multi_daemon_failure_nacl}
 \end{figure}
-
 
 \section{Conclusion}\label{sec:conclusion}
 Failure detection and propagation is a critical service for resilient systems. In this work, we present an efficient failure detection and propagation design and implementation for distributed systems.
