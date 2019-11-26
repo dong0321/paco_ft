@@ -1,5 +1,7 @@
 %%%% Proceedings format for most of ACM conferences (with the exceptions listed below) and all ICPS volumes.
 \documentclass[sigconf]{acmart}
+%\documentclass[5p,times,twocolumn]{elsarticle}
+
 \usepackage{algorithm}
 \usepackage[export]{adjustbox}
 \usepackage[noend]{algpseudocode}
@@ -810,7 +812,7 @@ compete for resources with \ourwork activities.
 For the collective benchmarks, we run on 64 nodes using all cores. For each message size, we set the number of
 repetitions for the test to last at a minimum 20 seconds so that multiple heartbeat emissions occur during the experiment. Overhead is calculated by using the maximum latency result, normalized by the non-fault tolerant performance:
 \begin{equation}
-Overhead = \frac{( {\ourwork - \prrte} )}{\prrte}
+Overhead = \frac{( {\ourwork - \prrte} )}{\prrte}\label{eq:1}
 \end{equation}
  From the graph we can see that the latency performance and bandwidth performance are barely affected with heartbeat period ranging from milliseconds to seconds. Notably, when $ \delta \geq 10 ms $, it has trivial influence on the system, as illustrated by the fact that the average overhead is within the band of natural variability of the benchmark. When  $ \delta = 1 ms $ the incurred noise varies in a band that increases the PingPong latency by up to three percent. In collective communication, the noise overhead is less than eight percent, slightly higher than the standard deviation of the benchmark itself, at four percent.
  In a general comparison with \ulfm (normalized to its performance without failure detection active),
@@ -989,18 +991,26 @@ reporting all failures.
 \end{figure}
 
 \section{Application support and evaluation}\label{sec:application}
-In this section we investigate application supports of \ourwork using different programming models
-including Pmix based, \mpi and OpenMP based applications.
-Figure~\ref{fig:prrte_with_oshmem} shows the overflow of building and running separate
-programming models running with \ourwork:
+In this section we investigate application support of \ourwork with different programming models
+including Pmix, \mpi and OpenMP or even hybrid applications. Our interests focus on complex application which
+associated with multiple programming models. Because for hybrid applications and models, there is no "standard" method by which programming models could
+follow to initiate themselves, it will be hard to inform each programming model
+that another model is actively in use.
+For example, MPI has the standard \mpifunc{Init} function that must be called to initialize the
+library – providing a "hook" within that function to notify others that it has been called.
+Also, OpenMP does not have an explicit call to "init" and is instead initialized on first use.
+Figure~\ref{fig:prrte_with_oshmem} shows how to coordinate between those two different models. We can see
+that they share the same external PMIx library within the processes, it will therefore be common to both programming
+libraries. Thus, the calls into PMIx\_Init by each programming model will enter the same code space.
+And then, the event notification mechanism within PMIx will share the information and coordinate between those models.
+\prrte supports different type of applications by: first use \textbf{\emph{prte}} to start the distributed
+virtual machine (DVM) and then use \textbf{\emph{prun}} to execute the binary as long as they are compiled correspondingly as:
 \begin{enumerate}
-  \item Pmix-based application use \textbf{\emph{pcc}} for compilation;
+  \item PMIx-based application use \textbf{\emph{pcc}} for compilation;
   \item MPI application need to install \mpi and \ourwork with the same external PMIx, then use \textbf{\emph{mpicc}} for compilation;
-  \item OpenSHMEM application need to install \mpi ( with option \textbf{\emph{enable-shmem}}) and
+  \item OpenSHMEM application need to install \mpi (with option \textbf{\emph{-enable-shmem}}) and
   also \ourwork with the same external PMIx, then use \textbf{\emph{oshcc}} for compilation;
 \end{enumerate}
-For all different type of applications we use \textbf{\emph{prte}} to start the DMV and the use \textbf{\emph{prun}} to execute the
-application.
 
 \begin{figure}[h]
   \centering
@@ -1010,7 +1020,7 @@ application.
 \end{figure}
 
 We also evaluate the overhead performance of \ourwork
-with both MPI and OpenSHMEM applications using a heavily communication-bound benchmark Graph500~\cite{graph500}.
+with MPI and OpenSHMEM applications using the heavily communication-bound benchmark Graph500~\cite{graph500}.
 Graph500 is an open specification of a graph-based effort to offer a standardized
 benchmark across large-scale distributed
 platforms which captures the behavior of common communication-bound graph algorithms.
@@ -1022,19 +1032,43 @@ popular open source project OpenSHMEM Benchmark (OSB) suite~\cite{g500shmem} inc
 both MPI and OpenSHMEM based Graph500 implementations.
 
 \subsection{MPI application}
-For MPI application we use mpi\_test\_simple, which is the baseline implementation that
+For MPI application we use "mpi\_test\_simple", which is the baseline implementation that
 uses two-sided \mpifunc{Send} and \mpifunc{Recv} and \mpifunc{AllReduce} to implement a breadth-first search (BFS).
 We evaluate the noise overhead incurred of heartbeats messages with different heartbeat
 periods on the point-to-point and collectives.
-For the experiment setting we use \texttt{\bf $scale\_factor = 20$, $edge\_factor = 16$ }
+For the experiment setting we use Cori with 1K nodes. For the application setting we use \texttt{\bf $scale\_factor = 20$, $edge\_factor = 16$ }
 which will generate a undirected graph with \texttt{\bf $2^{scale\_factor}$} vertices and
 \texttt{\bf $2^{scale\_factor}*edge\_factor$} edges. The benchmark collects the statistics
 of the generation of the breadth-first search tree of 64 randomly selected vertices. Also
 collect the statistics of validation time which ensures that all connected components are visited
 which generate large amount of communications.
 
-\subsection{Hybrid application}
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{bfs_mean.pdf}
+  \caption{Overhead for generating BFS running mpi\_test\_simple upon \prrte with fault tolerance over \prrte.}
+  \label{fig:mean_bfs}
+\end{figure}
 
+Figure~\ref{fig:mean_bfs} shows the overhead incurred with the P2P communication during the BFS generation phase.
+We present in shaded gray, the variability of the BSF without our heartbeat detection enabled ($mean\_time\_of\_BFS \pm \sigma$).
+We calculate the overhead the same as in equation \eqref{eq:1}. For comparison we plot the error bars for with different $\delta$ values.
+We can see under all cases the variability shows no difference as the detector is inactive.
+Figure~\ref{fig:validate_bfs} illustrates the overhead incurred with \mpifunc{AllReduce} during the validation phase.
+We achieve the same performance which shows that our failure detection heartbeats show
+barely no impact for the application with both P2P and collective communications.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=\linewidth]{validate_bfs.pdf}
+  \caption{Overhead for validating BFS running mpi\_test\_simple upon \prrte with fault tolerance over \prrte.}
+  \label{fig:validate_bfs}
+\end{figure}
+
+
+\subsection{Hybrid application}
+For the OpenSHMEM application we select the implementation of "graph500\_shmem\_one\_sided" that is using \mpi-2 one-sided code base.
+%\todo{MPI_Win_Fence p2p or not?}.
 
 \section{Conclusion}\label{sec:conclusion}
 Failure detection and propagation is a critical service for resilient systems.In this work, we present an efficient failure detection and propagation design and implementation for distributed systems.
@@ -1051,7 +1085,6 @@ significantly, and is competitive with specialized HPC solutions that can
 manage only \mpi applications. Thus, this runtime-level failure detector
 opens the gate for efficient management of failures for an emerging field
 of libraries, programming models, and runtime systems operating on large-scale systems.
-
 
 %\section{Acknowledgments}
 %
