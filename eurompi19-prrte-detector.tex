@@ -13,8 +13,10 @@
 \usepackage{booktabs}
 \usepackage{caption}
 \usepackage{amssymb,amsmath}
+\usepackage[strings]{underscore}
 
 \usepackage{url}
+\usepackage[hidelinks]{hyperref}
 
 \newcommand{\mpifunc}[1]{\lstinline"MPI_#1"\xspace}
 \newcommand{\prrte}[0]{\textsc{PRRTE}\xspace}
@@ -583,15 +585,15 @@ its local processes are not represented.
     \centering
     \includegraphics[scale=.3]{review_reorder_span.pdf}\vspace{-2em}
     \caption{Binomial spanning tree in broadcast from node 0, redundant messages from 0 are colored in blue.}
-    \label{fig:reorder_span}
+    \label{fig:reorder.span}
   \end{minipage}
 \end{figure*}
 
 The propagation message issued at each daemon is ordered so that the
 messages that are part of a binomial spanning tree rooted at the emitter
-are sent first. Figure \ref{fig:reorder_span} shows the a spanning tree
+are sent first. Figure \ref{fig:reorder.span} shows the a spanning tree
 for a broadcast originating from node 0; the redundant messages (colored
-in blue) are extra messages that provide reliablility and ensure that
+in blue) are extra messages that provide reliability and ensure that
 any node in the BMG can always be reached within $O(log_2 N)$ steps (given
 that less than $2 log_2 N$ failures strike, with more failures,
 statistically rare scenarios can degenerate in a linear propagation time).
@@ -748,7 +750,7 @@ the chance of false detection, SWIM uses a suspicion mechanism. When a node does
   \centering
   \includegraphics[width=\linewidth]{Scale_prrte_swim.pdf}\vspace{-1em}
   \caption{Detection latency comparison between \ourwork and SWIM with increasing number of processes ($\delta=0.5s$).}
-  \label{fig:scale_swim}
+  \label{fig:scale.swim}
 \end{figure}
 this suspicion information within a subgroup: if any node in the subgroup receives an acknowledge before the timeout, it declares the suspected node as alive; otherwise it declares a failure. In order to improve the efficiency of multi-cast, SWIM uses the infection-style dissemination mechanism and piggybacks the information to be disseminated in the detection's pings and acknowledgements messages.
 For the SWIM implementation, we use Go-Memberlist (\#a8f83c6). We used a go-\mpi interface
@@ -758,10 +760,10 @@ to replicate our \mpi detection benchmark with SWIM.
   \centering
   \includegraphics[width=\linewidth]{HB_prrte_swim.pdf}\vspace{-1em}
   \caption{Detection and Propagation delay comparison between \ourwork and SWIM with varying heartbeat period.}
-  \label{fig:hb_prrte_swim}
+  \label{fig:hb.prrte.swim}
 \end{figure}
 
-Figure \ref{fig:scale_swim} compares the scalability of the two detectors with regard to the number of deployed processes with $\eta = 1s$, $\delta = 0.5s$.
+Figure \ref{fig:scale.swim} compares the scalability of the two detectors with regard to the number of deployed processes with $\eta = 1s$, $\delta = 0.5s$.
 %For smaller number of processes is stabilizing in approximately 0.75s, while the stabilization delay of SWIM is 5s.
 We could run SWIM tests only up to 256 members; after that limit, some nodes exceed the maximum connection backlog
 set in the operating system for \texttt{listen} operations on TCP sockets, causing an application crash during
@@ -773,7 +775,7 @@ As the number of processes increases latency of \ourwork remains almost the same
 For 4K processes, the stabilization of \ourwork is still below the range of the heartbeat period and timeout.
 SWIM latency shows a linear increase when the number of processes increase which will be the bottleneck when scaling up (assuming the maximum connection requests limit issue can be solved).
 
-Figure~\ref{fig:hb_prrte_swim} compares single node failure detection and propagation latency between \ourwork and SWIM
+Figure~\ref{fig:hb.prrte.swim} compares single node failure detection and propagation latency between \ourwork and SWIM
 with different heartbeat period settings. For all tests we set $ \eta = \delta * 2 $. The
 experiment uses 64 nodes in both cases; \ourwork deploys on all 768 cores, but SWIM uses only
 256 cores (due to not being able to deploy with more processes, as discussed above).
@@ -798,7 +800,7 @@ general versus specialized---\ulfm. The \ulfm implementation also has two
   \centering
   \includegraphics[width=\linewidth]{review_Process_Failure_comparision.pdf}\vspace{-1em}
   \caption{Process failure detection and propagation delay compared to \ulfm.}
-  \label{fig:proc_failure_nacl}
+  \label{fig:proc.failure.nacl}
 \end{figure}
 The propagation overlay is also built at the BTL level. Reliable broadcast
 messages are sent using the same active message infrastructure employed to
@@ -821,10 +823,10 @@ the total messages transferred and forwarded compared to \ulfm, and the
 %  \centering
 %  \includegraphics[width=\linewidth]{Cori_Process_Failure_fit.pdf}
 %  \caption{Process failure detection and propagation delay on Cori.}
-%  \label{fig:proc_failure_cori}
+%  \label{fig:proc.failure.cori}
 %\end{figure}
 
-Figure~\ref{fig:proc_failure_nacl} compares the latency of process failure detection and propagation between \ulfm and \ourwork. For process failures (as opposed to node failures), both
+Figure~\ref{fig:proc.failure.nacl} compares the latency of process failure detection and propagation between \ulfm and \ourwork. For process failures (as opposed to node failures), both
 \ourwork and \ulfm rely on non-heartbeat--based detection.
 %
 \ulfm uses the
@@ -849,12 +851,12 @@ and employs InfiniBand communication for inter-node messages.
   \centering
   \includegraphics[width=\linewidth]{Cori_Process_Failure_fit.pdf}\vspace{-1em}
   \caption{Process failure detection and propagation delay on Cori.}
-  \label{fig:proc_failure_cori}
+  \label{fig:proc.failure.cori}
 \end{figure}
 The detection and propagation time is less than 5 milliseconds despite using TCP. For \ulfm the detection and propagation delay increases from 2 milliseconds to 3 milliseconds as the  number of processes increases. For both \ourwork and \ulfm the latency increase trend fit $ a*\log_2(N) + b $, which can be easily scale up to hundreds of thousands of nodes, but for \ulfm
 the trend follows the number of processes rather than the number of nodes.
 
-To further validate the logarithmic trend of \ourwork scalability, we scales the evaluation on the larger Cori system (with more processes per node). We can see in Figure~\ref{fig:proc_failure_cori} that with 4K processes the detection and propagation latency is about 10 milliseconds, and the scalability trend remains logarithmic with the number of nodes (not processes).
+To further validate the logarithmic trend of \ourwork scalability, we scales the evaluation on the larger Cori system (with more processes per node). We can see in Figure~\ref{fig:proc.failure.cori} that with 4K processes the detection and propagation latency is about 10 milliseconds, and the scalability trend remains logarithmic with the number of nodes (not processes).
 
 \subsection{Node Failures Detection}
 We now compare the detection latency for full-node failures. In \ourwork
@@ -867,28 +869,28 @@ before the timeout expiration.
   \centering
   \includegraphics[width=\linewidth]{PRRTE_ULFM_comparision.pdf}\vspace{-1em}
   \caption{Single Daemon Failure detection and propagation delay compared to \ulfm with different heartbeat period.}
-  \label{fig:node_failure_hb}
+  \label{fig:node.failure.hb}
 \end{figure}
 
-Figure~\ref{fig:node_failure_hb} presents the behavior observed when injecting a single daemon failure under different heartbeat period settings. We conducted the experiments on 64 nodes with 764 processes. For \ourwork after synchronizing, we inject a node crash by ordering a process to kill its host daemon. For \ulfm,
+Figure~\ref{fig:node.failure.hb} presents the behavior observed when injecting a single daemon failure under different heartbeat period settings. We conducted the experiments on 64 nodes with 764 processes. For \ourwork after synchronizing, we inject a node crash by ordering a process to kill its host daemon. For \ulfm,
 all application processes on the target node suicide as a group.
 %However, \ulfm doesn't have the capability of detecting node failure, we simulate "node crash" by kill the last process on that node. With the process ring detector this particular process failure will be detected by its observer on another node, this behavior is the same as \ourwork's node to detect node failure.
 %Also we assume that the time different between the daemon failure and process failure is trivial which is confirmed later in the experiment.
 For the heartbeat period setting we start from 30 milliseconds to 0.5 second for both \ourwork and \ulfm. For all heartbeat period, we set $ \eta = \delta * 2 $. From the figure, we can see that the detection latency in all cases lands in the interval $[\delta,\eta]$.
 
-Figure~\ref{fig:daemon_failure_diffnode} shows single node failure detection and propagation performance with a fixed heartbeat period $ \delta = 0.5s $ and an increasing total number of nodes. After a node crash, all processes hosted on this node are affected, the observer node fetches and packs the information of all affected processes information, then distributes the packed message.
+Figure~\ref{fig:daemon.failure.diffnode} shows single node failure detection and propagation performance with a fixed heartbeat period $ \delta = 0.5s $ and an increasing total number of nodes. After a node crash, all processes hosted on this node are affected, the observer node fetches and packs the information of all affected processes information, then distributes the packed message.
 \textbf{
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{Daemon_prrte_only.pdf}\vspace{-1em}
   \caption{Single Daemon Failure Detection and Propagation delay with different number of nodes.}
-  \label{fig:daemon_failure_diffnode}
+  \label{fig:daemon.failure.diffnode}
 \end{figure}}
 %
 From the figure see that \ourwork can detect and propagate a node failure between (0.5s, 1s) for all tested number of nodes.
 %
 
-The last experiment, presented in Figure~\ref{fig:multi_daemon_failure_nacl}), investigates the effect of multiple concurrent node failures. The experiment is similar to the single node failure case, except for the
+The last experiment, presented in Figure~\ref{fig:multi.daemon.failure.nacl}), investigates the effect of multiple concurrent node failures. The experiment is similar to the single node failure case, except for the
 number of processes that inject failures.
 We first consider the worst-case scenario, in which failures strike
 contiguous nodes. In this case, the daemon that detects the first failure
@@ -909,7 +911,7 @@ reporting all failures.
   \centering
   \includegraphics[width=\linewidth]{multi_daemon_failures.pdf}
   \caption{Multiple daemon failures at the same time.}
-  \label{fig:multi_daemon_failure_nacl}
+  \label{fig:multi.daemon.failure.nacl}
 \end{figure}
 
 \section{Communication Models Coverage and Application Evaluation}\label{sec:application}
@@ -919,7 +921,7 @@ In hybrid applications and models, there is no ``standard'' method by which prog
 For example, \mpi has the standard \mpifunc{Init} function that must be called to initialize the
 library – providing a "hook" within that function to notify others that it has been called.
 In contrast, OpenMP does not have an explicit call to "init" and is instead initialized on first use; older versions of \oshmem also allow implicit initialization.
-Figure~\ref{fig:prrte_with_oshmem} shows how to coordinate between two different models. We can see
+Figure~\ref{fig:prrte.with.oshmem} shows how to coordinate between two different models. We can see
 that as both communication libraries employ the PMIx library to interface with the runtime and job scheduling system,
 the different programming languages have a common interface to exchange information.
 The calls into PMIx\_Init from each programming model enters the same code space and offers an opportunity for coordination.
@@ -936,7 +938,7 @@ In practice, \prrte supports different type of applications when launching a sin
   \centering
   \includegraphics[width=\linewidth]{prrte_with_oshmem.pdf}\vspace{-1em}
   \caption{Hybrid programming model support of MPI and \oshmem}
-  \label{fig:prrte_with_oshmem}
+  \label{fig:prrte.with.oshmem}
 \end{figure}
 
 To evaluate the overhead on performance from \ourwork
@@ -966,21 +968,21 @@ periods on the point-to-point and collectives that are used in this benchmark.
   \centering
   \includegraphics[width=\linewidth]{bfs_mean.pdf}
   \caption{Overhead for generating BFS running mpi\_test\_simple when using \prrte with fault tolerance over \prrte (32K \mpi ranks; the gray area represents the normal variability of the benchmark).}
-  \label{fig:mean_bfs}
+  \label{fig:mean.bfs}
 \end{figure}
 
-Figure~\ref{fig:mean_bfs} shows the overhead incurred with the P2P communication during the BFS generation phase.
+Figure~\ref{fig:mean.bfs} shows the overhead incurred with the P2P communication during the BFS generation phase.
 We present in shaded gray, the variability of the BSF without our heartbeat detection enabled ($mean\_time\_of\_BFS \pm \sigma$).
 We calculate the overhead the same as in equation~\eqref{eq.overhead}. For comparison, we plot the overhead with error bars for with different $\delta$ values.
 We can see that in all cases the variability without the detector active is comparable to the maximum spread of the overhead when fault tolerance is enabled, and the average overhead is close to 0.
-Figure~\ref{fig:validate_bfs} shows the overhead incurred in the \mpifunc{AllReduce} during the validation phase.
+Figure~\ref{fig:validate.bfs} shows the overhead incurred in the \mpifunc{AllReduce} during the validation phase.
 Again, the application with failure detection enabled achieves the same performance, which demonstrates that our failure detection heartbeats has barely no impact in communication intensive applications with both P2P and collective communications.
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{validate_bfs.pdf}
   \caption{Overhead for validating BFS in mpi\_test\_simple when using \prrte with fault tolerance over \prrte (32K \mpi ranks; the gray area represents the normal variability of the benchmark).}
-  \label{fig:validate_bfs}
+  \label{fig:validate.bfs}
 \end{figure}
 
 
@@ -990,19 +992,19 @@ Again, the application with failure detection enabled achieves the same performa
   \centering
   \includegraphics[width=\linewidth]{shmem_bfs_mean.pdf}
   \caption{Overhead for generating BFS running graph500\_shmem\_one\_sided upon \prrte with fault tolerance over \prrte (32K \oshmem PEs; the gray area represents the normal variability of the benchmark).}
-  \label{fig:shmem_mean_bfs}
+  \label{fig:shmem.mean.bfs}
 \end{figure}
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{shmem_validate_bfs.pdf}
   \caption{Overhead for validating BFS running graph500\_shmem\_one\_sided upon \prrte with fault tolerance over \prrte (32K \oshmem PEs; the gray area represents the normal variability of the benchmark).}
-  \label{fig:shmem_validate_bfs}
+  \label{fig:shmem.validate.bfs}
 \end{figure}
 For the \oshmem application, we selected the implementation of \textbf{\emph{graph500\_shmem\_one\_sided}} that
 is derived from the \mpi-2 one-sided code base.
 For the communication it uses shmem\_put/getmem, which are similar to MPI\_put/get. It also uses a shmem reduce collective as a replacement for \mpifunc{AllReduce}.
-Figure~\ref{fig:shmem_mean_bfs} and Figure~\ref{fig:shmem_validate_bfs} shows the overhead of
+Figure~\ref{fig:shmem.mean.bfs} and Figure~\ref{fig:shmem.validate.bfs} shows the overhead of
 those two types of communications during BFS generation and validation.
 Again, for all different heartbeat periods, they show similar trends in which our detector does not stress the applications' communication.
 
