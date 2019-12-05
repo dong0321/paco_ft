@@ -912,24 +912,24 @@ reporting all failures.
   \label{fig:multi_daemon_failure_nacl}
 \end{figure}
 
-\section{Application support and evaluation}\label{sec:application}
+\section{Communication Models Coverage and Application Evaluation}\label{sec:application}
 In this section we investigate application support of \ourwork with different programming models.
-Our interests focus on 1) demonstrating how our generic capabilities can support multiple programming languages, 2) how much overhead (if any) is incurred on both 2-sided (e.g., \mpi) and 1-sized programming models (e.g., \oshmem), and 3) provide the blueprints for supporting applications using multiple programming models.
+Our interests focus on 1) demonstrating how our generic capabilities can support multiple programming languages, 2) how much overhead (if any) is incurred on both two-sided (e.g., \mpi) and one-sized programming models (e.g., \oshmem), and 3) provide the blueprints for supporting applications using multiple programming models.
 In hybrid applications and models, there is no ``standard'' method by which programming models can coordinate.
 For example, \mpi has the standard \mpifunc{Init} function that must be called to initialize the
 library – providing a "hook" within that function to notify others that it has been called.
 In contrast, OpenMP does not have an explicit call to "init" and is instead initialized on first use; older versions of \oshmem also allow implicit initialization.
 Figure~\ref{fig:prrte_with_oshmem} shows how to coordinate between two different models. We can see
-that as they both employ the PMIx library to interface with the runtime and job scheduling system,
+that as both communication libraries employ the PMIx library to interface with the runtime and job scheduling system,
 the different programming languages have a common interface to exchange information.
 The calls into PMIx\_Init from each programming model enters the same code space and offers an opportunity for coordination.
 The event notification mechanism within PMIx can then be used to share the information and coordinate between those models.
 
-In practice, \prrte supports different type of applications when launching a single \prrte Distributed Virtual Machine (DVM) (using the \textbf{\emph{prte}} command), and then usin the \textbf{\emph{prun}} launcher to execute the binary as long as they are compiled in the following fashion:
+In practice, \prrte supports different type of applications when launching a single \prrte Distributed Virtual Machine (DVM) (using the \textbf{\emph{prte}} command), and then using the \textbf{\emph{prun}} launcher to execute the binaries, as long as they are compiled in the following fashion:
 \begin{enumerate}
   \item \pmix-based application use \textbf{\emph{pcc}} for compilation;
-  \item \mpi application need to install \mpi and \ourwork with the same external PMIx, then use \textbf{\emph{mpicc}} for compilation;
-  \item \oshmem application need to install \oshmem and \ourwork with the same external PMIx, then use \textbf{\emph{oshcc}} for compilation. In \ompi, \mpi+\oshmem programs are directly supported when compiling with \oshmem support (using the option \textbf{\emph{-enable-shmem}}).
+  \item \mpi applications need to install \mpi and \ourwork with the same external PMIx, then use \textbf{\emph{mpicc}} for compilation;
+  \item \oshmem applications need to install \oshmem and \ourwork with the same external PMIx, then use \textbf{\emph{oshcc}} for compilation. In \ompi, \mpi+\oshmem programs are directly supported when compiling with \oshmem support (using the option \textbf{\emph{-enable-shmem}}).
 \end{enumerate}
 
 \begin{figure}[h]
@@ -945,7 +945,7 @@ Graph500 is an open specification effort to offer a standardized graph-based
 benchmark across large-scale distributed
 platforms which captures the behavior of common communication-bound graph algorithms.
 Graph500 differs from other large-scale
-benchmarks such as HPL, and HGPGMG in the way it primarily highlights data access patterns.
+benchmarksm such as HPL, and HGPGMG in the way it primarily highlights data access patterns.
 Graph500 performs a breadth-first search (BFS) in
 parallel on a large randomly generated undirected graph. Our experiments use a
 the open source project \oshmem Benchmark (OSB) suite~\cite{g500shmem} that features both \mpi and \oshmem based 
@@ -1001,10 +1001,10 @@ Again, the application with failure detection enabled achieves the same performa
 \end{figure}
 For the \oshmem application, we selected the implementation of \textbf{\emph{graph500\_shmem\_one\_sided}} that
 is derived from the \mpi-2 one-sided code base.
-For the communication it uses shmem\_put/getmem which are similar to MPI\_put/get. It also uses a shmem reduce collective as a replacement for \mpifunc{AllReduce}.
+For the communication it uses shmem\_put/getmem, which are similar to MPI\_put/get. It also uses a shmem reduce collective as a replacement for \mpifunc{AllReduce}.
 Figure~\ref{fig:shmem_mean_bfs} and Figure~\ref{fig:shmem_validate_bfs} shows the overhead of
 those two types of communications during BFS generation and validation.
-They show similar trends: for all different heartbeat periods, our detector does not stress the applications' communication.
+Again, for all different heartbeat periods, they show similar trends in which our detector does not stress the applications' communication.
 
 \section{Conclusion}\label{sec:conclusion}
 Failure detection and propagation is a critical service for resilient systems. In this work, we present an efficient failure detection and propagation design and implementation for distributed systems.
