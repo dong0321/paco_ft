@@ -1,5 +1,3 @@
-%%%% Proceedings format for most of ACM conferences (with the exceptions listed below) and all ICPS volumes.
-%\documentclass[sigconf]{acmart}
 \documentclass[5p,times,twocolumn]{elsarticle}
 
 \usepackage{algorithm}
@@ -30,63 +28,13 @@
 
 \newcommand{\imb}[0]{\textsc{IMB}\xspace}
 
-%%%% As of March 2017, [siggraph] is no longer used. Please use sigconf (above) for SIGGRAPH conferences.
-
-%%%% Proceedings format for SIGPLAN conferences
-% \documentclass[sigplan, anonymous, review]{acmart}
-
-%%%% Proceedings format for SIGCHI conferences
-% \documentclass[sigchi, review]{acmart}
-
-%%%% To use the SIGCHI extended abstract template, please visit
-% https://www.overleaf.com/read/zzzfqvkmrfzn
-
-%
-% defining the \BibTeX command - from Oren Patashnik's original BibTeX documentation.
-\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08emT\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
-
-% Rights management information.
-% This information is sent to you when you complete the rights form.
-% These commands have SAMPLE values in them; it is your responsibility as an author to replace
-% the commands and values with those provided to you when you complete the rights form.
-%
-% These commands are for a PROCEEDINGS abstract or paper.
-%\copyrightyear{2019}
-%\acmYear{2019}
-%\acmConference[EuroMPI 2019]{26th European MPI Users' Group Meeting}{September 11--13, 2019}{Zürich, Switzerland}
-%\acmBooktitle{26th European MPI Users' Group Meeting (EuroMPI 2019), September 11--13, 2019, Zürich, Switzerland}
-%\acmPrice{15.00}
-%\acmDOI{10.1145/3343211.3343225}
-%\acmISBN{978-1-4503-7175-9/19/09}
-
-%
-% These commands are for a JOURNAL article.
-%\setcopyright{acmcopyright}
-%\acmJournal{TOG}
-%\acmYear{2018}\acmVolume{37}\acmNumber{4}\acmArticle{111}\acmMonth{8}
-%\acmDOI{10.1145/1122445.1122456}
-
-%
-% Submission ID.
-% Use this when submitting an article to a sponsored event. You'll receive a unique submission ID from the organizers
-% of the event, and this ID should be used as the parameter to this command.
-%\acmSubmissionID{123-A56-BU3}
-
-%
-% The majority of ACM publications use numbered citations and references. If you are preparing content for an event
-% sponsored by ACM SIGGRAPH, you must use the "author year" style of citations and references. Uncommenting
-% the next command will enable that style.
-%\citestyle{acmauthoryear}
-
-%
-% end of the preamble, start of the body of the document source.
 \begin{document}
 
 %
 % The "title" command has an optional parameter, allowing the author to define a "short title" to be used in page headers.
 %\title{Runtime Level Failure Detection and Propagation in HPC Systems}
 
-\title{Efficient Failure Detection and Propagation in Distribute Systems}
+\title{General Failure Detection and Propagation in HPC and Distributed Systems}
 
 %
 % The "author" command and its associated commands are used to define the authors and their affiliations.
@@ -139,8 +87,7 @@
 %}
 
 %\begin{vquote}
-\author[First]{Dong Zhong\corref{cor1}%
- \fnref{fn1}}
+\author[First]{Dong Zhong}%\fnref{fn1}}
 \ead{dzhong@vols.utk.edu}
 
 \author[First]{Aurelien Bouteiller}
@@ -149,11 +96,11 @@
 \author[First]{Xi Luo}
 \ead{xluo12@vols.utk.edu}
 
-\author[First]{George Bosilca}
+\author[First]{George Bosilca\corref{cor1}}
 \ead{bosilca@icl.utk.edu}
 
 \cortext[cor1]{Corresponding author}
-\fntext[fn1]{This is the first author footnote.}
+%\fntext[fn1]{This is the first author footnote.}
 
 \address[First]{The University of Tennessee, 1122 Volunteer Blvd, knoxville, TN 37996}
 %\address[seconds]{The University of Tennessee, 1122 Volunteer Blvd, knoxville, TN 37996}
@@ -178,7 +125,7 @@ the solution is at the same time generic and efficient.
 %\keywords{Fault tolerance, Failure detection, Reliable broadcast, Message propagation, HPC runtime system}
 
 \begin{keyword}
-Fault tolerance \sep Failure detection \sep Reliable broadcast \sep Message propagation \sep HPC runtime system
+Fault Tolerance \sep Failure Detection \sep Reliable Broadcast \sep High Performance Computing \sep Runtime Systems \sep Distributed Systems
 \end{keyword}
 
 %
@@ -207,7 +154,7 @@ ways, but it notably put to prominence two different issues that had been
 largely disregarded in the last two decades: fault tolerance and novel programming
 models.
 
-The Message Passing Interface (MPI) has been instrumental in
+The Message Passing Interface (\mpi) has been instrumental in
 permitting the efficient programming of massively parallel systems, scaling
 along from early systems with tens of processors to current systems routinely
 encompassing hundreds of thousands of cores. As failures become more
@@ -255,7 +202,11 @@ serve multiple HPC networking stack clients.
 We then compare this generic
 failure detection service with the fully dedicated \mpi detector from
 \ulfm \ompi on one hand, and with the Scalable Weakly-Consistent Infection-style Membership (SWIM) protocol on the other hand, the latter standing
-as a state-of-the-art detector for unstructured peer-to-peer systems. Henceforth
+as a state-of-the-art detector for unstructured peer-to-peer systems. 
+%
+This paper is an extension of~\cite{Zhong:2019:RLF:3343211.3343225} in which we consider not only the case of synthetic communication benchmarks, but also application benchmarks like the Graph500. We also consider the overhead incurred in both \mpi and \oshmem applications, using the same shared \ourwork infrastructure as backend.
+%
+Henceforth
 we highlight that there is a performance trade-off in generality, but a
 satisfactory level of performance can be achieved in a portable and reusable
 component that can satisfy the needs of a variety of HPC networking systems.
@@ -335,7 +286,7 @@ The \prrte runtime serves as the demonstrator and reference implementation
 for the \pmix specification~\cite{CASTAIN18}. Technically, it is a fork of
 the \orte runtime, and thus inherits most of its capabilities to launch
 and monitor \mpi jobs. Thanks to a well documented, and recently standardized \pmix interface, \prrte
-has increased its capabilities, outgrowing the MPI world it was originally designed for, and is currently capable of
+has increased its capabilities, outgrowing the \mpi world it was originally designed for, and is currently capable of
 deploying a wide variety of parallel applications and tools.
 Although \prrte provides rudimentary support for clients' fault detection and reporting,
 detection of failed nodes is unstable, and the reporting
@@ -366,7 +317,7 @@ handle which limits the type of topologies that can be employed.
 This resilient \prrte work
 avoids these limitations and has the capability to detect both process and
 node failures with a smaller observation topology, and is not limited to
-MPI application only.
+\mpi application only.
 
 \subsection{Reliable Broadcast}
 %Notable efforts have been made for fault-tolerant communication based on logical network typologies~\cite{Luo18}.
@@ -616,7 +567,7 @@ its local processes are not represented.
  to be forwarded. If the message carries a list of processes that are already known to
  have failed, then the daemon already triggered the propagation, and no further
  action is needed. Thus every daemon forwards the message once, ensuring that
- all edges of the BMG will carry exactly one message per detection.
+ all edges of the BMG carry exactly one message per detection.
 \end{compactenum}
 
 
@@ -739,7 +690,7 @@ the \pmix key-value store can be avoided.
 \subsection{Experimental Setup}
 Experiments are conducted on two different machines: (1) ICL's NaCl is an Infiniband QDR Linux cluster comprising 66 Intel Xeon X5660 compute nodes, 12 cores per node; (2) NERSC's Cori
 %~\cite{Cori01}
-is a Cray XC40 supercomputer with Intel Xeon "Haswell" processors and the Cray "Aries" high speed inter-node network, 32 cores per node. Our \ourwork is based upon \prrte (\#71ef547), with external \pmix (\#21d7c9). We compare with \ulfm revision \#77f9157, which is based on the same base version of \ompi we use to evaluate \ourwork in MPI workloads. Each experiment is repeated 30 times and we present the average. We use Intel MPI Benchmark (\imb v2019.2)~\cite{IMB} for MPI performance measurements for point-to-point (P2P) and collective communications (one \mpi rank per core). For all experiments we use the map-by node, bind-to core binding policy which puts sequential MPI ranks on adjacent cores. The only exception is the \imb P2P experiment where we use
+is a Cray XC40 supercomputer with Intel Xeon "Haswell" processors and the Cray "Aries" high speed inter-node network, 32 cores per node. Our \ourwork is based upon \prrte (\#71ef547), with external \pmix (\#21d7c9). We compare with \ulfm revision \#77f9157, which is based on the same base version of \ompi we use to evaluate \ourwork in \mpi workloads. Each experiment is repeated 30 times and we present the average. We use Intel \mpi Benchmark (\imb v2019.2)~\cite{IMB} for \mpi performance measurements for point-to-point (P2P) and collective communications (one \mpi rank per core). For all experiments we use the map-by node, bind-to core binding policy which puts sequential \mpi ranks on adjacent cores. The only exception is the \imb P2P experiment where we use
 the map-by node, bind-by node policy to set communicating \mpi ranks on different nodes.
 
 \subsection{Accuracy}
@@ -771,7 +722,7 @@ as the behavior at the limit for very short $\eta$ timeout values (in the order 
 %From all above we can see that the granularity of timeout is 40 milliseconds limited by the latency for daemons to launch the application processes. And the granularity of heartbeat period is 0.1 millisecond.
 
 \subsection{Noise}
-We also investigate the noise overhead incurred on an MPI application by the heartbeat emission
+We also investigate the noise overhead incurred on an \mpi application by the heartbeat emission
 and management from \ourwork.
 Figure \ref{fig:overhead} illustrates the overhead incurred with P2P and collective communications running \imb.
 %All IMB-MPI1 suits can be successfully conducted with no false detection with $ \delta \geq 1 ms $.
@@ -783,7 +734,7 @@ compete for resources with \ourwork activities.
 For the collective benchmarks, we run on 64 nodes using all cores. For each message size, we set the number of
 repetitions for the test to last at a minimum 20 seconds so that multiple heartbeat emissions occur during the experiment. Overhead is calculated by using the maximum latency result, normalized by the non-fault tolerant performance:
 \begin{equation}
-Overhead = \frac{( {\ourwork - \prrte} )}{\prrte}\label{eq:1}
+Overhead = \frac{( {\ourwork - \prrte} )}{\prrte}\label{eq.overhead}
 \end{equation}
  From the graph we can see that the latency performance and bandwidth performance are barely affected with heartbeat period ranging from milliseconds to seconds. Notably, when $ \delta \geq 10 ms $, it has trivial influence on the system, as illustrated by the fact that the average overhead is within the band of natural variability of the benchmark. When  $ \delta = 1 ms $ the incurred noise varies in a band that increases the PingPong latency by up to three percent. In collective communication, the noise overhead is less than eight percent, slightly higher than the standard deviation of the benchmark itself, at four percent.
  In a general comparison with \ulfm (normalized to its performance without failure detection active),
@@ -799,7 +750,7 @@ the chance of false detection, SWIM uses a suspicion mechanism. When a node does
   \caption{Detection latency comparison between \ourwork and SWIM with increasing number of processes ($\delta=0.5s$).}
   \label{fig:scale_swim}
 \end{figure}
-this suspicion information within a subgroup: if any node in the subgroup receives an acknowledge before the timeout, it will declare the suspected node as alive; otherwise it will declare a failure. In order to improve the efficiency of multi-cast, SWIM uses the infection-style dissemination mechanism and piggybacks the information to be disseminated in the detection's pings and acknowledgements messages.
+this suspicion information within a subgroup: if any node in the subgroup receives an acknowledge before the timeout, it declares the suspected node as alive; otherwise it declares a failure. In order to improve the efficiency of multi-cast, SWIM uses the infection-style dissemination mechanism and piggybacks the information to be disseminated in the detection's pings and acknowledgements messages.
 For the SWIM implementation, we use Go-Memberlist (\#a8f83c6). We used a go-\mpi interface
 to replicate our \mpi detection benchmark with SWIM.
 
@@ -925,7 +876,7 @@ all application processes on the target node suicide as a group.
 %Also we assume that the time different between the daemon failure and process failure is trivial which is confirmed later in the experiment.
 For the heartbeat period setting we start from 30 milliseconds to 0.5 second for both \ourwork and \ulfm. For all heartbeat period, we set $ \eta = \delta * 2 $. From the figure, we can see that the detection latency in all cases lands in the interval $[\delta,\eta]$.
 
-Figure~\ref{fig:daemon_failure_diffnode} shows single node failure detection and propagation performance with a fixed heartbeat period $ \delta = 0.5s $ and an increasing total number of nodes. After a node crash, all processes hosted on this node will be affected, the observer node fetches and packs the information of all affected processes information, then distributes the packed message.
+Figure~\ref{fig:daemon_failure_diffnode} shows single node failure detection and propagation performance with a fixed heartbeat period $ \delta = 0.5s $ and an increasing total number of nodes. After a node crash, all processes hosted on this node are affected, the observer node fetches and packs the information of all affected processes information, then distributes the packed message.
 \textbf{
 \begin{figure}[h]
   \centering
@@ -962,106 +913,101 @@ reporting all failures.
 \end{figure}
 
 \section{Application support and evaluation}\label{sec:application}
-In this section we investigate application support of \ourwork with different programming models
-including Pmix, \mpi and OpenMP or even hybrid applications. Our interests focus on complex application which
-associated with multiple programming models. Because for hybrid applications and models, there is no "standard" method by which programming models could
-follow to initiate themselves, it will be hard to inform each programming model
-that another model is actively in use.
-For example, MPI has the standard \mpifunc{Init} function that must be called to initialize the
+In this section we investigate application support of \ourwork with different programming models.
+Our interests focus on 1) demonstrating how our generic capabilities can support multiple programming languages, 2) how much overhead (if any) is incurred on both 2-sided (e.g., \mpi) and 1-sized programming models (e.g., \oshmem), and 3) provide the blueprints for supporting applications using multiple programming models.
+In hybrid applications and models, there is no ``standard'' method by which programming models can coordinate.
+For example, \mpi has the standard \mpifunc{Init} function that must be called to initialize the
 library – providing a "hook" within that function to notify others that it has been called.
-Also, OpenMP does not have an explicit call to "init" and is instead initialized on first use.
-Figure~\ref{fig:prrte_with_oshmem} shows how to coordinate between those two different models. We can see
-that they share the same external PMIx library within the processes, it will therefore be common to both programming
-libraries. Thus, the calls into PMIx\_Init by each programming model will enter the same code space.
-And then, the event notification mechanism within PMIx will share the information and coordinate between those models.
-\prrte supports different type of applications by: first use \textbf{\emph{prte}} to start the distributed
-virtual machine (DVM) and then use \textbf{\emph{prun}} to execute the binary as long as they are compiled correspondingly as:
+In contrast, OpenMP does not have an explicit call to "init" and is instead initialized on first use; older versions of \oshmem also allow implicit initialization.
+Figure~\ref{fig:prrte_with_oshmem} shows how to coordinate between two different models. We can see
+that as they both employ the PMIx library to interface with the runtime and job scheduling system,
+the different programming languages have a common interface to exchange information.
+The calls into PMIx\_Init from each programming model enters the same code space and offers an opportunity for coordination.
+The event notification mechanism within PMIx can then be used to share the information and coordinate between those models.
+
+In practice, \prrte supports different type of applications when launching a single \prrte Distributed Virtual Machine (DVM) (using the \textbf{\emph{prte}} command), and then usin the \textbf{\emph{prun}} launcher to execute the binary as long as they are compiled in the following fashion:
 \begin{enumerate}
-  \item PMIx-based application use \textbf{\emph{pcc}} for compilation;
-  \item MPI application need to install \mpi and \ourwork with the same external PMIx, then use \textbf{\emph{mpicc}} for compilation;
-  \item OpenSHMEM application need to install \mpi (with option \textbf{\emph{-enable-shmem}}) and
-  also \ourwork with the same external PMIx, then use \textbf{\emph{oshcc}} for compilation;
+  \item \pmix-based application use \textbf{\emph{pcc}} for compilation;
+  \item \mpi application need to install \mpi and \ourwork with the same external PMIx, then use \textbf{\emph{mpicc}} for compilation;
+  \item \oshmem application need to install \oshmem and \ourwork with the same external PMIx, then use \textbf{\emph{oshcc}} for compilation. In \ompi, \mpi+\oshmem programs are directly supported when compiling with \oshmem support (using the option \textbf{\emph{-enable-shmem}}).
 \end{enumerate}
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{prrte_with_oshmem.pdf}\vspace{-1em}
-  \caption{Hybrid programming model support of MPI and OpenSHMEM}
+  \caption{Hybrid programming model support of MPI and \oshmem}
   \label{fig:prrte_with_oshmem}
 \end{figure}
 
-We also evaluate the overhead performance of \ourwork
-with MPI and OpenSHMEM applications using the heavily communication-bound benchmark Graph500~\cite{graph500}.
-Graph500 is an open specification of a graph-based effort to offer a standardized
+To evaluate the overhead on performance from \ourwork
+in \mpi and \oshmem applications, we use the heavily communication-bound benchmark Graph500~\cite{graph500}.
+Graph500 is an open specification effort to offer a standardized graph-based
 benchmark across large-scale distributed
 platforms which captures the behavior of common communication-bound graph algorithms.
-Graph500 is different with other large-scale
-benchmarking evaluations such as HPL and HGPGMG which primarily focus on computation
-and data access patterns. Graph500 performs a breadth-first search in
+Graph500 differs from other large-scale
+benchmarks such as HPL, and HGPGMG in the way it primarily highlights data access patterns.
+Graph500 performs a breadth-first search (BFS) in
 parallel on a large randomly generated undirected graph. Our experiments use a
-popular open source project OpenSHMEM Benchmark (OSB) suite~\cite{g500shmem} including
-both MPI and OpenSHMEM based Graph500 implementations.
-
-\subsection{MPI application}
-For MPI application we use \textbf{\emph{mpi\_test\_simple}}, which is the baseline implementation that
-uses two-sided \mpifunc{Send} and \mpifunc{Recv} and \mpifunc{AllReduce} to implement a breadth-first search (BFS).
-We evaluate the noise overhead incurred of heartbeats messages with different heartbeat
-periods on the point-to-point and collectives.
-For the experiment setting we use Cori with 1K nodes. For the application setting we use \texttt{\bf $scale\_factor = 20$, $edge\_factor = 16$ }
-which will generate a undirected graph with \texttt{\bf $2^{scale\_factor}$} vertices and
+the open source project \oshmem Benchmark (OSB) suite~\cite{g500shmem} that features both \mpi and \oshmem based 
+Graph500 implementations. For the application setting we use \texttt{\bf $scale\_factor = 20$, $edge\_factor = 16$ }
+which generates an undirected graph with \texttt{\bf $2^{scale\_factor}$} vertices and
 \texttt{\bf $2^{scale\_factor}*edge\_factor$} edges. The benchmark collects the statistics
-of the generation of the breadth-first search tree of 64 randomly selected vertices. Also
+of the generation of the breadth-first search tree of 64 randomly selected vertices. It also
 collect the statistics of validation time which ensures that all connected components are visited
-which generate large amount of communications.
+which generate large amount of communications. For the experiments, we use NERSC Cori with 1K nodes. This results in a deployment with 32K \mpi  ranks, or 32K \oshmem Processing Elements (PEs). 
+
+\subsection{Two-sided Application}
+The \textbf{\emph{mpi\_test\_simple}} benchmark  is the baseline implementation of the BFS that
+uses two-sided \mpifunc{Send} and \mpifunc{Recv} and \mpifunc{AllReduce}.
+We evaluate the noise overhead incurred from heartbeats messages with different heartbeat
+periods on the point-to-point and collectives that are used in this benchmark.
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{bfs_mean.pdf}
-  \caption{Overhead for generating BFS running mpi\_test\_simple upon \prrte with fault tolerance over \prrte.}
+  \caption{Overhead for generating BFS running mpi\_test\_simple when using \prrte with fault tolerance over \prrte (32K \mpi ranks; the gray area represents the normal variability of the benchmark).}
   \label{fig:mean_bfs}
 \end{figure}
 
 Figure~\ref{fig:mean_bfs} shows the overhead incurred with the P2P communication during the BFS generation phase.
 We present in shaded gray, the variability of the BSF without our heartbeat detection enabled ($mean\_time\_of\_BFS \pm \sigma$).
-We calculate the overhead the same as in equation(1). For comparison we plot the error bars for with different $\delta$ values.
-We can see under all cases the variability shows no difference as the detector is inactive.
-Figure~\ref{fig:validate_bfs} illustrates the overhead incurred with \mpifunc{AllReduce} during the validation phase.
-We achieve the same performance which shows that our failure detection heartbeats show
-barely no impact for the application with both P2P and collective communications.
+We calculate the overhead the same as in equation~\eqref{eq.overhead}. For comparison, we plot the overhead with error bars for with different $\delta$ values.
+We can see that in all cases the variability without the detector active is comparable to the maximum spread of the overhead when fault tolerance is enabled, and the average overhead is close to 0.
+Figure~\ref{fig:validate_bfs} shows the overhead incurred in the \mpifunc{AllReduce} during the validation phase.
+Again, the application with failure detection enabled achieves the same performance, which demonstrates that our failure detection heartbeats has barely no impact in communication intensive applications with both P2P and collective communications.
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{validate_bfs.pdf}
-  \caption{Overhead for validating BFS running mpi\_test\_simple upon \prrte with fault tolerance over \prrte.}
+  \caption{Overhead for validating BFS in mpi\_test\_simple when using \prrte with fault tolerance over \prrte (32K \mpi ranks; the gray area represents the normal variability of the benchmark).}
   \label{fig:validate_bfs}
 \end{figure}
 
 
-\subsection{Hybrid application}
+\subsection{One-sided Application}
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{shmem_bfs_mean.pdf}
-  \caption{Overhead for generating BFS running graph500\_shmem\_one\_sided upon \prrte with fault tolerance over \prrte.}
+  \caption{Overhead for generating BFS running graph500\_shmem\_one\_sided upon \prrte with fault tolerance over \prrte (32K \oshmem PEs; the gray area represents the normal variability of the benchmark).}
   \label{fig:shmem_mean_bfs}
 \end{figure}
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{shmem_validate_bfs.pdf}
-  \caption{Overhead for validating BFS running graph500\_shmem\_one\_sided upon \prrte with fault tolerance over \prrte.}
+  \caption{Overhead for validating BFS running graph500\_shmem\_one\_sided upon \prrte with fault tolerance over \prrte (32K \oshmem PEs; the gray area represents the normal variability of the benchmark).}
   \label{fig:shmem_validate_bfs}
 \end{figure}
-For the OpenSHMEM application we select the implementation of \textbf{\emph{graph500\_shmem\_one\_sided}} that
-is using \mpi-2 one-sided code base.
-For the communication it uses shmem\_put/getmem which are similar to MPI\_put/get,
-and it also uses a shmem reduce collective instead of \mpifunc{AllReduce}.
+For the \oshmem application, we selected the implementation of \textbf{\emph{graph500\_shmem\_one\_sided}} that
+is derived from the \mpi-2 one-sided code base.
+For the communication it uses shmem\_put/getmem which are similar to MPI\_put/get. It also uses a shmem reduce collective as a replacement for \mpifunc{AllReduce}.
 Figure~\ref{fig:shmem_mean_bfs} and Figure~\ref{fig:shmem_validate_bfs} shows the overhead of
-those two types of communications during BFS generating and validating.
-They show similar trends that with all different heartbeat periods our detector will not stress the applications' communication.
+those two types of communications during BFS generation and validation.
+They show similar trends: for all different heartbeat periods, our detector does not stress the applications' communication.
 
 \section{Conclusion}\label{sec:conclusion}
-Failure detection and propagation is a critical service for resilient systems.In this work, we present an efficient failure detection and propagation design and implementation for distributed systems.
+Failure detection and propagation is a critical service for resilient systems. In this work, we present an efficient failure detection and propagation design and implementation for distributed systems.
 The algorithm is integrated within \prrte so that the detection service
 can be employed by a wide variety of clients through a well specified and
 popular interface (\pmix). The process and node failure detection strategy presented in this work depends on heartbeats and timeouts. Unlike gossip-based algorithms,
@@ -1072,8 +1018,8 @@ topology that scales with the number of nodes rather than the number of
 managed processes. Our results from different machines and benchmarks
 compared to related works shows that \ourwork outperforms non-HPC solutions
 significantly, and is competitive with specialized HPC solutions that can
-manage only \mpi applications. Thus, this runtime-level failure detector
-opens the gate for efficient management of failures for an emerging field
+manage only \mpi applications. At the same time, we demonstrate in application benchmarks that
+our detector can sustain the operation of \mpi, and non-\mpi applications (like \oshmem), with no noticeable overhead. Thus, this runtime-level failure detector opens the gate for efficient management of failures for an emerging field
 of libraries, programming models, and runtime systems operating on large-scale systems.
 
 \section*{Acknowledgments}
@@ -1091,7 +1037,7 @@ U.S. Department of Energy Office of Science and the National Nuclear Security Ad
 %
 % The next two lines define the bibliography style to be used, and the bibliography file.
 %\bibliographystyle{elsart-num}
-\section*{References}
+%\section*{References}
 \bibliographystyle{elsarticle-num}
 %\bibliographystyle{elsarticle-num-names}
 \bibliography{sample-base}
