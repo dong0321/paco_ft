@@ -113,7 +113,7 @@ As the scale of high-performance computing (HPC) systems continues to grow, mean
 % A ring topology is maintained by allowing one node sending and receiving periodically heartbeat to/from another node to detect a node failure(observing another single node). For process failure each host node (is in charge of monitoring) monitors its children processes. The propagation use a reliable broadcast method over a binomial graph(an arbitrary communication topology) to distribute error message to applications, guarantees a logarithmic propagate time.
 The resulting framework has been implemented in the context of a system-level runtime for parallel environments, \pmix Reference RunTime Environment (\prrte), providing efficient and scalable capabilities of fault management to a large range of programming and execution paradigms.
 % the algorithms and strategies proposed have a larger scope of most distributed programming environment.
-The experimental evaluation of the resulting software stack on different machines demonstrate that
+The experimental evaluation of the resulting software stack on different machines and programming models demonstrate that
 the solution is at the same time generic and efficient.
 \end{abstract}
 
@@ -206,7 +206,7 @@ failure detection service with the fully dedicated \mpi detector from
 \ulfm \ompi on one hand, and with the Scalable Weakly-Consistent Infection-style Membership (SWIM) protocol on the other hand, the latter standing
 as a state-of-the-art detector for unstructured peer-to-peer systems. 
 %
-This paper is an extension of~\cite{Zhong:2019:RLF:3343211.3343225} in which we consider not only the case of synthetic communication benchmarks, but also application benchmarks like the Graph500. We also consider the overhead incurred in both \mpi and \oshmem applications, using the same shared \ourwork infrastructure as backend.
+This paper is an extended version of the conference proceedings~\cite{Zhong:2019:RLF:3343211.3343225} that considers not only the case of synthetic communication benchmarks, but also application benchmarks, like the Graph500, at a larger scale. It also studies the overhead incurred in both \mpi and \oshmem applications, using \ourwork infrastructure as a shared backend.
 %
 Henceforth
 we highlight that there is a performance trade-off in generality, but a
