@@ -915,6 +915,14 @@ reporting all failures.
 \end{figure}
 
 \section{Communication Models Coverage and Application Evaluation}\label{sec:application}
+Nowadays, more and more systems in HPC feature a hierarchical hardware design: Shared memory nodes
+with several multi-core CPUs are connected via a network infrastructure. This trend promotes programming
+must combine distributed memory parallelization on the node interconnect with shared memory parallelization
+inside each node. Scientists throughout industry and academia are exploring the usage of hybrid applications
+that utilize more than one programming model to fully exploit the hardware resources. Consequently,
+runtime environment needs to handle the cooperations between different programming models. Together,
+failure detection and management techniques need to be expanded and extended across different models.
+
 In this section we investigate application support of \ourwork with different programming models.
 Our interests focus on 1) demonstrating how our generic capabilities can support multiple programming languages, 2) how much overhead (if any) is incurred on both two-sided (e.g., \mpi) and one-sized programming models (e.g., \oshmem), and 3) provide the blueprints for supporting applications using multiple programming models.
 In hybrid applications and models, there is no ``standard'' method by which programming models can coordinate.
