@@ -21,9 +21,9 @@ We present the design and implementation of an efficient runtime-level failure d
 This paper is an extended version of the conference proceedings~\cite{Zhong:2019:RLF:3343211.3343225} that considers not only the case of synthetic communication benchmarks, but also application benchmarks.
 We use the heavily communication-bound benchmark Graph500 which is an open specification effort to offer a standardized graph-based benchmark across large-scale distributed
 platforms which captures the behavior of common communication-bound graph algorithms.
-We conducted our experiments at a larger scale. At the same time, studies the overhead incurred in both MPI and OpenSHMEM applications, using \ourwork infrastructure as a shared backend.
+We conducted our experiments at a larger scale. At the same time, we expanded the study to consider the case of applications using parallel global address space (PGAS) programming models, and study and compare the overhead incurred by enabling failure detection in both MPI and OpenSHMEM applications, using \ourwork infrastructure as a shared backend.
 
-To be noted that we change the paper title.
+Section 6, and figures 16, 17, 18, 19, 20 are additions that present the new application results with both OpenSHMEM and MPI on the Cori supercomputer. We have updated the abstract, introduction, conclusion and title of the paper to reflect the supplementary content.
 
 \bibliographystyle{elsarticle-num}
 \bibliography{sample-base}
