@@ -1,0 +1,31 @@
+\documentclass[1p,times]{elsarticle}
+
+\usepackage{xspace}
+\usepackage{amssymb,amsmath}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+
+\newcommand{\ourwork}[0]{\textsc{RDaemon}\ensuremath{^\#}\xspace}
+
+\begin{document}
+
+\title{Cover Letter}
+
+\section*{Paper title}
+General Failure Detection and Propagation in HPC and Distributed Systems
+
+\section*{Statement}
+We present the design and implementation of an efficient runtime-level failure detection and propagation strategy targeting large-scale, dynamic systems that can detect both node and process failures. Multiple overlapping topologies are used to optimize the detection and propagation, minimizing the incurred overheads and guaranteeing the scalability of the entire framework.
+
+
+This paper is an extended version of the conference proceedings~\cite{Zhong:2019:RLF:3343211.3343225} that considers not only the case of synthetic communication benchmarks, but also application benchmarks.
+We use the heavily communication-bound benchmark Graph500 which is an open specification effort to offer a standardized graph-based benchmark across large-scale distributed
+platforms which captures the behavior of common communication-bound graph algorithms.
+We conducted our experiments at a larger scale. At the same time, studies the overhead incurred in both MPI and OpenSHMEM applications, using \ourwork infrastructure as a shared backend.
+
+To be noted that we change the paper title.
+
+\bibliographystyle{elsarticle-num}
+\bibliography{sample-base}
+
+\end{document}
