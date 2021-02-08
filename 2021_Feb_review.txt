@@ -1,0 +1,128 @@
+ Manuscript Number: PARCO-D-20-00122R1  
+
+General Failure Detection and Propagation in HPC and Distributed Systems
+
+Dear Mr zhong,
+
+Thank you for submitting your manuscript to Parallel Computing.
+
+I have completed my evaluation of your manuscript. The reviewers recommend reconsideration of your manuscript following major revision. I invite you to resubmit your manuscript after addressing the comments below. Please resubmit your revised manuscript by Mar 03, 2021.
+
+When revising your manuscript, please consider all issues mentioned in the reviewers' comments carefully: please outline every change made in response to their comments and provide suitable rebuttals for any comments not addressed. Please note that your revised submission may need to be re-reviewed. 
+
+To submit your revised manuscript, please log in as an author at https://www.editorialmanager.com/parco/, and navigate to the "Submissions Needing Revision" folder.  
+
+Parallel Computing values your contribution and I look forward to receiving your revised manuscript.
+
+Kind regards,    
+Anne Benoit  
+Associate Editor  
+
+Parallel Computing
+
+Editor and Reviewer comments:
+
+Editor's comments: Please carefully address reviewer's comments, by providing a major revision of the manuscript
+and clearly explaining the differences in the response to reviewers.
+
+
+Reviewer #1: The paper is clearly written and easy to follow.
+The proposed algorithms and implementations, despite not being novel, suggest some useful fault-dedection extensions to the widely used interface PMIx.
+RDAEMON could possibly serve many different parallel computing environments including MPI as foundation for fault-tolerant implementations.
+
+Tue due the fact, that all sections but section 6 of the paper are already published (https://dl.acm.org/doi/10.1145/3343211.3343225) and not all of the inconsistencies from the original publication got fixed and the newly presented part just gives some hints on the overhead for RDAEMON itself, but not in comparison to other techniques like ULFM, I suggest a major revision before publishing.  This was a very minor revision over last submission.
+
+General remarks
+
+
+1. My question:
+5.3 Figure 7: You show overheads for δ = 1ms and for 10ms, even you state before in
+section 5.2, that this values leads to false positive results. Would not it be more feasible to
+show values starting from 20ms increasing?
+
+Your answer
+Figure 7 shows the overhead without failure injection, the overhead comes from the ring
+topology of heartbeats sending and receiving. If there is no node failures, we can set heartbeat to
+a smaller value, this is the reason why we could have 1ms and 10ms results included.
+
+My comment:
+Sorry I still don't get it. Why are you showing  this, it will fail in case off errors!
+It shows that for very small heartbeat times the overhead gets significant (what a surprise!),
+and same for ULFM. You should emphasize why you have chosen this values for ULFM.
+Is ULFM still working with such small heartbeats?
+
+What was the size of the experiments? Was it the full NaCl cluster?
+
+Please redraw the graphs with different line types for RDAEMON and ULFM, when printed in black and white the are indistinguishable.
+
+2. Figure 8: Does this graph show node failures? Please add more information about the setup.
+What is shown by the red area? Min/Max, stderr, stddev, quartiles?
+
+3. Figure 9: Does it show node failures?
+What is shown by the red area.
+
+4. Figure 10:
+What is shown by the red area?
+A similar comparison on heartbeat times for ULFM would be great. Figure 11 does not show it and Figure 7 shows now failures.
+
+5. Figure 11: Please use different linestyles to make the graph decipherable when printed in black and white.
+
+6. Figure 12: Please but the log curve behind all others.
+
+7. Figure 13: What is the blue and red area?
+
+8. Figure 17 - 20: Do the error bars also show stddev?
+Maybe boxplots would give a better insight on the distribution of the different experiments.
+Again heartbeats smaller 20ms lead to false positives! Please use reasonable ranges!
+
+
+
+Reviewer #2: The authors present a revised manuscript on "General Failure Detection and Propagation in HPC and Distributed Systems", which is an extended version of a conference paper at EuroMPI 2019. The extensions over the conference paper consist of additional benchmarks and experiments at larger scales.
+
+The manuscript describes RDaemon#, which is a fault-tolerance infrastructure implemented in the PMIx Reference RunTime Environment (PRRTE). PMIx is a standard interface for launching and managing processes in a distributed-memory HPC environment. It is agnostic to the programming model used and can support MPI, OpenSHMEM, and other programming models used for the programming of such distributed-memory systems. With system architectures becoming more and more parallel (at the same time embracing deeper hierarchies) resilience to different failures during execution of a parallel application becomes paramount.
+
+The presented work focuses on the efficient and accurate detection of failures in a parallel execution. Comparing with prior work in this field, and their own work on ULFM and the Scalable Weakly-Consistent Infection-style Membership (SWIM) protocol in particular, the authors discuss the hypothesis that portable failure detection does not need to be tightly integrated with (and therefore dependent on) the programming model it meant to serve.
+
+Strengths:
+
+- RDaemon# operates completely in the context of the PMIx runtime system, supporting its use with different messaging frameworks (e.g., MPI, OpenSHMEM)
+- Scalability of failure detection is shown up to 4k with latency dominated by the number of nodes rather than the number of processes involved.
+- Show independence of application-level networking library by providing MPI and OpenSHMEM measurements.
+
+Questions and Comments:
+
+- The authors' answers to the rebuttal questions seem oddly out of context as sometimes the quoted reviewers comments don't seem to refer to the original manuscript. Could it be that these refer to the original conference paper?
+
+- Section 5.2: "presents the results on NaCL 64 nodes" -> "presents the results on NaCl for 64 nodes"
+
+- It seems odd that Figure 8 is referenced before Figure 7. I would usually expect the Figures referenced by their appearance (or their appearance being implied by their reference).
+
+- Section 6: at the end of page 10, cohesion is lost by removing a large paragraph after "support of RDaemon# with different programming models." It is not immediately clear that the fact that MPI provides a hook for the infrastructure to get set up is an important factor for the differences in support of programming models. The last sentence removed ("there is no standard way by which programming models can coordinate") should be retained for better cohesion.
+
+- page 11, enumeration: "then use mpicc for compilatiove" -> "then use mpicc for compilation"
+
+- section 6.1: "from heartbeats messages" -> "from heartbeat messages"
+
+- section 6.1: "have barely no impact" -> "have barely any impact"
+
+- Capitalization of names and acronyms in the bibliography (e.g., HPC, MPI, ...) should be checked and fixed.
+
+
+Overall:
+
+The work described in the manuscript is relevant to the HPC community in that it describes the concept and implementation of an efficient failure detection infrastructure agnostic to the application-level networking library used. This being also the main contribution of the extended journal version of the original conference paper. The paper is well written and structured with only minor corrections necessary.
+
+
+
+
+Reviewer #3: The authors aimed to address my concerns in the revised version, but, unfortunately they did not succeed in doing so satisfactorily.
+
+For question 1.1 (what is new from conceptual perspective) the rebuttal is incomplete (third paragraph cut out). The first two paragraphs are not convincing.
+ULFM can detect process failures but RDAEMON can detect node failures. You are comparing software. You need to compare concepts independent of implementation details.
+What makes the problem of node failures harder compared with process failures? Is there an impact at algorithmic level and communication protocols?
+
+For question 1.2 (limited experiments), the authors provide a vague answer. First of all, what is your position? The statement "we are still working on this, we are trying to
+test" sounds like the current work is incomplete. Please outline the differences compared with the previous revision. Highlight any new experiments and explanations you added
+to the paper. The paper can only be judged based on the diff you submitted to the reviewers, not your future plans.
+
+For these reasons, I maintain my original score.
