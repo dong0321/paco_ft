@@ -206,7 +206,7 @@ failure detection service with the fully dedicated \mpi detector from
 \ulfm \ompi on one hand, and with the Scalable Weakly-Consistent Infection-style Membership (SWIM) protocol on the other hand, the latter standing
 as a state-of-the-art detector for unstructured peer-to-peer systems. 
 %
-This paper is an extended version of the conference proceedings~\cite{Zhong:2019:RLF:3343211.3343225} that considers not only the case of synthetic communication benchmarks, but also application benchmarks, like the Graph500, at a larger scale. It also studies the overhead incurred in both \mpi and \oshmem applications, using \ourwork infrastructure as a shared backend.
+This paper is an extended version of the conference proceedings~\cite{Zhong:2019:RLF:3343211.3343225} that considers not only the case of synthetic communication benchmarks, but also application benchmarks, like the Graph500, at a larger scale. It also studies the overhead incurred in both \mpi and \oshmem applications, using the \ourwork infrastructure as a shared backend.
 %
 Henceforth
 we highlight that there is a performance trade-off in generality, but a
@@ -216,7 +216,7 @@ component that can satisfy the needs of a variety of HPC networking systems.
 The rest of this paper is organized as follows. Section~\ref{sec:motivation}
 motivates our study and provides use cases and background on the \mpi specific
 failure detector implementation in \ulfm. Section~\ref{sec:related} presents
-related work on failure detectors followed by Section~\ref{sec:design} where we
+related work on failure detectors followed by Section~\ref{sec:design}, where we
 describe the algorithm and implementation details of our generic failure
 detector. Section~\ref{sec:experiments} describes the performance and accuracy
 comparison between three different failure detectors providing a distinct
@@ -252,11 +252,11 @@ application developers can experiment with modulating the frequency and
  failure detector directly, or through \oshmem interfaces.
 
 \textbf{EREINIT} is a global-restart failure recovery model based
-on a fast re-initialization of \mpi~\cite{reinit18}. This work is a co-design between MVAPICH and Slurm resource manager to add process and node failure detection and propagation features.
+on a fast re-initialization of \mpi~\cite{reinit18}. This work is a co-design between MVAPICH and the Slurm resource manager to add process and node failure detection and propagation features.
 %The detection is using Slurm's health check mechanism by sending ping messages to nodes, propagation is implemented in a manner of forcing the controller to individually send the notification to children of the failed nodes.
 % However, this work is highly dependent on one particular resource manager: Slurm.
-It exhibit interesting detection capabilities, but unfortunately it use an inefficient propagation method and is tied to a single resource manager (Slurm). \ourwork can substitute a portable fault detection capability to enable
-EREINIT to run on machines with different resource managers (Slurm, PBS, LSF, TORQUE, etc) and a more efficient propagation
+It exhibits interesting detection capabilities, but unfortunately it uses an inefficient propagation method and is tied to a single resource manager (Slurm). \ourwork can substitute a portable fault detection capability to enable
+EREINIT to run on machines with different resource managers (Slurm, PBS, LSF, TORQUE, etc.) and a more efficient propagation
 to reduce the stabilization and recovery time of EREINIT.
 
 \textbf{DataSpaces and FTI} are persistent data storage services.
@@ -264,7 +264,7 @@ Fault Tolerance Interface (FTI) provides a fast and efficient multilevel
 checkpointing functionality~\cite{Bautista-Gomez:2011:FHP:2063384.2063427}. Its interface lets users decide what data need to be protected and when it is reasonable to do so. The
 checkpointing routine then saves the marked data into a hierarchical storage using a variety of
 encoding and caching strategies, and staging to mitigate the cost of checkpointing.
-DataSpaces is a data sharing framework which supports the complex
+DataSpaces is a data sharing framework that supports the complex
 interaction and coordination patterns required by coupled data-intensive application workflows~\cite{Sun:2016:IDP:3018814.3018816}.
 It can asynchronously capture and index data  which allows for dynamic interactions and in-memory
 data exchanges between coupled applications. For both these software, \ourwork can provide the basic service to
@@ -329,7 +329,7 @@ node failures with a smaller observation topology, and is not limited to
 %Gossip-style~\cite{infection-style,Abhinandan02} dissemination mechanisms emulate the spread of gossip in society. Initially, members are inactive, then when a rumor is planted (failure message) at one member, it becomes active as infected \todo{Do you mean it becomes active as it spreads? Yes}. This member will randomly ping others to spread the infection. Anyone who receives the rumor becomes active and shares the rumor in the same way. When an active member pings an already active member, this active member loses interest in sharing the rumor and becomes inactive. The Gossip-style is resilient to process failure and spreads exponentially quickly in the group.
 Gossip-style~\cite{infection-style,Abhinandan02} dissemination mechanisms emulate the spread of gossip in society. Initially, members are inactive except for one member which is aware of an event of interest. It propagates this information by randomly pinging other members, until it pings someone who already was already notified. Notified members use the same strategy to gossip the information. Gossip-style is resilient to process failure and spreads exponentially quickly in the group, however, in the worst case, some members may never get notified.
 
-Regarding deterministic reliable broadcast algorithms, a fully connected topology can handle a large number of failures but has scalability issues since it generate too many messages. At the other extreme, a mendable ring topology might be good for scalability (as each process only has 2 neighbors)
+Regarding deterministic reliable broadcast algorithms, a fully connected topology can handle a large number of failures but has scalability issues since it generates too many messages. At the other extreme, a mendable ring topology might be good for scalability (as each process only has 2 neighbors)
 but offers poor propagation latency and suffers in scenarios with multiple node failures.
 Circulant k-nomial graphs~\cite{Angskun07, Pava11} provide a balance between the previous two methods.
 Among circulant graphs, the binomial graph (BMG) has the lowest diameter, which minimizes the number of hops for a dissemination to reach all
@@ -504,11 +504,11 @@ propagation algorithm itself needs to be resilient to failures.
 For broadcasting fault information between daemons, we use the scalable and fault-tolerant BMG topology~\cite{Angskun07}. BMG has good fault-tolerant properties such
 as optimal connectivity, low fault-diameter, strongly resilient and good optimal
 probability in failure cases. Note that unlike prior works, the propagation
-algorithm~\ref{fig:2lvlbmg} is not a flat BMG between application processes, but consists of an
+Algorithm~\ref{fig:2lvlbmg} is not a flat BMG between application processes, but consists of an
 inner BMG overlay between daemons, and an outer star overlay from each daemon to its
 local managed processes.
 
-\begin{algorithm}
+\begin{algorithm}[ht]
 \caption{Two-Level Reliable Broadcast Algorithm.}\label{fig:2lvlbmg}
 
 \textbf{\textit{N}} \Comment{Number of nodes (value from environment)}\\
@@ -591,7 +591,7 @@ its local processes are not represented.
 
 The propagation message issued at each daemon is ordered so that the
 messages that are part of a binomial spanning tree rooted at the emitter
-are sent first. Figure \ref{fig:reorder.span} shows the a spanning tree
+are sent first. Figure \ref{fig:reorder.span} shows the spanning tree
 for a broadcast originating from node 0; the redundant messages (colored
 in blue) are extra messages that provide reliability and ensure that
 any node in the BMG can always be reached within $O(log_2 N)$ steps (given
@@ -632,7 +632,7 @@ Many communication libraries, resource managers, and job scheduling systems are 
 %remove this down?
 For example, \ompi has now substituted \orte with a shim layer over \pmix and thus can be launched and monitored by \prrte.
 Similarly, \oshmem uses \prrte as the default launcher.
-Meanwhile, the Slurm batch scheduler and job starter ships with native \pmix support, meaning that an application that interoperate with Slurm through \pmix can be ported  over \prrte without effort.
+Meanwhile, the Slurm batch scheduler and job starter ships with native \pmix support, meaning that an application that interoperates with Slurm through \pmix can be ported  over \prrte without effort.
 %Overall, the fact that \prrte interfaces with the communities of interest highlighted in Section~\ref{sec:motivation} through a well defined and stable interface is a clear benefit for increasing the impact of \ourwork.
 
 In \ourwork, we leverage the interfaces specified by \pmix~\cite{Ralph15} to interoperate
@@ -649,7 +649,7 @@ daemon to the client processes.
 
 While a full depiction of the architecture and feature set of \prrte is out of the scope of this paper, some are relevant to our implementation effort.
 \prrte is based on a Modular Component Architecture (MCA) which permits easily extending or substituting the core subsystem with experimental features.
-As shown in in figure~\ref{fig:prrte}, within this architecture, each of the major subsystems is defined as an MCA framework, with a well-defined interface, and multiple components implementing that framework can coexist.
+As shown in in Figure~\ref{fig:prrte}, within this architecture, each of the major subsystems is defined as an MCA framework, with a well-defined interface, and multiple components implementing that framework can coexist.
 
 We added two new frameworks and four components to \prrte daemons. The \texttt{proc\_failure}
 component is in charge of detecting the failure of locally hosted processes (using
@@ -699,7 +699,7 @@ the map-by node, bind-by node policy to set communicating \mpi ranks on differen
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{accuracy.pdf}\vspace{-1em}
-  \caption{Accuracy with short detection timeout.}
+  \caption{Accuracy with short detection heartbeat and timeout.}
   \label{fig:accuracy}
 \end{figure}
 
@@ -791,7 +791,7 @@ general versus specialized---\ulfm. The \ulfm implementation also has two
   \item Using a separate, library-internal thread to send the heartbeats in order to be separated from the application's communication. This also mitigates the drift in heartbeat
   emission dates (which would cause false positive detection) in compute-intensive applications.
   For receiver it needs to poll BTL engine to check the aliveness of its successor.
-  \item Using RDMA put to raise a flag in the receiver's registered memory. By using the hardware accelerated put operations, \ulfm avoids the problem of active polling BTL engine.
+  \item Using RDMA put to raise a flag in the receiver's registered memory. By using the hardware accelerated put operations, \ulfm avoids the problem of actively polling BTL engine.
   \item Using in-band detection directly from the high-performance network
   fabric to report unreachable error directly to the propagation component.
 \end{compactenum}
@@ -844,8 +844,8 @@ The process mapping results in \ulfm performing a large part of the
 propagation between co-hosted processes (using the SM BTL transport)
 and employs InfiniBand communication for inter-node messages.
 \ourwork uses TCP to broadcast between daemons, and each daemon uses a
-\pmix's notification to distribute the error information to all hosted processes.
- We can see that our implementation enjoys the same performance as \ulfm but greatly reduces the complexity.
+\pmix notification to distribute the error information to all hosted processes.
+ We can see that our implementation is slightly slower than \ulfm for process failure case, but greatly reduces the complexity.
 %
 \begin{figure}[h]
   \centering
@@ -883,14 +883,14 @@ Figure~\ref{fig:daemon.failure.diffnode} shows single node failure detection and
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{Daemon_prrte_only.pdf}\vspace{-1em}
-  \caption{Single Daemon Failure Detection and Propagation delay with different number of nodes.}
+  \caption{Single Daemon Failure Detection and Propagation delay with different number of nodes ($ \delta = 0.5s $).}
   \label{fig:daemon.failure.diffnode}
 \end{figure}}
 %
-From the figure see that \ourwork can detect and propagate a node failure between (0.5s, 1s) for all tested number of nodes.
+From the figure we see that \ourwork can detect and propagate a node failure between (0.5s, 1s) for all tested number of nodes.
 %
 
-The last experiment, presented in Figure~\ref{fig:multi.daemon.failure.nacl}), investigates the effect of multiple concurrent node failures. The experiment is similar to the single node failure case, except for the
+The last experiment (presented in Figure~\ref{fig:multi.daemon.failure.nacl}) investigates the effect of multiple concurrent node failures. The experiment is similar to the single node failure case, except for the
 number of processes that inject failures.
 We first consider the worst-case scenario, in which failures strike
 contiguous nodes. In this case, the daemon that detects the first failure
@@ -910,7 +910,7 @@ reporting all failures.
 \begin{figure}[h]
   \centering
   \includegraphics[width=\linewidth]{multi_daemon_failures.pdf}
-  \caption{Multiple daemon failures at the same time.}
+  \caption{Multiple daemon failures at the same time ($ \delta = 0.5s $, 64 Nodes).}
   \label{fig:multi.daemon.failure.nacl}
 \end{figure}
 
@@ -920,12 +920,10 @@ with several multi-core CPUs are connected via a network infrastructure. This tr
 On one hand, one may encounter programming styles that combines distributed memory parallelization between nodes separated by the interconnect, and shared memory parallelization, or GPU acceleration inside each node. On the other hand, parallel applications may alternate between 
 library calls that utilize different programming environments and programming models 
 to perform internode communication, for example, message passing and parallel global address space models may coexist in the same application. Consequently,
-runtime environment needs to handle the cooperations between different programming models. Together,
+the runtime environment needs to handle the cooperations between different programming models. Together,
 failure detection and management techniques need to be expanded across different models.
 
 In this section we investigate application support of \ourwork with different programming models.
-Our interests focus on 1) demonstrating how our generic capabilities can support multiple programming languages, 2) how much overhead (if any) is incurred on both two-sided (e.g., \mpi) and one-sized programming models (e.g., \oshmem), and 3) provide the blueprints for supporting applications using multiple programming models.
-In hybrid applications and models, there is no ``standard'' method by which programming models can coordinate.
 For example, \mpi has the standard \mpifunc{Init} function that must be called to initialize the
 library – providing a "hook" within that function to notify others that it has been called.
 In contrast, OpenMP does not have an explicit call to "init" and is instead initialized on first use; older versions of \oshmem also allow implicit initialization.
@@ -936,11 +934,11 @@ The calls into PMIx\_Init from each programming model enters the same code space
 The event notification mechanism within PMIx can then be used to share the information and coordinate between those models.
 
 In practice, \prrte supports different type of applications when launching a single \prrte Distributed Virtual Machine (DVM) (using the \textbf{\emph{prte}} command), and then using the \textbf{\emph{prun}} launcher to execute the binaries, as long as they are compiled in the following fashion:
-\begin{enumerate}
+\begin{compactenum}
   \item \pmix-based application use \textbf{\emph{pcc}} for compilation;
-  \item \mpi applications need to install \mpi and \ourwork with the same external PMIx, then use \textbf{\emph{mpicc}} for compilation;
+  \item \mpi applications need to install \mpi and \ourwork with the same external PMIx, then use \textbf{\emph{mpicc}} for compilatiove;
   \item \oshmem applications need to install \oshmem and \ourwork with the same external PMIx, then use \textbf{\emph{oshcc}} for compilation. In \ompi, \mpi+\oshmem programs are directly supported when compiling with \oshmem support (using the option \textbf{\emph{-enable-shmem}}).
-\end{enumerate}
+\end{compactenum}
 
 \begin{figure}[h]
   \centering
@@ -959,8 +957,8 @@ benchmarksm such as HPL, and HGPGMG in the way it primarily highlights data acce
 Graph500 performs a breadth-first search (BFS) in
 parallel on a large randomly generated undirected graph. Our experiments use a
 the open source project \oshmem Benchmark (OSB) suite~\cite{g500shmem} that features both \mpi and \oshmem based 
-Graph500 implementations. For the application setting we use \texttt{\bf $scale\_factor = 20$, $edge\_factor = 16$ }
-which generates an undirected graph with \texttt{\bf $2^{scale\_factor}$} vertices and
+Graph500 implementations. For the application setting we use \texttt{\bf $scale\_factor = 20$ and $edge\_factor = 16$ }
+, which generates an undirected graph with \texttt{\bf $2^{scale\_factor}$} vertices and
 \texttt{\bf $2^{scale\_factor}*edge\_factor$} edges. The benchmark collects the statistics
 of the generation of the breadth-first search tree of 64 randomly selected vertices. It also
 collect the statistics of validation time which ensures that all connected components are visited
@@ -968,13 +966,13 @@ which generate large amount of communications. For the experiments, we use NERSC
 
 \subsection{Two-sided Application}
 The \textbf{\emph{mpi\_test\_simple}} benchmark  is the baseline implementation of the BFS that
-uses two-sided \mpifunc{Send} and \mpifunc{Recv} and \mpifunc{AllReduce}.
+uses two-sided \mpifunc{Send}, \mpifunc{Recv} and \mpifunc{AllReduce}.
 We evaluate the noise overhead incurred from heartbeats messages with different heartbeat
 periods on the point-to-point and collectives that are used in this benchmark.
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{bfs_mean.pdf}
+    \includegraphics[width=\linewidth]{new_bfs_mean.png}
   \caption{Overhead for generating BFS running mpi\_test\_simple when using \prrte with fault tolerance over \prrte (32K \mpi ranks; the gray area represents the normal variability of the benchmark).}
   \label{fig:mean.bfs}
 \end{figure}
@@ -984,11 +982,11 @@ We present in shaded gray, the variability of the BSF without our heartbeat dete
 We calculate the overhead the same as in equation~\eqref{eq.overhead}. For comparison, we plot the overhead with error bars for with different $\delta$ values.
 We can see that in all cases the variability without the detector active is comparable to the maximum spread of the overhead when fault tolerance is enabled, and the average overhead is close to 0.
 Figure~\ref{fig:validate.bfs} shows the overhead incurred in the \mpifunc{AllReduce} during the validation phase.
-Again, the application with failure detection enabled achieves the same performance, which demonstrates that our failure detection heartbeats has barely no impact in communication intensive applications with both P2P and collective communications.
+Again, the application with failure detection enabled achieves the same performance, which demonstrates that our failure detection heartbeats have barely no impact in communication intensive applications with both P2P and collective communications.
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{validate_bfs.pdf}
+  \includegraphics[width=\linewidth]{new_validate_bfs.png}
   \caption{Overhead for validating BFS in mpi\_test\_simple when using \prrte with fault tolerance over \prrte (32K \mpi ranks; the gray area represents the normal variability of the benchmark).}
   \label{fig:validate.bfs}
 \end{figure}
@@ -998,14 +996,14 @@ Again, the application with failure detection enabled achieves the same performa
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{shmem_bfs_mean.pdf}
+    \includegraphics[width=\linewidth]{new_shmem_bfs_mean.png}
   \caption{Overhead for generating BFS running graph500\_shmem\_one\_sided upon \prrte with fault tolerance over \prrte (32K \oshmem PEs; the gray area represents the normal variability of the benchmark).}
   \label{fig:shmem.mean.bfs}
 \end{figure}
 
 \begin{figure}[h]
   \centering
-  \includegraphics[width=\linewidth]{shmem_validate_bfs.pdf}
+  \includegraphics[width=\linewidth]{new_shmem_validate_bfs.png}
   \caption{Overhead for validating BFS running graph500\_shmem\_one\_sided upon \prrte with fault tolerance over \prrte (32K \oshmem PEs; the gray area represents the normal variability of the benchmark).}
   \label{fig:shmem.validate.bfs}
 \end{figure}
